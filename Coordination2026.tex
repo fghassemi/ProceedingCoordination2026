@@ -1,0 +1,238 @@
+\documentclass[runningheads]{llncs}
+\usepackage{longtable}
+
+\begin{document}
+\frontmatter
+\setcounter{page}{5}
+
+\chapter*{Preface}
+\markboth{Preface}{Preface}
+This volume contains the proceedings of the 28th International Conference on Coordina-
+tion Models and Languages (COORDINATION 2026), held on June 8–12, 2026, in Urbino, Italy hosted by the
+University of Urbino Carlo Bo., as part of the 21st International Federated
+Conference on Distributed Computing Techniques (DisCoTec 2026).
+
+
+Modern information systems rely increasingly on combining concurrent, distributed,
+mobile, adaptive, reconfigurable, and heterogeneous components. New models, architectures, languages, and verification techniques are necessary to cope with the complexity induced by the demands of today’s software development. Coordination languages
+have emerged as a successful approach, in that they provide abstractions that cleanly
+separate behaviour from communication, thereby increasing modularity, simplifying
+reasoning, and ultimately enhancing software development. Building on the success of
+the previous editions, COORDINATION 2026 provides a well-established forum for the
+growing community of researchers interested in models, languages, architectures, and
+implementation techniques for coordination.
+
+
+COORDINATION 2026 solicited contributions in four different categories: (1) regular papers describing thorough and complete research results and experience reports;
+(2) short papers describing research in progress, calls for action, or opinions on past
+COORDINATION research, on the current state of the art, or on prospects for the years
+to come; (3) survey papers describing important results and success stories related to
+the topics of COORDINATION; and (4) tool papers describing technological artefacts
+in the scope of the research topics of COORDINATION, and requiring the submission
+of the associated artefact via a separate procedure.
+
+
+There were 28 paper submissions distributed over the different categories: 24 regular
+papers, and 4 tool papers. The selection of the papers
+was entrusted to the Programme Committee (PC), consisting of 32 members from 15
+different countries (with gender balance F/M = 12/20). The selection of the papers was
+done electronically, in two phases. In the first phase, which lasted three weeks, each
+submission was single-blind reviewed by at least three PC members, in some cases with
+the help of external reviewers. During the second phase, which lasted four days, the papers were thoroughly discussed. The decision to accept or reject a paper
+was based not only on the reviews and scores but also on these in-depth discussions. In
+the end, 13 papers were selected to be presented at the conference: 11 regular papers, and 2 tool papers.
+
+
+The authors of the submitted tool papers were requested to participate in the EAPLS
+artefact badging, which instead was optional for all the other paper categories. There
+were 13 artefact submissions. The 9 members of the Artefact Evaluation Committee
+(AEC), chaired by Gianluca Aguzzi, awarded the Available and Reusable Badge to 3
+artefacts, and the Available and Functional Badge to 4 artefacts.
+
+As Programme Chairs, we actively contributed to the selection of the three keynote
+speakers of DisCoTec 2026:\begin{itemize}
+	\item Prof. Mehdi Dastani (Utrecht University, The Netherlands);
+	\item Paolo Romano (NESC-ID, Portugal);
+	\item Nathalie Bertrand (Inria, France).
+\end{itemize}
+We are most grateful to Prof. Dastani for accepting our invitation as the  COORDINATION-related keynote speaker. This volume includes the abstract of his keynote
+talk: “Efficient Communication and Coordination in Multiagent Reinforcement Learning”.
+As is traditional in DisCoTec, a joint session with the best papers from each main conference was organised. The best paper of COORDINATION 2026 was “X” by X.
+We are grateful to all the persons involved in COORDINATION 2026. In particular,
+we thank the authors for their submissions, the attendees of the conference for their
+participation, the PC members and external reviewers for their work in reviewing sub-
+missions and participating in the discussions, the AEC chair Gianluca Aguzzi and
+the AEC members for their effort in the evaluation of the artefacts, and the Steering Committee,
+chaired by Michele Loreti, for their guidance and support. We are also grateful to the
+Organising Committee, chaired by Claudio Antares Mezzina, for their excellent job. We also thank
+the providers of the EasyChair Conference Management System, which was of great
+help in the submission and reviewing process and in the preparation of the proceedings.
+We would also like to acknowledge the prompt and professional support from Springer,
+which published these proceedings in printed and electronic volumes as part of their
+LNCS book series.
+\medskip
+
+\begin{flushright}
+\noindent April 2026\hfill
+{[Roberto Casadei]}\\
+{[Fatemeh Ghassemi]}
+\end{flushright}
+
+
+\chapter*{Organization}
+\markboth{Organization}{Organization}
+\setlength{\tabcolsep}{0pt}     % remove spacing between columns in the following long tables
+\setlength{\LTpre}{0pt}         % remove extra vertical space before the long tables
+
+%\section*{General Chair}
+%\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+%Robert Bai          & University of Cambridge, UK
+%\end{longtable}
+%
+%\section*{Program Committee Chairs}
+%\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+%Vincent Garc\'{\i}a & Technische Universit\"{a}t Dresden, Germany\\
+%Laurent Ho          & Dublin City University, Ireland\\
+%Steffen Rao         & Carleton University, Canada\\
+%\end{longtable}
+%
+%\section*{Steering Committee}
+%\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+%Michael Agarwal     & KU Leuven, Belgium\\
+%John Banerjee       & McMaster University, Canada\\
+%Antonio Chan        & Harvard University, USA\\
+%Stefano Guo         & Ritsumeikan University, Japan\\
+%Mohamed Fang        & University of Porto, Portugal\\
+%Alessandro Davis    & University of the Aegean, Greece\\
+%Rafael Hoffmann     & Hanyang University, South Korea\\
+%Mike L\'{o}pez      & Universidad de Granada, Spain\\
+%Marek Keller        & University of Calabria, Italy\\
+%Adrian Kwon         & Massachusetts Institute of Technology, USA\\
+%Hans Meyer          & University of Kaiserslautern, Germany\\
+%Nicholas Pinto      & Siemens AG, Germany\\
+%Marcus Reddy        & ETH Zurich, Switzerland\\
+%Sandra Ryu          & University of Bonn, Germany\\
+%Patricia Silva      & Universidad Aut\'{o}noma de Madrid, Spain\\
+%Edward  Smith       & King's College London, UK\\
+%Tom\'{a}\v{s} Weber & University of Turku, Finland\\
+%Gerhard Wu          & Masaryk University, Czech Republic\\
+%Hiroki Yamamoto     & Bielefeld University, Hungary\\
+%Werner Yoshida      & University of Catania, Italy\\
+%\end{longtable}
+
+\section*{Program Committee}
+\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+	
+S. Akshay &	IIT Bombay, India\\
+Duncan Paul Attard & University of Malt, Malta \\
+Giorgio Audrito &	University of Turin, Italy \\
+Simon Bliudze &	INRIA, France \\
+Valentina Castiglioni &  Eindhoven University of Technology, Netherlands \\
+Mariangiola Dezani-Ciancaglini &	University of Turin, Italy\\
+Cinzia Di Giusto &	Université Côte d’Azur, France \\
+Francisco Ferreira & University of London, UK \\
+Silvia Ghilezan & University of Novi Sad, Mathematical Institute SASA, Serbia\\
+Susanne Graf & CNRS,VERIMAG, France\\
+Ludovic Henrio & CNRS, France; IRIF \\
+Thomas T. Hildebrandt & 	University of Copenhagen, Denmark \\
+Ping Hou & University of Oxford, UK \\
+Eva Kühn & Vienna University of Technology, Austria \\
+Ivan Lanese & University of Bologna, Italy \\
+Carlos López Pombo &  Universidad Nacional de Río Negro, Argentina; CONICET \\
+Michele Loreti &	University of Camerino, Italy \\
+Stefano Mariani & University of Modena and Reggio Emilia, Italy \\
+Hernán C. Melgratti & University of Buenos Aires, Argentina \\
+Fabrizio Montesi & University of Southern Denmark, Denmark \\
+J. Garreth Morris & University of Iowa, USA\\
+Rumyana Neykova & Brunel University London, UK \\
+José Proença & University of Porto, Portugal \\
+Violet Ka I Pun & Western Norway University of Applied Sciences, Norway \\
+António Ravara & 	NOVA LINCS, Portugal \\
+Marjan Sirjani & 	Mälardalen University, Sweden \\
+Carolyn L. Talcott & 	SRI International, USA \\
+Maurice H. ter Beek & ISTI-CNR, Italy \\
+Francesco Tiezzi & University of Florence, Italy \\
+Nils Timm & University of Pretoria, South Africa \\	
+Emilio Tuosto & Gran Sasso Science Institute, Italy \\
+Frank Valencia & École Polytechnique de Paris, France
+\end{longtable}
+
+\section*{Artefact Evaluation Committee}
+\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+Davide Domini & University of Bologna, Italy \\
+Nicolas Farabegoli & University of Bologna, Italy\\
+Matteo Magnini & University of Luxembourg, Luxembourg\\
+Mário Pereira & NOVA School of Science and Technology, Portugal\\
+Marco Quadrini & University of Camerino, Italy\\
+Corentin Reuther & University of Namur, Belgium \\
+Lorenzo Rossi & University of Camerino, Italy \\
+Gerard Tabone & University of Malta, Malta\\
+Laura Voinea & University of Glasgow, UK
+\end{longtable}
+
+\section*{Additional Reviewers}
+\begin{multicols}{2}
+\noindent Nicola Del Giudice \\
+Masoud Ebrahimi \\
+Gabriele Genovese \\
+Ramchandra Phawade \\
+Jose Ignacio Requeno\\
+Volker Stolz \\
+\end{multicols}
+
+\tableofcontents
+
+\mainmatter
+
+%Create dummy chapters for the sample ToC
+
+%-----keynote
+\setcounter{page}{1}
+\addtocontents{toc}{\protect\section*{Keynote}}
+\include{keynote}
+
+%first heading
+\setcounter{page}{1}
+\addtocontents{toc}{\protect\section*{Theoretical models and foundations for coordination}}
+\author{One Author and Another Author}
+\title{This Is a Sample Title}
+\maketitle
+\clearpage
+
+\setcounter{page}{11}
+\author{Some Author}
+\title{This Is Another Contribution Title}
+\maketitle
+\clearpage
+
+\setcounter{page}{21}
+\author{First Author and Second Author}
+\title{A Third Paper Title}
+\maketitle
+\clearpage
+
+\setcounter{page}{31}
+\addtocontents{toc}{\protect\section*{Software Engineering and Applications for Coordinated Systems}}
+\author{Still Another Author}
+\title{A Paper About Something}
+\maketitle
+\clearpage
+
+\setcounter{page}{41}
+\author{Same Author}
+\title{Last Paper of the Sample ToC}
+\maketitle
+\clearpage
+
+\setcounter{page}{51}
+\phantom{Author Index}
+\addcontentsline{toc}{title}{\protect\textbf{Author Index}}
+\clearpage
+
+\setcounter{page}{31}
+\addtocontents{toc}{\protect\section*{Coordination Platforms, Middleware, and Tools}}
+\author{Still Another Author}
+\title{A Paper About Something}
+\maketitle
+\clearpage
+\end{document}
