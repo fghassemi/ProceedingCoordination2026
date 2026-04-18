@@ -1,0 +1,26 @@
+\contentsline {title}{Efficient Communication and Coordination in Multiagent Reinforcement Learning}{1}{}%
+\authcount {1}
+\contentsline {author}{Mehdi Dastani}{1}{}%
+\section *{Keynote}
+\section *{Theoretical foundations and models for distributed systems}
+\contentsline {title}{Timed Scenario Expressions and Realisability}{1}{}%
+\authcount {1}
+\contentsline {author}{Neda Saeedloei and Feliks Kluzniak}{1}{}%
+\contentsline {title}{HistMSO: a Logic for Reasoning on Consistency Models with MONA}{22}{}%
+\authcount {1}
+\contentsline {author}{Isabelle Coget and Étienne Lozes}{22}{}%
+\contentsline {title}{Motif Refinement for the Hierarchical Control of Structured CPSs}{44}{}%
+\authcount {1}
+\contentsline {author}{Simon Bliudze, Sophie Cerf and Olga Kouchnarenko}{44}{}%
+\section *{Software Engineering and Applications for Coordinated Systems}
+\contentsline {title}{A Paper About Something}{31}{}%
+\authcount {1}
+\contentsline {author}{Still Another Author}{31}{}%
+\contentsline {title}{Last Paper of the Sample ToC}{41}{}%
+\authcount {1}
+\contentsline {author}{Same Author}{41}{}%
+\contentsline {title}{\textbf {Author Index}}{51}{}%
+\section *{Coordination Platforms, Middleware, and Tools}
+\contentsline {title}{A Paper About Something}{31}{}%
+\authcount {1}
+\contentsline {author}{Still Another Author}{31}{}%
