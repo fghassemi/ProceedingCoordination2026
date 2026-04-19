@@ -1,5 +1,6 @@
 # COORDINATION 26 proceedings
 
+
 ## Basic info
 
 - Your volume number is: **16590**. 
@@ -29,13 +30,6 @@
 - 5.8 Title and Subtitle
     - The **title** of the proceedings represents the **focus of the conference**. It should not include terms like “Proceedings of …” or “Advances in …”. 
     - The **subtitle** takes our standard form, which usually includes the **number of the event, the acronym, and the place and dates of the event**.
- 
-
-
-
-
-
- 
 
 
 
@@ -57,3 +51,13 @@
     - user: lncs ; password: u2UEaSKlGM#/
     - If you would rather share your files with csproceedings_support@springernature.com via Google Drive, please feel free to do so.
 - [ ] NOTIFY: Kindly **inform <csproceedings_support@springernature.com> as soon as you have sent the files to the sftp server**. If we are not informed, then the files will not be picked up. This is to avoid files being picked up before they are complete.
+
+
+## Examples
+
+- SERIES: https://link.springer.com/conference/coordination
+- COORDINATION 2025: https://link.springer.com/book/10.1007/978-3-031-95589-1
+- COORDINATION 2024: https://link.springer.com/book/10.1007/978-3-031-62697-5
+- COORDINATION 2023: https://link.springer.com/book/10.1007/978-3-031-35361-1
+- COORDINATION 2022: https://link.springer.com/book/10.1007/978-3-031-08143-9
+- COORDINATION 2021: https://link.springer.com/book/10.1007/978-3-030-78142-2
