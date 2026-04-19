@@ -1,0 +1,670 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+
+\input{macros}
+\usepackage[firstpage]{draftwatermark}
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+\usepackage{color}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+\urlstyle{rm}
+%
+\usepackage{algorithm}
+\usepackage{algpseudocode}  
+\usepackage{amsmath}         
+\usepackage{amssymb} 
+\usepackage{acronym}
+\acrodef{ap}[AP]{Aggregate Programming}
+\acrodef{fc}[FC]{Field Calculus}
+\acrodef{xc}[XC]{eXchange Calculus}
+\acrodef{rmse}[RMSE]{Root Mean Square Error}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\algblockdefx{Old}{EndOld}
+[1]{\textbf{rep starting from} #1 \textbf{update}}
+{\textbf{end rep}}
+
+\algblockdefx{Share}{EndShare}
+[1]{\textbf{share starting from} #1 \textbf{update}}
+{\textbf{end share}}
+
+% \algblockdefx{Spawn}{EndSpawn}
+% [2]{\textbf{spawn process} #1 \textbf{and for each} #2 \textbf{do}}
+% {\textbf{end spawn}}
+\algblockdefx{Spawn}{EndSpawn}
+[2]{\textbf{spawn for each} #2 \textbf{doing}}
+{\textbf{end spawn}}
+\newcommand{\Exit}[1]{\textbf{exit process if} #1 \textbf{else}}
+
+\algblockdefx{ForEach}{EndForEach}
+[1]{\textbf{for each} #1 \textbf{do}}{\textbf{end for}}
+
+\newcommand{\Continue}{\State \textbf{continue}}
+\newcommand{\Indent}{\hspace{\algorithmicindent}}
+
+\begin{document}
+%
+\SetWatermarkText{\hspace*{3.7in}\raisebox{8.55in}{\href{https://eapls.org/pages/artifact_badges/}{\mbox{\includegraphics[width=1.4cm]{badges/available}\includegraphics[width=1.4cm]{badges/reusable}}}}} 
+\SetWatermarkAngle{0}
+%
+\title{Aggregate Indoor Localisation}
+%
+%\titlerunning{Abbreviated paper title}
+
+\author{Giorgio Audrito\inst{1}\orcidID{0000-0002-2319-0375} \and
+Leonardo Bertolino\inst{1} \and
+Ferruccio Damiani\inst{1}\orcidID{0000-0001-8109-1706} \and
+Gianluca Torta\inst{1}\orcidID{0000-0002-4276-7213}}
+%
+\authorrunning{G. Audrito et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Department of Computer Science, University of Turin, Torino, Italy  \\
+\email{\{giorgio.audrito,ferruccio.damiani,gianluca.torta\}@unito.it} \\ leonardo.bertolino@edu.unito.it}
+
+\maketitle
+
+\begin{abstract}
+Accurate indoor localisation is a key enabling technology for many distributed systems, including collective robotics, smart environments, and user wearable devices. In these settings, localisation must often be achieved without central coordination, under limited sensing capabilities, and in the presence of dynamic environmental changes. Collective indoor localisation algorithms address these challenges by exploiting local interactions among devices to collectively infer positions. However, many existing approaches implicitly assume relatively stable conditions and offer limited guarantees on adaptability and resilience.
+
+In this paper, we investigate cooperative indoor localisation from a self-adaptive perspective. We reformulate two established localisation algorithms within the aggregate programming framework, and propose novel variants of them to improve their performance. We evaluate our proposals through extensive simulation, analysing error and communication cost across a wide range of scenarios, including recovery from disruptive events. Our results uncover the trade-offs between accuracy, resiliency and efficiency, shedding light on the design space of what we call aggregate indoor localisation algorithms.
+
+\keywords{Aggregate programming  \and Cooperative indoor localisation \and Self-stabilisation.}
+\end{abstract}
+
+\section{Introduction}
+
+Localization is a fundamental enabling functionality for numerous distributed systems operating in indoor environments, including collective robotics, sensor networks, cyber-physical systems, and smart environments. In such scenarios, knowledge of spatial position enables coordination, motion planning, and efficient resource management.
+Unlike outdoor scenarios, where satellite systems such as GPS provide a consolidated global infrastructure for positioning, indoor environments render such a solution impractical or highly unreliable \cite{DBLP:journals/telsys/NiculescuN03}. Satellite signals are significantly attenuated by building structures, are subject to reflections and interference that degrade accuracy, and, in many cases, are not received at all in the absence of direct visibility of the satellites. Moreover, even when the signal is available, the accuracy provided is generally not sufficient for applications requiring metric or sub-metric precision in complex enclosed spaces.
+
+Consequently, indoor localization cannot rely on a pre-existing global infrastructure, but must instead be achieved through distributed mechanisms based on local information. This requirement is particularly relevant in systems composed of autonomous and potentially mobile devices, which communicate predominantly with physically nearby nodes and operate asynchronously \cite{DBLP:journals/percom/TestaADT22}. In such contexts, position must be estimated through cooperative processes in which spatial information is progressively propagated across the network through multi-hop interactions.
+Despite the extensive literature on cooperative localization, many existing algorithms assume relatively stable conditions, such as reliable connectivity, largely static network topologies, and the absence of significant perturbations. In real scenarios, however, distributed indoor systems are inherently dynamic: devices may join or leave the network, experience temporary failures or variations in measurement quality, and the communication topology may evolve over time. Under these conditions, traditional algorithms can be slow to converge, unstable, or unable to automatically adapt to changes.
+
+The problem we address, therefore, is how to design cooperative localization algorithms that are not only accurate, but also resilient and capable of self-adapting to network dynamics and environmental perturbations without requiring external intervention. In particular, we are interested in solutions that are fit for decentralised, asynchronous systems with proximity-based interactions.
+We revisit two well-known algorithms from the literature: \emph{distance vector–based positioning} and \emph{non-Bayesian cooperative localisation} \cite{DBLP:journals/pieee/WymeerschLW09,DBLP:journals/telsys/NiculescuN03}, expressing them within the \emph{aggregate programming} \cite{BPV-COMPUTER2015} framework, which is designed to support decentralised coordination in mutable environments. This translation enables the algorithms to naturally react to changes and \emph{self-stabilise} towards consistent results without external intervention. We then introduce improved variants of the two algorithms above, working both with and without inter-node distance estimates, and aimed at improving localisation accuracy and communication efficiency. 
+
+We evaluate the proposed algorithms through an extensive selection of simulations in dynamic multi-hop scenarios, varying the communication radius, device speed, and measurement noise level. The analysis considers both the localization accuracy and the computational and communication cost, in a scenario which comprises nodes failing and joining to assess resilience. The results highlight an improved trade-off between precision, capacity for self-adaptation, and efficiency of the proposed variants with respect to the original versions of the algorithms. Overall, the evaluation provides a comprehensive guide for choosing the best algorithm for any given scenario at hand.
+
+This paper makes the following contributions:
+\begin{itemize}
+    \item \textbf{Formalisation in aggregate programming.} We reformulate two established indoor localisation algorithms (distance vector–based positioning and non-Bayesian cooperative localisation) within the aggregate programming paradigm, providing an elegant and compositional specification in the \ac{xc} \cite{jss:xc} for both of them.
+    
+    \item \textbf{Stabilisation guarantees.} We prove that the aggregate reformulation induces (self-)stabilising behaviour, endowing the algorithms with formal convergence guarantees that were not directly available in their original decentralised formulations, particularly for distance vector–based approaches.
+    
+    \item \textbf{Algorithmic variants and trade-off analysis.} We design several variants, operating both with and without inter-node distance estimates, and systematically evaluate their behaviour under noise and network disruptions, including recovery from transient perturbations. We provide a comparative study of localisation error and communication cost, highlighting the trade-offs among accuracy, message size, computational cost, and recovery performance in dynamic multi-hop settings.
+\end{itemize}
+
+The remainder of the paper is structured as follows.
+\Cref{sec:problem} states the problem of cooperative indoor localisation in decentralized multi-hop networks, introducing the system model, the role of anchor nodes, and the self-stabilisation requirement adopted.
+\Cref{sec:background} presents the necessary background on the Aggregate Programming paradigm and on the main multi-hop geometric algorithms for indoor localisation.
+\Cref{sec:algorithms} describes our aggregate reformulation of the two selected algorithms, illustrating their operation with pseudocode and introducing the proposed variants to improve convergence and robustness.
+\Cref{sec:evaluation} presents the experimental evaluation, analysing the results in terms of accuracy, communication cost, and adaptability in dynamic scenarios.
+\Cref{sec:conclusion} concludes with final remarks and directions for future work.
+
+\section{Problem Statement} \label{sec:problem}
+
+We consider the problem of cooperative indoor localisation in decentralised distributed systems composed of multiple devices interacting through proximity-based communication. The system is modelled as a multi-hop network, where each node can exchange information only with neighbours within communication range, and no central coordination entity is assumed.
+A subset of nodes, called \emph{anchors}, have a fixed and known position in a common reference frame. All other nodes aim to estimate their own position by exploiting local interactions with neighbours. Depending on sensing capabilities, nodes may or may not have access to (noisy) estimates of the distance to their neighbours.
+%
+The network and the environment are assumed to be mutable: nodes (including anchors) may move, join or leave the network, and communication may fail.
+
+A first, obvious requirement for any proposed solution is that it is \emph{stabilising}, i.e., that after a finite amount of time every node in the network reaches a stable value. However, to address the mutability of the network, localisation algorithms should ideally not only provide accurate position estimates under stable conditions, but also be able to adapt to changes as the ones previously mentioned without requiring explicit reinitialisation or external control.
+It is then highly desirable that the solutions are also \emph{self-stabilising}, a stronger property than mere stabilisation. Informally, a self-stabilising algorithm is one that, starting from an arbitrary internal state (that may be influenced by e.g.~a recent input change), provided that its input data and environment stay constant for enough time, is guaranteed to converge to the correct outcome for its input and environment, independently of the algorithm state before stabilisation.
+
+\section{Related Work and Background} \label{sec:background}
+
+\subsection{Aggregate Programming}\label{sec:ap}
+The Internet of Things (IoT) is leading to an exponential growth in the number of connected devices, such as smartphones, drones, sensors, and embedded systems, which primarily rely on proximity-based local communications. Programming approaches centered on individual devices are becoming burdensome for developers, who are forced to directly manage communication, coordination, and behavioral composition, resulting in issues of modularity and reusability.
+
+To address these challenges, \acf{ap} emerged as a paradigm for programming the collective behavior of sets of distributed devices. Such devices operate autonomously and asynchronously, do not share memory, and typically communicate only with physically neighboring nodes. The entire computational environment is viewed as a single entity—more precisely, a region—within which the technical details of individual devices are abstracted away. Rather than reasoning about individual devices, programmers reason about the space those devices occupy, using data constructs that span across space and time in the region \cite{BPV-COMPUTER2015}.
+
+Despite this global abstraction, the program is executed locally by the individual devices, which implicitly coordinate to ensure robustness and resilience, even in the presence of failures or dynamic changes in the system.
+%
+Local execution on each device follows a cyclical round-based schedule, also known as \emph{sense–compute–send–sleep}. In each cycle, the device initially acquires information from local sensors and messages received from neighboring nodes in the previous cycle (\emph{sense}). Based on this data, local computation is then performed (\emph{compute}), at the end of which messages may be produced for adjacent devices (\emph{send}). Once execution is complete, the device remains inactive until the start of the next cycle (\emph{sleep}).
+
+For \ac{ap}, the reference languages are the \ac{fc} \cite{DBLP:journals/jlap/ViroliBDACP19} and its recent evolution, \ac{xc} \cite{jss:xc}. The latter is essentially a typed lambda calculus with a fundamental $\exchangeK$ operator to provide implicit communication between nearby devices. Within \ac{xc}, communication between nearby devices does not occur via direct messages but through a special kind of data called \emph{nvalue} (for neighboring value). The nvalue is a map that associates device identifiers with literal values and has a \emph{default} value that is assigned to all other devices, including those that are not known as neighbours by the sender. Neighbouring values are used to represent both values received from directly connected devices, and to represent values that need to be sent back to them.
+%
+%The main communication construct in XC is the exchange operator. Communication between neighboring devices takes place through this primitive, which is responsible for constructing and using neighbouring values. 
+The $\exchangeK$ primitive has the following form:
+\begin{center}
+\lstinline[mathescape,language=xc]
+{exchange($\e_i$, (n) => return $\e_r$ send $\e_s$))}
+\end{center}
+%\lstinline{\exchangeK(\e_i, (\nname) \toSymK \returnK\ \e_r \sendK\ \e_s)\]
+A device evaluates the expression $\e_i$ to obtain an initial literal value $\lvalue_i$. Then, it substitutes the lambda argument
+%the variable $o$ with the nvalue computed in the previous round by the local device (if absent, it is replaced with $li$)and
+$\nname$ with an nvalue that has $\lvalue_i$ as \emph{default}, and associates neighbours to the messages received from them for this exchange expression. The expression returns a value $\e_r$ to be used on the device, and simultaneously generates the nvalue $\e_s$ to be sent to neighbors, which will use it in their next round to produce their argument $\nname$.
+%
+In the pseudo-code in the following sections, we will use some convenient specializations of $\exchangeK$: 
+\begin{lstlisting}[mathescape, language=xc]
+def share(init, update) {
+  exchange(init, (n) => val v = update(n); return v send v)
+}
+
+def nbr(init, value) {
+  exchange(init, (n) => return n send value)
+}
+
+def rep(init, update) {
+  exchange(init, (n) => val v = update(self(n)); return v send v)
+}
+\end{lstlisting}
+The $\shareK$ specialization derives a single local value (i.e., an nvalue with only the default and no special values for neighbours) by applying an {\tt update} function to {\tt n}, then returns it and sends it to all the neighbours.
+The $\nbrK$ specialization returns the received nvalue, and sends a local value received as parameter to all the neighbours.
+Finally, the $\repK$ specialization returns and sends to itself an {\tt update} of the value \lstinline[language=xc]|self(n)| for the current device in {\tt n} (i.e., it propagates local status between rounds).
+
+
+In a program, there may be multiple $\exchangeK$ calls in the same round, and it is necessary that each such call receives the correct values from neighbours. A mechanism called \emph{alignment} is used to ensure that each $\exchangeK$ receives the correct neighbouring values corresponding to the same $\exchangeK$ expression in neighbours' rounds (both as position in source code syntax tree, and as position in the current stack trace of function calls). This ensures that there are no conflicts between multiple exchanges in the same program. This important feature enables \emph{compositionality}, i.e., an \ac{xc} program can reuse (one or several) functions that contain $\exchangeK$, that will just work as expected.
+
+In addition to the fundamental exchange construct and its specializations ($\shareK$, $\nbrK$, $\repK$), XC also provides a higher-level mechanism for managing dynamic spatial computations, called $\spawnK$ \cite{DBLP:journals/lmcs/AudritoCDTV25,DBLP:journals/eaai/CasadeiVAPD21}, which forms the basis of the \emph{aggregate processes} model. The function $\spawnK(\e_b, \e_k, \e_i)$ allows the initiation and management of sets of distributed processes indexed by keys. The expression $\e_b$ models the process behaviour and is a function that, given an identifying key and an input, returns a pair composed of an output value and a Boolean indicating whether the process should propagate to neighbours or terminate in the current node. The expression $\e_k$ defines the set of process keys for which new processes should be spawned on the current device, while $\e_i$ represents an additional input provided to the process behaviour. The result of spawn is a map that associates each key of an executed process with its corresponding output value.
+
+From a semantic point of view, depending on whether each device decides to keep a process instance active, that instance is automatically propagated to neighbouring devices or not, giving rise to a distributed computation that extends through space and evolves dynamically over time. Furthermore, processes influence the alignment mechanism: an exchange operation executed within a process can only be aligned with corresponding operations belonging to the same process (with the same key) on neighbouring devices. This ensures isolation between parallel computations and allows multiple independent processes to execute simultaneously, preserving modularity and composability.
+
+\subsection{Multi-Hop Indoor Localisation}
+The localization of devices (hereafter also referred to as \emph{nodes}) in indoor environments represents a significant challenge, as knowledge of their positions plays a central role in many network applications and functionalities, such as the need to associate collected measurements with a spatial context. The use of GPS is not applicable indoors, due to the attenuation (or complete blocking) of the signal caused by walls and roofs.
+Even in outdoor scenarios, however, GPS is not always a suitable solution, because, e.g., of costs, power consumption, inaccuracy \cite{DBLP:journals/telsys/NiculescuN03}, or simply in GPS-denied areas. Thus, most of the techniques considered here can also be relevant to outdoor settings.
+
+To allow localization without relying on GPS (or similar systems), algorithms based on geometric methods have been introduced, enabling the estimation of node positions relying on other information. Among the most widely used geometric methods are trilateration, and its variant named multilateration. Trilateration \cite{DBLP:journals/trob/ThomasR05} is a geometric technique that allows the position of a node to be determined by knowing its distances from three reference nodes (anchors) with known positions. The node position corresponds to the intersection of three spheres, each centered at a reference node and with a radius equal to the measured distance from the unknown node. 
+The determination of the distance between two nodes is itself an interesting problem that is typically addressed with wireless technologies, such as BLE, WiFi, or UWB. 
+Among these technologies, UWB has been reported to achieve positioning accuracy with an error bound of approximately $10cm$ \cite{network4040027}.
+Explicitly considering the techniques for distance estimation is out of the scope of the present paper. However, we will introduce controlled random estimation errors in the experiments to make them more realistic.
+
+Position estimation through multilateration \cite{DBLP:conf/cist/AsmaaHM14} is formulated as an optimization problem, in which the position of the unknown node is determined by minimizing the \ac{rmse} between the distances measured from \emph{anchor} nodes and the distances corresponding to the estimated position. This approach makes it possible to achieve robust localization even in the presence of noisy distance measurements, by combining multiple measurements and, if necessary, assigning them appropriate weights. The numerical solution of this least-squares problem can be obtained using the Levenberg–Marquardt method \cite{DBLP:journals/cj/BasterrechMRS11}. When at least two anchors are present, the function enters an iterative loop: at each iteration, it computes the total position error by comparing the estimated distances with the actual ones. It then determines the direction in which to move, taking into account both the gradient and the direction in which the error increases. Based on this information (and the \emph{step size}), a new position estimate is computed, for which the error is evaluated again. If the error increases, the new estimate is rejected and the step size is reduced; conversely, if the error decreases, the estimate is accepted and the step size is increased. This adaptation mechanism guarantees the stability and convergence of the algorithm toward a solution that minimizes the error.
+
+Several studies have addressed \emph{multi-hop} localization, that is, localization in networks where nodes can share information with their neighbours to support the localization task  where the availability of anchor nodes is limited. Among these, \cite{DBLP:journals/access/ShamsOAK21} proposes a combined multi-hop localization and time synchronization approach (the latter is necessary for correctly estimating the distances between nodes) using a single anchor node, highlighting the challenges and strategies for localization under resource-limited conditions. Yet, when three or more anchor nodes are available, it is possible to exploit the geometric methods discussed previously. 
+%
+A classic algorithm known as \emph{DV-Hop} \cite{DBLP:journals/telsys/NiculescuN03} (where DV stands for Distance Vector) is structured into three main phases. First, nodes exchange information with their neighbors to determine the distance in hops from the anchors. Second, the anchors, knowing their mutual Euclidean distances, calculate a correction factor to estimate the average hop length. Finally, nodes use this information to perform multilateration and estimate their own position. Note that DV-hop is considered to be a \emph{sequential} algorithm \cite{xwsw:tit22}, due to unidirectional share of information in the first two phases, followed by local position estimation in the third phase.
+%
+Another classic approach is \emph{NB-Coop} (which stands for Non-Bayesian Cooperative) \cite{DBLP:journals/pieee/WymeerschLW09}, in which nodes iteratively update their own position by comparing the estimated distances from neighbors with those calculated from their current estimated positions. It is similar to the multilateration method described above, but with notable differences that will be explained later. One key difference is that a node’s neighbors are generally not all anchors. The approach is defined as non-Bayesian because it treats node positions as unknown input parameters, rather than random variables with given probability distributions.
+
+Finally, there is a vast literature on more complex multi-hop geometric algorithms, ranging from Bayesian cooperative message passing \cite{DBLP:journals/pieee/WymeerschLW09} to distributed convex optimization \cite{6725647}. In this paper we will focus on the \ac{ap} implementation and optimization of the DV-hop and NB-Coop classic algorithms mentioned above. We remark that, to the best of our knowledge, no investigation has been performed in literature on the usage of these algorithms in mutable environments, and in particular on self-stabilisation. Instead, works in literature assume a single execution until convergence on a fixed topology. The convergence proof for the classic NB-Coop algorithm to (local or) global minima can be re-interpreted as a (self-)stabilisation proof for the algorithm. However, classic formulations of DV-hop algorithm do not self-stabilise, since these do not include a mechanism to remove knowledge about anchors that exited the network.
+
+
+\section{Aggregate Indoor Localisation Algorithms} \label{sec:algorithms}
+
+\subsection{Non-Bayesian Cooperative Localisation}
+
+\begin{figure}[t]
+%\begin{algorithm}[t]
+\textbf{Non-Bayesian Cooperative Localisation}
+%\label{algo:nbcoop}
+\begin{algorithmic}[1]
+    \Require $\mathit{initPos}, \mathit{isAnchor}, \mathit{nbrDist}$
+    \Share{$\mathit{pos} \gets \mathit{initPos}$}
+        \State $\mathit{anchorInfo} \gets \{(\mathit{pos}_i, \mathit{nbrDist}_i) \text{ for each neighbour } i\}$
+        \If{$\mathit{isAnchor}$} 
+            \State \Return $\mathit{pos} \gets$ known position
+        \Else
+            \State \Return  $\mathit{pos} \gets \mathit{gradientDescent}$ given $\mathit{anchorInfo}$ and $\mathit{pos}$
+        \EndIf
+    \EndShare
+\end{algorithmic}
+%\end{algorithm}
+\medskip
+\begin{lstlisting}[language=xc]
+def nbcoop(initPos, isAnchor, nbrDist) {
+  share(initPos, (pos) =>
+    val anchorInfo = nfold(cons, tuple(pos, nbrDist), nil);
+    if (isAnchor) { knownPos } else {
+      gradientDescent(anchorInfo, self(pos))
+    }
+  )
+}
+\end{lstlisting}
+    %\caption{XC code for the non-bayesian cooperative localisation algorithm.}
+    \caption{Non-bayesian cooperative localisation algorithm (above) and corresponding XC code (below).}
+    \label{code:nbcoop}
+\end{figure}
+
+The Non-Bayesian cooperative localisation algorithm \cite{DBLP:journals/pieee/WymeerschLW09} proceeds by iterative refinement of a working estimated position. We consider a uniformly random position in the monitored area as the initial estimate \emph{initPos}. As the iterations proceed, the estimate is progressively refined thanks to the exchange of information with neighbours. This strategy of progressive refinement can be naturally expressed as an aggregate algorithm in XC, given in \Cref{code:nbcoop}. For presentation purposes, we also include a pseudo-code representation of the algorithm, which we discuss in the following, leaving the interpretation of the XC code to the interested reader.
+
+At each round, each node receives from its neighbours their estimated position \emph{pos} (through the \textbf{share} function\footnote{While in the pseudo-code \textbf{share} has a slightly different syntax than as presented in \Cref{sec:ap}, its {\em init} value and {\em update} can be easily recognized. A similar observation applies to \textbf{rep} and \textbf{spawn} in pseudo-code given later.} in line 1) and the measured distance \emph{nbrDist} (algorithm input) that separates the current device from them, both as neighbouring values. If the node is an anchor (line 3), no calculation is needed since its position is already known (line 4). For non-anchor nodes, this information is processed by the \emph{gradientDescent} function (line 6), which is the technical heart of the algorithm. This routine compares measured distances $\mathit{nbrDist}_i$ with the geometric distances of position estimates $\mathit{pos}_i$, and updates the current position estimate \emph{pos} accordingly, moving it closer to or farther from the neighbours in linear proportion to the discrepancies detected.\footnote{This can be physically interpreted as the overall nudge that would result in a movable point at the estimated position \emph{pos}, that is connected with elastic springs to fixed points at the estimated positions of neighbours $\mathit{pos}_i$, where the length at rest of the springs is given by the measured distances $\mathit{nbrDist}_i$.} This procedure corresponds to a gradient descent of the linearised least-squares error (hence the name of the function), which is an approximation of the actual least-squares error that is simpler to optimise.
+
+A key role in this algorithm is played by the anchor nodes, which provide the absolute spatial references necessary to constrain the localization process. In the absence of anchors, the algorithm still converges, but only to a relative solution, which may differ from reality by any global translation or rotation. At least three anchors are needed to remove all ambiguity, and an adequate distribution of more anchors helps to speed up the iterative process and reduce errors.
+
+In order to improve convergence speed and accuracy, we also consider a variant of the algorithm which uses a \emph{multilateration} function instead of \emph{gradientDescent} to update the position of the nodes, substituting line 6 as follows:
+\begin{algorithmic}[1] \setcounter{ALG@line}{5}
+    \State \Indent \Indent \Return $\mathit{pos} \gets \mathit{multilateration}$ given $\mathit{anchorInfo}$ and $\mathit{pos}$
+\end{algorithmic}
+This variant differs in the strategy adopted for updating the position of non-anchor nodes. In the standard version based on \emph{gradientDescent}, the node’s position is updated incrementally, following the direction reducing the linearised least-squares error between the estimated and measured distances.
+By contrast, in this \emph{multilateration}-based variant, we directly compute the position minimising the actual least-squares error with the Levenberg–Marquardt method. This approach requires more computation per each round, but may allow for more precise estimates (as we do not resort to the linearised approximation). Further, since we directly compute the optimal position, this method can allow for faster convergence time. However, in general faster convergence may also increase instability in case of noisy or fast-changing input, so the practical effectiveness of the approach has to be evaluated through simulation.
+We remark that in both variants, the update is iterative and local: at each step, the node modifies its position based on the current state and the information received from neighbours, progressively integrating the contributions of all available measurements.
+Furthermore, both variants can be shown to be stabilising.
+
+\begin{theorem}
+    Algorithm \ref{code:nbcoop} is stabilising in both the \emph{gradient descent} and \emph{multilateration} variants.
+\end{theorem}
+\begin{proof}
+    Define the total error of the network as the sum of the square of the differences between all measured distances $\mathit{nbrDist_i}$ and the corresponding distances of the estimated positions $\lVert \mathit{pos_i} - pos \rVert$.
+    During each round, the algorithm can only (weakly) decrease the error of the current device, thus reducing also the overall error of the whole network. Since the total error is a positive number represented in finite precision, it cannot decrease forever, and a minimum (possibly larger than 0) will be eventually reached. Once that happens, the algorithm  will have stabilised.
+\end{proof}
+
+However, neither of the variants is necessarily \emph{self-stabilising}, that is, so that the stabilisation result does not depend on the initial conditions. In fact, the literature shows \cite{11205997} that the optimisation may get stuck on local minima, never reaching the global minima, depending on the initial conditions. Special variations have been developed to ensure a single minimum \cite{11205997}, often at the expense of convergence time. In our simulations, however, we never encountered such local minima, proving experimentally that they are unlikely for randomised graphs. Thus, we decided not to consider those variations in this paper.
+
+\begin{figure}[t]
+%\begin{algorithm}[t]
+\textbf{Distance Vector-Based Positioning}
+%\label{algo:dv}
+\begin{algorithmic}[1]
+    \Require $\mathit{initPos}, \mathit{isAnchor}, \mathit{nbrDist}$
+    \Old{$\mathit{pos} \gets \mathit{initPos}$ and $\mathit{corr} \gets 1$}
+        \State $\{\mathit{dist}_a, \mathit{pos}_a, \mathit{corr}_a \text{ for each close anchor } a\} \gets \mathit{anchorsDPC}$ algorithm 
+        \If{$\mathit{isAnchor}$} 
+            \State $\mathit{totApxDist} \gets$ sum of $\mathit{dist}_a$ if $\mathit{dist}_a$ finite
+            \State $\mathit{totTrueDist} \gets$ sum of $\rVert \mathit{pos} - \mathit{pos}_a \lVert$ if $\mathit{dist}_a$ finite
+            \State \Return $\mathit{pos} \gets$ known position, $\mathit{corr} \gets \mathit{totTrueDist} / \mathit{totApxDist}$
+        \Else
+            \State $\mathit{anchorInfo} \gets \{(\mathit{pos}_a, \mathit{dist}_a \cdot \mathit{corr}_a) \text{ for each close anchor } a\}$
+            \State \Return $\mathit{pos} \gets \mathit{multilateration}$ given $\mathit{anchorInfo}$ and $\mathit{pos}$, $\mathit{corr} \gets 1$
+        \EndIf
+    \EndOld
+\end{algorithmic}
+%\end{algorithm}
+\medskip
+ %NOTA: non è proprio corretto, perché D,P,C sono mappe generiche e non field, ma se no il codice veniva tanto brutto
+\begin{lstlisting}[language=xc,mathescape]
+def dv(initPos, isAnchor, nbrDist) {
+  rep(tuple(initPos, 1), (old) =>
+    val [pos,corr] = old;
+    val [D,P,C] = anchorsDPC(pos, corr, isAnchor, nbrDist, param);
+    if (isAnchor) {
+      val totApxDist = nfold(+, mux(D < $\infty$, D, 0));
+      val totTrueDist = nfold(+, mux(D < $\infty$, norm(pos - P), 0);
+      tuple(knownPos, totTrueDist / totApxDist)
+    } else {
+      val anchorInfo = tuple(P, D*C);
+      tuple(multilateration(anchorInfo, pos), 1)
+} ) }
+\midskip
+\end{lstlisting}
+    \caption{Distance Vector-based positioning algorithm (above) and corresponding  XC code.}
+    \label{code:dv}
+\end{figure}
+
+\begin{figure}[t]
+%\begin{algorithm}[t]
+\textbf{R-Close Anchors DPC}
+%\label{algo:rclose}
+\begin{algorithmic}[1]
+    \Require $\mathit{pos}, \mathit{corr}, \mathit{isAnchor}, \mathit{nbrDist}, \mathit{R}$
+    \Spawn{$\mathit{UID}$ \textbf{if} $\mathit{isAnchor}$}{anchor $a$}
+        \State $\mathit{dist}_a \gets \mathit{distance}$ from $a$ using $\mathit{nbrDist}$
+        \State $\mathit{pos}_a, \mathit{corr}_a \gets \mathit{broadcast}$ of $\mathit{pos}, \mathit{corr}$ from $a$ using $\mathit{dist}_a$
+        \State \Exit{$\mathit{dist}_a \ge \mathit{R}$}
+        \State \Return $\mathit{dist}_a, \mathit{pos}_a, \mathit{corr}_a$
+    \EndSpawn
+    \State \Return $\{\mathit{dist}_a, \mathit{pos}_a, \mathit{corr}_a$ for each close anchor $a\}$
+\end{algorithmic}
+%\end{algorithm}
+\medskip
+\begin{lstlisting}[language=xc,mathescape]
+def anchorsDPC(pos, corr, isAnchor, nbrDist, R) {
+  spawn((a) => {
+    val dist = distance(uid() == a, nbrDist);
+    val [pos,corr] = broadcast(dist, tuple(pos,corr));
+    tuple(tuple(dist,pos,corr), dist < R)
+  }, if (isAnchor) {cons(nil,uid())} else {nil})
+}
+\end{lstlisting}
+    \caption{R-close anchors DPC algorithm (above) and the corresponding XC code (below).}
+    \label{code:rclose}
+\end{figure}
+
+\begin{figure}[t]
+%\begin{algorithm}[t]
+\textbf{K-Closest Anchors DPC}
+%\label{algo:kclose}
+\begin{algorithmic}[1]
+    \Require $\mathit{pos}, \mathit{corr}, \mathit{isAnchor}, \mathit{nbrDist}, \mathit{K}$
+    \Share {$\mathit{dpc} \gets \{\mathit{UID} \mapsto (0, \mathit{pos}, \mathit{corr})\}$ \text{if} $\mathit{isAnchor}$ \text{else} $\{\}$}
+        \ForEach{neighbour $i$ \textbf{and} anchor $a$ in $\mathit{dpc}_i$}
+            \State increase $\mathit{dist}_i(a)$ by $\mathit{nbrDist}_i$ in $\mathit{dpc}_i(a) = (\mathit{dist}_i(a), \mathit{pos}_i(a), \mathit{corr}_i(a))$
+        \EndForEach 
+        \State $\mathit{dpc} \gets$ merge of $\mathit{dpc}_i$ for each neighbour $i$, preferring shorter distances
+        \If{size of $\mathit{dpc}$ is larger than $K$} 
+            \State $\mathit{dpc} \gets$ select $K$ elements of $\mathit{dpc}$ with smallest distance
+        \EndIf
+        \State \Return $\mathit{dpc}$
+    \EndShare
+    \State \Return $\mathit{dist}_a, \mathit{pos}_a, \mathit{corr}_a = \mathit{dpc}(a)$ for each anchor $a$ in $\mathit{dpc}$
+\end{algorithmic}
+%\end{algorithm}
+\medskip
+\begin{lstlisting}[language=xc,mathescape]
+def anchorsDPC(pos, corr, isAnchor, nbrDist, K) {
+  val init = if (isAnchor) {map(uid(), tuple(0,pos,corr))} else {map()};
+  share(init, (ndpc) => {
+    val mdpc = nmap(map_inc, ndpc, nbrDist);
+    val dpc = nfold(map_join, mdpc, init);
+    map_trunc(dpc, K)
+  })
+}
+\end{lstlisting}
+    \caption{K-closest anchors DPC algorithm (above) and the corresponding XC code (below). Functions \lstinline|map_inc|, \lstinline|map_join| and \lstinline|map_trunc| respectively increase the first component of tuples in a map, merge maps preferring smaller values for the first component, and select the $K$ values in the map with the smallest first component.}
+    \label{code:kclose}
+\end{figure}
+
+\subsection{Distance Vector-Based Positioning}
+
+In the DV-Hop algorithm \cite{DBLP:journals/telsys/NiculescuN03}, each node progressively builds an estimate of its own position based on information received from anchor nodes. In particular, each node maintains a list of known anchors and their respective estimated distances, which are iteratively updated through the propagation of information across the network. This process of progressive dissemination and update can be naturally expressed as an aggregate algorithm in XC (see \Cref{code:dv}), as shown also in the simplified pseudo-code.
+
+At each round, every node internally maintains a copy of the state values \emph{pos} (position) and \emph{corr} (correction factor), through  the \textbf{rep} function in line 1. Here, \emph{pos} represents the node's current estimate of its spatial position, and \emph{corr} is a scaling factor computed by anchor nodes to rescale estimated distances to more closely match Euclidean distances. The initial values are \emph{pos = initPos} (which may be a fixed or random position in the deployment area) and \emph{corr = 1} (no rescaling). At each round, these values are recomputed from the information received from anchors and stored as persistent state for the next round, keeping track of current estimates during the algorithm execution.
+
+At line 2, we collect \emph{DPC} information (where DPC stands for estimated relative Distance, absolute euclidean Position, Correction factor) from anchors. We accomplish this according to two main variants. In the first, closer to \cite{DBLP:journals/telsys/NiculescuN03}, which we call \emph{R-Close Anchors} (\Cref{code:rclose}), each node considers all anchors whose estimated distance does not exceed a predefined threshold $R$, stopping the propagation of information beyond this range. In the second variant, called \emph{K-Closest Anchors} (\Cref{code:kclose}), each node maintains an updated list of reachable anchors, and, if the total number exceeds a maximum value $K$, it selects only the $K$ closest anchors in terms of estimated distance. Regardless of the variant chosen, the DPC information collected from the anchors is then used to update \emph{pos} and \emph{corr}, as shown in the following lines of the algorithm.
+If the node is an anchor (lines 4–6), the position is known and no calculation is needed to update \emph{pos}. Instead, \emph{corr} is set to the ratio between the sum of Euclidean distances and the sum of estimated distances to the other anchors, providing the needed scaling factor from estimated to Euclidean. For non-anchor nodes, there is no associated correction factor, and  \emph{corr} is hence just set to $1$. Instead, \emph{pos} is updated through multilateration (lines 9), where the distances to anchors are obtained by multiplying estimated distances and correction factors (line 8).
+
+In the R-Close Anchors variant (\Cref{code:rclose}), a \textbf{spawn} of a new aggregate process is performed for each anchor (line 1) to handle data collection concurrently. Each process checks the estimated distance to the anchor using distance estimates to neighbours \emph{nbrDist} (line 2) and performs a broadcast of the anchor’s position and correction factor (line 3). If the distance exceeds the predefined threshold $R$, the current node exits the aggregate process (line 4), ensuring that only ``close enough'' anchors are considered. This is crucial to ensure self-stabilisation: if a node stops being an anchor, distance estimates from it will start increasing until when its process is fully terminated. The algorithm terminates (line 7) returning a collection of distance, position and correction values for each anchor whose process was active in the current device (thus, only those within a distance of $R$).
+
+In the K-Closest Anchors variant (\Cref{code:kclose}), the node maintains a distributed table of anchor information using the \textbf{share} construct (line 1). For each neighbour $i$ and anchor $a$ in the table received from that neighbour (line 2), the node updates the distance estimates in that table by adding the distance estimate to the neighbour \emph{nbrDist} (line 3). All tables received are then merged, preferring shorter distances if the same anchor appears in multiple tables (line 5). If the total number of anchors in the resulting table \emph{dpc} exceeds the maximum value $K$ (lines 6–7), only the $K$ closest anchors in it are retained. Finally, the selected anchors are shared with neighbours (line 9), and returned to be used in the subsequent multilateration step (line 11).
+
+In both variants, distances between nodes and anchors are expressed according to a given metric \emph{nbrDist}, which may take very different forms: for instance, it may only represent the number of hops (if \emph{nbrDist} is equal to $1$ for each neighbour) or on noisy estimated distances (for instance, calculated with power ratio RSSI or message round-trip time measurements). The correction factor is crucial to ensure that any such metric can be used to estimate distances, leveraging the exact positional knowledge of anchors to compensate for systematic errors or even totally different scales, such as when distances are measured in hops.
+Furthermore, both variants can be shown to be self-stabilising.
+
+\begin{theorem}
+    Algorithm \ref{code:dv} is self-stabilising with either sub-routines in Algorithm \ref{code:rclose} or Algorithm \ref{code:kclose}.
+\end{theorem}
+\begin{proof}
+    Algorithm \ref{code:rclose} is self-stabilising since it is a $\spawnK$ on a fixed (thus stable) set of keys, whose process body consists of the $\mathit{distance}$ and $\mathit{broadcast}$ algorithms together with local-only computations, which are all known from literature to be self-stabilising \cite{Viroli:TOMACS_selfstabilisation}.
+
+    Algorithm \ref{code:kclose} is also self-stabilising, since it is an instance of the minimising pattern presented in \cite{Viroli:TOMACS_selfstabilisation}. In this pattern, a $\shareK$ repeatedly updates partially ordered values by first \emph{increasing} with an increasing function all values received by neighbours, and then returning their \emph{join} (maximum lower bound). This is exactly the structure of Algorithm\ref{code:kclose}, where:
+    \begin{itemize}
+        \item values are maps of at most $K$ elements or the form $\mathit{UID} \mapsto (\mathit{dist}, \mathit{pos}, \mathit{corr})$;
+        \item values are partially ordered by $m \leq m'$ iff for each $\deviceId \in \domof{m} \cap \domof{m'}$ we have that $m(\deviceId)_1 \le m'(\deviceId)_1$ and $m(\deviceId)_1 = m'(\deviceId)_1 \Rightarrow m(\deviceId) = m'(\deviceId)$ (for devices appearing in both maps, the distances in $m$ are not larger than those in $m'$, and if they are the same so are the position and correction values), and for each $\deviceId' \in \domof{m'} \setminus \domof{m}$ we have that $m'(\deviceId')_1 \geq m(\deviceId)_1$ for all $\deviceId \in \domof{m}$ (the distances in $m'$ for devices that do not appear in $m$ are larger than all distances in $m$);
+        \item notice that this partial order induces a \emph{join} operation (maximum lower bound) that is exactly the $K$ elements with smallest distance among both maps after removing duplicates by favoring shorter distances (which is what Algorithm \ref{code:kclose} calculates in $\mathit{dpc}$);
+        \item the increasing function is the one updating distances in a map $m$ by adding them the values $\mathit{nbrDist}_i$, which is indeed increasing with respect to the partial order above.
+    \end{itemize}
+
+    Thus, Algorithm \ref{code:dv} obtains its $\mathit{dpc}$ values from a self-stabilising algorithm, whose inputs are the positions $\mathit{pos}$ of anchors (which is an algorithm input, so stable by hypothesis) and corrections of anchors $\mathit{corr}$, which are computed by the algorithm itself, so we have to prove that they are also self-stabilising. First, notice that both Algorithms \ref{code:rclose} and \ref{code:kclose} do not use the correction values to calculate distances and positions. It follows that even if corrections are not stable, those algorithms already self-stabilise for their computation of distances and positions in finite time. After distances and positions are stable, the correction factors of anchors as computed in Algorithm \ref{code:dv} also stabilise. At this point all inputs of Algorithms \ref{code:rclose} and \ref{code:kclose} are stable, so in additional finite time also the correction factors computed by those algorithms will be stable. Since the position computed by Algorithm \ref{code:dv} is a local function of those values, this concludes the self-stabilisation proof.
+\end{proof}
+
+\section{Evaluation} \label{sec:evaluation}
+
+We evaluated the algorithms presented in this paper in the following variations. For \emph{distance vector-based positioning}, we considered:
+\begin{itemize}
+    \item multilateration with $R$-close anchors using aggregate processes, where $R$ is sufficiently large to include all anchors in the area (in the following, we will call it \texttt{dv all});
+    \item multilateration with the six closest anchors (\texttt{dv 6close}).
+\end{itemize}
+For each of them we considered both a \texttt{hop} version (where distance measures to neighbours are not available, and hop-counts are used instead), and the \texttt{real} version (using noisy distance measures with neighbours). For \emph{non-bayesian cooperative localisation}, we considered both the version from literature based on gradient descent (\texttt{nbcoop}) and our variation based on multilateration (\texttt{mlcoop}). These algorithms assume the availability of distance measures, so do not have a \texttt{hop} version. The algorithms and simulation setup were implemented in the FCPP library \cite{DBLP:journals/scp/AudritoT24}.
+
+We considered three simulation parameters: \emph{radius} ($r$), \emph{speed} ($v$) and \emph{variance} ($d$). The \emph{radius} parameter, from 50m to 300m, determined the distance at which communication between devices becomes impossible, and indirectly affected the overall size of the network in hops (larger radius, fewer hops) and the average number of anchors in neighbourhoods (larger neighbourhoods contain more anchors). The \emph{speed} parameter, from $0m/s$ to $5m/s$, determined the speed of long-range movement for the devices. The \emph{variance} parameter, from 0\% to 50\%, determined the relative standard error of the three sources of noise that we considered: \emph{(i)} error in round timing; \emph{(ii)} error in distance measures; \emph{(iii)} variance in communication success rate (more details below). We considered the speed parameter only in isolation, using zero speed when varying the other parameters, since that allowed for trends to be observed more clearly in the plots.
+
+We simulated a rectangular area of $500m \times 500m$, with 20 stationary anchors uniformly positioned along the border, and 100 devices positioned inside the area uniformly at random, which moved across randomly-generated checkpoints at a constant speed $v$. Devices performed rounds every second on average, with standard error $d$. Distance measures where computed by multiplying exact distances with a Weibull distribution of mean $1$ and standard deviation $d$. We used a probabilistic model for connectivity based on real-world data, tuned to have an about 100\% delivery success at 0m distance, about 0\% delivery success beyond \emph{radius} distance, and 50\% delivery success at distance $r \cdot (1 - d)$. This entails that with $d = 0$, messages always succeed within $r$ and fail above it; and as $d$ increases more devices get an higher chance of communication failure.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{images/screenshot.png}
+    \caption{Screenshot of the simulation with parameters $r = 150m$, $v = 0m/s$ and $d = 20\%$ at about $51s$ after the start. Crashed anchors and nodes are coloured in gray, with tetrahedron and icosahedron shapes respectively. The other anchors and nodes, with cubic and spherical shape respectively, are coloured according to the current error of the position estimated by the \texttt{nbcoop real} algorithm (hues changing continuously from green to yellow, red, purple with increasing error). Lines between nodes represent communication links (half lines represent asymmetric communication).}
+    \label{fig:screenshot}
+\end{figure}
+
+In order to test the resiliency of the proposed algorithms, we simulated that $1/4$ of the devices and anchors crash after $50s$ of simulated time, and are replaced (or fixed) after $100s$ of simulated time, until simulation ends at $150s$. We run simulations for $26$ values of \emph{radius}, $21$ values of \emph{speed}, $26$ values of \emph{variance}, and 100 different random seeds for each scenario, for a total of $7100$ simulations. The experiments were run on a MacBook Pro 2019 with a 2.4GHz i9 8-core CPU and 32GB 2667MHz DDR4 RAM and required about 8 hours to complete.
+The experiment source code is publicly available online on Zenodo,\footnote{\url{https://doi.org/10.5281/zenodo.19443874}} and can run both graphical simulations (see \Cref{fig:screenshot}) and plots from batch simulations (see \Cref{fig:plots}).
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.49\linewidth]{images/batch-timerr.pdf}
+    \includegraphics[width=0.49\linewidth]{images/batch-varerr.pdf} \\
+    \includegraphics[width=0.49\linewidth]{images/batch-raderr.pdf}
+    \includegraphics[width=0.49\linewidth]{images/batch-speerr.pdf} \\
+    \includegraphics[width=\linewidth]{images/batch-legenda1.pdf} \\
+    \includegraphics[width=\linewidth]{images/batch-legenda2.pdf}
+    \caption{Average localisation error over time (top-left, in seconds), variance (top-right, a dimensionless value from $0\%$ to $50\%$), radius (bottom-left, in meters), and speed (bottom-right, in $m/s$). Lightly coloured bands represent the standard deviation of the results for the time plot, or $0.1$ the standard deviation for the other plots (which have an higher deviation, since the average is calculated also over varying time points).}
+    \label{fig:plots}
+\end{figure}
+
+First, we inspected the size of messages exchanged for the various algorithms. The results had an average for \texttt{dv all} at 1889 bytes, \texttt{dv 6close} at 321 bytes, and both \texttt{coop} algorithms at 32 bytes, with almost zero variance across time and different scenarios so we do not include a plot for them (as it would just consist of horizontal lines). By profiling, we also inspected the time spent on the different algorithms during a simulation, obtaining about $4.6s$ for \texttt{dv all}, $1.1s$ for \texttt{dv 6close} and $0.3s$ for \texttt{coop} algorithms. Hop versions were a bit more efficient than their real counterparts, and \texttt{nbcoop} was a bit more efficient than \texttt{mlcoop}, but with a difference below $10\%$.
+
+Then, we inspected the mean \emph{error} (distance in meters between the estimated position and true position) among all devices, both as time passes in a default scenario (with $r = 150m, v = 0m/s, d=20\%$) and as one of the parameters $r$, $v$ or $d$ vary (with other parameters at the default), averaged across all simulated time (see the four plots in \Cref{fig:plots}).
+The times when devices and anchors crash and then get replaced induce spikes in error that are then recovered (top-left graph). The \texttt{dv all} algorithms have significantly worst spikes, that are much lower for the other algorithms. Furthermore, both cooperative algorithms to not produce a spike in error when anchors are removed, while \texttt{mlcoop} and \texttt{dv 6close real} do not produce a spike when anchors are reintroduced.
+Generally, increasing \emph{variance} (top-right plot) degrades performance as expected, but not by the same amount for each algorithm: \texttt{dv 6close hop} is the least affected as it is almost constant, probably partially because it doesn't rely on the increasingly noisier distance estimates. Reducing \emph{radius} (bottom-left plot) also tends to degrade performance, as the network becomes increasingly disconnected: with  smaller values, more and more devices resort to totally random estimates of their position, as they are not connected to any anchor. More unexpectedly, also a larger \emph{radius} tends to degrade performance: this is probably due to the fact that an increased \emph{radius} also reduces the hop-diameter of the network to a few units, so that \texttt{hop} algorithms have an hard time getting reasonable estimates. However, this also affects \texttt{real} algorithms (except for \texttt{mlcoop}), although by a smaller extent, for unclear reasons. Finally, increasing \emph{speed} (bottom-right plot) also tends to degrade performance, although not significantly nor uniformily, proving the resilience in mutable environments of all algorithms we tested.
+
+Summarizing the information across all plots, the \texttt{real} versions consistently outperform their \texttt{hops} counterparts, except for \texttt{dv 6close} when \emph{variance} is very high (above $38\%$). Thus, using distance estimates proves to be useful whenever they are available, except when they are so noisy that they become effectively more inaccurate than just estimating hops.
+
+Furthermore, \texttt{dv 6close} outperforms \texttt{dv all} almost always: the only exception is when \emph{radius} is below $80m$ (so that the network is almost disconnected), or for the \texttt{hop} variants when \emph{variance} is below $2\%$. Thus, considering only the closest anchors tends to improve performance, which can be justified since the distances to the farthest anchors are the least accurate. Given that \texttt{dv all} also requires much larger message sizes, its use is basically never advised.
+
+Overall, the \texttt{mlcoop} algorithm is a clear winner in basically every scenario. This algorithm not only achieves the best steady-state values (together with \texttt{nbcoop}), but also provides the faster convergence time on simulation startup, while being almost unaffected by both the removal and addition of new devices. Also \texttt{nbcoop} performs quite well and is unaffected by device removal, but gets penalised by its slow initial convergence and by the error spike when new devices are added. Although it is still the second best algorithm in most conditions, it is outperformed by \texttt{dv 6close real} for small \emph{variance} and for \emph{radius} between about $90m$ and $150m$. On the other hand, we remark that both \texttt{coop} algorithms are stabilising but not necessarily self-stabilising, since they may converge to a local minimum \cite{11205997}. In summary, the best algorithms depending on the setting are:
+\begin{itemize}
+    \item if distance estimates are not available, or formal self-stabilisation is required and variance is very high, \texttt{dv 6close hop}; otherwise
+    \item if formal self-stabilisation is required, \texttt{dv 6close real}; otherwise
+    \item if initial convergence is not an issue (long-running system), and computational power is very constrained, \texttt{nbcoop} provides the best steady-state values with small messages and few computations per round; otherwise
+    \item \texttt{mlcoop} provides the best accuracy and resilience overall with small messages.
+\end{itemize}
+
+\section{Conclusion} \label{sec:conclusion}
+
+In this work, we addressed the problem of distributed multi-hop localisation in indoor environments, in which devices must estimate their position through local interactions, in the presence of measurement noise and dynamic network conditions. We reformulated two classical geometric approaches (DV-based positioning and NB-cooperative) within the aggregate computing paradigm, exploiting the exchange and alignment constructs of the XC language to obtain modular, composable, fully distributed and (self-)stabilising implementations. In addition to the versions more directly translated from the literature, we introduced and analysed improved variants: the K-Closest anchor selection strategies for DV-based positioning, and a variant of NB-cooperative based on multilateration instead of gradient descent. Through an extensive experimental set-up conducted within the FCPP framework, which considered different configurations of communication radius, mobility, and noise levels, we evaluated accuracy, convergence time, resilience to node crashes, message size, and computational cost. The results show that selecting only the closest anchors significantly improves the performance of DV-based variants. Furthermore, the multilateration-based cooperative version represents, overall, the solution with the best trade-off between accuracy, convergence speed, and robustness, while maintaining small message sizes and limited computational costs.
+
+Despite the encouraging results, this work presents some limitations that open interesting directions for future research. First, the analysis focused on two representative classical algorithms and related variants, leaving room for the integration of additional cooperative localisation strategies. Among these, a weighted version of the \emph{mlcoop} algorithm appears particularly promising. In such version, each node also maintains an estimate of its own error and uses it as a weight in the multilateration process. This may modulate the contribution of different nodes according to their reliability and potentially improve robustness in scenarios with high variability or highly noisy measurements. Furthermore, the guaranteed self-stabilising version of the \emph{coop} algorithm inspired from \cite{11205997}, albeit with expected slower convergence, should also be evaluated.
+Second, the evaluations were conducted in a highly synthetic simulated environment, although extensive and parametric. A natural evolution of this work could consist in defining a more realistic case study, modelled on a concrete application scenario and aimed at a future experimental validation in the field. This would make it possible to analyse more deeply aspects such as hardware constraints, energy consumption, radio interference, and real environmental dynamics, further consolidating the practical applicability of the proposed solutions.
+
+\begin{credits}
+\subsubsection{\ackname}
+This publication is part of the project NODES, which has received funding from the MUR – M4C2 1.5 of PNRR funded by the European Union - NextGenerationEU (Grant agreement no. ECS00000036). This  study has been supported by the Italian PRIN project ``CommonWears'' (2020HCWWLP) and was carried out within the Agritech National Research Center and received funding from the European Union Next-GenerationEU (PIANO NAZIONALE DI RIPRESA E RESILIENZA (PNRR) – MISSIONE 4 COMPONENTE 2, INVESTIMENTO 1.4 – D.D. 1032 17/06/2022, CN00000022). This manuscript reflects only the authors’ views and opinions, neither the European Union nor the European Commission can be considered responsible for them.
+
+\subsubsection{\discintname}
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+\bibliographystyle{splncs04}
+\bibliography{long}
+
+\end{document}
+
+\newpage
+\appendix
+\section{Artifact Summary}
+
+% WHAT THIS IS IN GENERAL, AND RELATION WITH THE PAPER
+
+In this artifact we provide an executable implementation of the experiments described in \Cref{sec:evaluation}.
+We claim the artifact to be available, functional and reusable.
+
+\section{Availability} \label{apx:avail}
+
+The artifact is currently available at:
+\begin{center}
+\url{https://github.com/fcpp-experiments/indoor-localisation}
+\end{center}
+When submitting the camera-ready version, we will also upload the latest revised version on Zenodo.
+
+You can download a local copy through command:
+\begin{lstlisting}[language=bash]
+git clone \
+https://github.com/fcpp-experiments/indoor-localisation.git
+\end{lstlisting}
+Do not download a shallow copy directly from the website, since that would prevent submodules to update correctly.
+
+Please follow the instructions below for your platform to install the pre-requisites required by the artifact.
+The artifact itself will be built the first time that you run it (see \Cref{reproducibility-instructions}).
+
+\subsubsection{Docker}\label{docker}
+
+% comando di pull:
+% docker pull ghcr.io/fcpp-experiments/indoor-localization:1.0.0
+We provide a Docker image equipped with Linux Ubuntu 22.04 and all the pre-requisites installed. Note that on Linux you will be able to exploit it for running both the \texttt{graphic} and \texttt{batch} versions of the system, while on Mac and Windows only to run the \texttt{batch} version.
+
+You can download the image from the Github registry with:
+\begin{lstlisting}[language=bash]
+docker pull \
+ghcr.io/fcpp-experiments/indoor-localization:1.0.0
+\end{lstlisting}
+Alternatively, you can build it locally yourself using the provided \texttt{Dockerfile}.
+
+You should run the container from the \emph{root folder of the git repository} you have cloned above.
+To run a container on \textit{Linux}, you should first enable access to xhost from docker (for the GUI):
+\begin{lstlisting}[language=bash]
+xhost +local:docker
+\end{lstlisting}
+then type the following to access the container:
+\begin{lstlisting}[language=bash]
+docker run -it --rm --volume $PWD:/indoor-localization \
+--workdir /indoor-localization -e DISPLAY=:0 \
+-v /tmp/.X11-unix:/tmp/.X11-unix --entrypoint /bin/bash \
+ghcr.io/fcpp-experiments/indoor-localization:1.0.0
+\end{lstlisting}
+In order to properly link the executables in Docker, you may need to add the \texttt{-pthread} option (substitute \texttt{-O} for \texttt{-O -pthread} below).
+
+On \emph{Mac} you can use the same command (possibly omitting the parameters related with X), but you will only be able to run the \texttt{batch} execution target.
+
+Finally, on \emph{Windows} (MSYS2 shell) you should give a slightly different command to run the container:
+\begin{lstlisting}[language=bash]
+MSYS2_ARG_CONV_EXCL='*' docker run -it --rm  \
+-v "$(pwd -W):/indoor-localization" -w /indoor-localization \
+--entrypoint /bin/bash \
+ghcr.io/fcpp-experiments/indoor-localization:1.0.0
+\end{lstlisting}
+to deal with path conversions between MSYS2 and the container. As on Mac computers, you will only be able to run the \texttt{batch} execution target.
+
+\subsubsection{Windows}\label{windows}
+
+Pre-requisites:
+
+\begin{itemize}
+\item
+  MSYS2
+\item
+  Asymptote (for building the plots)
+\end{itemize}
+
+Run ``MSYS2 MinGW x64" from the start menu; a terminal will appear. Run the following commands:
+\begin{lstlisting}[language=bash]
+pacman -Syu
+\end{lstlisting}
+After updating packages, the terminal will close. Open it again, and then type:
+\begin{lstlisting}[language=bash]
+pacman -Sy --noconfirm --needed base-devel mingw-w64-x86_64-toolchain \
+    mingw-w64-x86_64-cmake mingw-w64-x86_64-make git    
+\end{lstlisting}
+
+The build system should now be available from the ``MSYS2 MinGW x64" terminal.
+
+\subsubsection{Linux}\label{linux}
+
+Pre-requisites:
+
+\begin{itemize}
+\item
+  Xorg-dev package (X11)
+\item
+  G++ 9 (or higher)
+\item
+  CMake 3.18 (or higher)
+\item
+  Asymptote (for building the plots)
+\end{itemize}
+
+To install these packages in Ubuntu, type the following command:
+
+\begin{lstlisting}
+sudo apt-get install xorg-dev g++ cmake asymptote
+\end{lstlisting}
+
+In Fedora, the xorg-dev package is not available. Instead, install the packages:
+
+\begin{lstlisting}
+libX11-devel libXinerama-devel.x86_6 libXcursor-devel.x86_64 \
+libXi-devel.x86_64 libXrandr-devel.x86_64 mesa-libGL-devel.x86_64
+\end{lstlisting}
+
+\subsubsection{MacOS}\label{macos}
+
+Pre-requisites:
+
+\begin{itemize}
+\item
+  Xcode Command Line Tools
+\item
+  CMake 3.18 (or higher)
+\item
+  Asymptote (for building the plots)
+\end{itemize}
+
+To install them, assuming you have the brew package manager, type the following commands:
+\begin{lstlisting}
+xcode-select --install
+brew install cmake asymptote
+\end{lstlisting}
+
+\section{Functionality}
+
+The artifact is implemented in C++ using the FCPP library to 
+evaluate the indoor localisation algorithms presented in this paper.
+The core of the implementation is located in the lib folder, including both the coop- and dv-based algorithms (resp. \texttt{coop.hpp} and \texttt{dv.hpp} files),
+a general multilateration routine (\texttt{multilateration.hpp} file), and the overall simulation setup (in the \texttt{localisation.hpp} file).
+
+We remark that the API documentation for FCPP is available at \url{http://fcpp-doc.surge.sh}. More high-level documentation about FCPP functionality and concepts can also be found at \url{https://github.com/fcpp/fcpp}. Additional resources can be found at the main FCPP website \url{https://fcpp.github.io}.
+
+
+\subsection{Runtime}\label{runtime}
+
+The total runtime for the \textbf{batch} target is of several hours, depending on the machine at hand.
+This long runtime can be easily reduced by reducing the maximum random seed to be considered, in line 22 of file \texttt{run/batch.cpp}, from 99 to a smaller number (such as 9 or even less).
+The total runtime for the \textbf{graphic} target is of a few minutes, and simulation speed can be increased through the UI using the O key. Both targets produce summary plots in the \texttt{plot/} folder, and save output from stdout and stderr into the \texttt{output/} folder.
+
+\subsection{Reproducibility Instructions}\label{reproducibility-instructions}
+
+To reproduce the results, after installing the dependencies described in \Cref{apx:avail}, open a terminal from the
+main folder of the git repository and follow the rest of these instructions.
+
+\subsubsection{Batch Simulations}
+To launch the batch simulations and reproduce the graphs in \Cref{fig:plots} execute the following command:
+\begin{lstlisting}[language=bash]
+# On non-intel Macs replace -O with -O3
+./make.sh run -O batch
+\end{lstlisting}
+
+You should see output about building the FCPP library, then building the \texttt{batch} target.
+Finally, the resulting executable will be run and you should be able to monitor the CPU time and RAM used (except on Windows).
+When the simulation finishes, you should see output about building the plot PDFs.
+
+If the PDF generation does not start automatically (which is expected to happen on Windows), you can do it manually via the following commands:
+\begin{lstlisting}[language=bash]
+cd plot
+asy *.asy -f pdf
+cd ..
+\end{lstlisting}
+
+\subsubsection{Graphical Simulations}
+
+In order to launch a simulation with GUI and reproduce \Cref{fig:screenshot}, you have to run:
+\begin{lstlisting}[language=bash]
+# On non-intel Macs replace -O with -O3
+./make.sh gui run -O graphic
+\end{lstlisting}
+
+This will launch a scenario with all parameters to their default value (communication radius $100m$, variance $20\%$, speed $0m/s$) and display in colors the error of algorithm \texttt{mlcoop\_real}. You can change these values by adding explicit parameters for all these variables as follows:
+\begin{lstlisting}[language=bash]
+# On non-intel Macs replace -O with -O3
+./make.sh gui run -O graphic - <comm_radius> <variance> \
+                               <speed> <algorithm>
+\end{lstlisting}
+Sensible values for \texttt{algorithm} are:
+\texttt{dv\_all\_real},
+\texttt{dv\_all\_hop},
+\texttt{dv\_6close\_real},
+\texttt{dv\_6close\_hop},
+\texttt{nbcoop\_real},
+\texttt{mlcoop\_real}.
+
+To inspect the algorithms' results on a specific node, click on the node and a detail window will pop up.
+You can pause/unpause the simulation by clicking the P key, and show connections between nodes by clicking the L key.
+To see all the keyboard shortcuts press the spacebar.
+
+\section{Reusability}\label{reusability}
+
+We claim this artifact is reusable because the code is publicly available and licensed under the Apache License 2.0. Furthermore, the artifact's content may be of use in future projects for two main reasons.
+
+Firstly, the implementation of the localisation algorithms in this artifact can be reused in other projects, including practical case studies, both in simulation and in concrete deployments (thanks to the capabilities of FCPP).
+
+Secondly, the simulation code itself can be reused to test other localisation or related algorithms in a similar setting.
+
+To further substantiate our claim, the reviewer can personally experiment with the artifact reusability by tweaking some simulation parameters in file \texttt{lib/localisation.hpp}.
+For instance, the time of disruption in variable \texttt{bad\_time} at line 21, the number of anchors in type \texttt{anchor\_spawn\_s} at line 263, or any other part of the code that the reviewer sees fit.
+
+\end{document}

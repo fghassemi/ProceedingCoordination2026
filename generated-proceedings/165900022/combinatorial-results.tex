@@ -1,0 +1,21 @@
+In this section we show that the partial order $\rb$ among operations of a
+given \underline{finite} history is the transitive closure of a graph whose cutwidth is bounded
+by the square of the number of processes; since the treewidth is bounded
+by the cutwidth, this result induces in particular a tree decomposition of
+histories bounded by the number of processes. We refer the interested the reader to
+second author’s previous work~\cite{DBLP:journals/pacmpl/GiustoFLL23}, and more generally to Courcelle's theorem~\cite{Courcelle10}, to better understand how this question is related to the decidability of satisfiability checking or to local, PTIME model-checking. 
+\iflong
+Proofs omitted here can be found in Appendix~\ref{app:proofs}.
+\else
+Proofs omitted here can be found in the of~\cite{coget2026histmsologicreasoningconsistency}.
+\fi
+In this section, all histories are implicitly assumed to be \underline{finite}.
+
+\subsection{Problem statement}\label{sec:graphs-finite-histories}
+\input{graphs.tex}
+
+\subsection{Constructive definition of the subgraph}
+\input{graph-constructive-def.tex}
+
+\subsection{Bounding the cutwidth of histories}
+\input{decidability-histories.tex}

@@ -1,0 +1,651 @@
+In this section we fully tackle the problem of realisability of sets
+of scenarios as expressions, that is we account also for
+constraints. We begin with an example.
+%The members of ${\mathcal{S}}$, in all the examples so far,
+%include only default constraints.
+%It turns out that in the presence of non-default constraints, when
+%${\mathcal{S}}$ is not realisable by a single DTS, reasoning
+%based on K-rankings alone might not provide us with enough
+%information to properly partition {\mathcal{S}}$.
+%----------------
+% try3-time
+\begin{example}
+\label{ex-with-time-1}
+% Consider the set of scenarios
+Let $\mathcal{S}=\{\SeqS_1,\SeqS_2,\SeqS_3\}$ over $\Sigma=\{a,b,c,d\}$, where
+$\SeqS_1=(cdab,\{\TT{c}{b} \leq 3\})$,
+$\SeqS_2=(cadb,\{\TT{c}{d} \leq 1,\TT{c}{b} \leq 3\})$ and
+$\SeqS_3=(cabd,\{\TT{c}{d} \leq 1\})$.
+%The maximal chains representing $\ParS{\mathcal{S}}$ are $c-a-b$ and
+%$c-d$. Every member of ${\mathcal{S}}$ has a match in
+%$\Proj{\mathcal{S}}$, and vice versa.
+The set $\mathcal{S}$ is order-closed,
+but, as will be explained below, it is not realisable by a single
+DTS. Therefore, $\mathcal{S}$ must be partitioned, somehow.
+The pairs of events not related by $\ParS{\mathcal{S}}$ are $(a,d)$ and
+$(b,d)$, based on which two different OBDs,
+ $(\{\SeqS_2,\SeqS_3\}$, $\{\SeqS_1\})$ and $(\{\SeqS_1,\SeqS_2\}$,
+$\{\SeqS_3\})$, could be formed.
+The divisions have not only equal o-rankings, but also equal
+K-rankings and l-rankings.
+So a division must be chosen randomly. Choosing the second division
+results in the trivial expression
+$\SeqS_1\BAR\SeqS_2\BAR\SeqS_3$. But, in
+fact, a satisfactory result can be obtained from the first division.
+\end{example}
+\noindent
+This example shows that in the presence of non-default constraints, when
+${\mathcal{S}}$ is order-closed, but not realisable by a single DTS,
+reasoning based on orderings alone
+does not provide us with enough information to properly partition
+${\mathcal{S}}$.
+Next, we investigate how the constraints can be used to effectively
+partition $\mathcal{S}$.
+%\emph{We assume $\mathcal{S}$ is order-closed:
+%it is not possible to divide it based on orderings.}
+%---------------------
+\begin{definition}
+\label{def-locally-stable}
+Let $\mathcal{S}$ be an order-closed set of scenarios.
+%$\DR{\mathcal{S}}$=(\ParS{\mathcal{S}},\DF{\mathcal{S}})$
+%be its distance relation. Let
+Let $\SeqSC\in\mathcal{S}$ and
+%$\DF{\SeqSC}$ be its distance function. Let
+$p\in\Proj{\mathcal{S}}$, such that $\SeqSC$ matches $p$.
+%$match(\SeqSC,p)$.
+%generated from $\DR{\mathcal{S}}$, such that $\ESeq{\SeqSC}=\ESeq{p}$.
+We say $\SeqSC$ is \emph{compatible with} $\DR{\mathcal{S}}$
+if $\DF{\SeqSC}=\DF{p}$.
+\end{definition}
+%-------------------
+\noindent
+%Recall that projection $p$ is obtained from $\DR{\mathcal{S}}$
+%(see \Sec{sec-dts}).
+%So the notion of compatibility of a
+%scenario in $\mathcal{S}$ depends on $\DR{\mathcal{S}}$.
+Notice that if all the members of $\mathcal{S}$ have
+only default constraints, then they are all compatible with
+$\DR{\mathcal{S}}$.
+
+In Example \ref{ex-with-time-1}
+$\PR{\SeqS_1}$ is represented by $c-d-a-b$, while $\PR{\SeqS_2}$ and
+$\PR{\SeqS_3}$ are represented by $c-a-d-b$ and $c-a-b-d$, respectively.
+The distance functions of members of $\mathcal{S}$ are shown below:
+
+$\DF{\SeqS_1}=
+\{
+(a, b, 0, 3),
+ (c, a, 0, 3),
+(c, b, 0, 3),
+ (c, d, 0, 3),
+(d, a, 0, 3),
+(d, b, 0, 3)
+\}$,
+
+$\DF{\SeqS_2}=
+\{
+(a, b, 0, 3),
+(a, d, 0, 1),
+(c, a, 0, 1),
+(c, b, 0, 3),
+(c, d, 0, 1),
+(d, b, 0, 3)\}$,
+
+$\DF{\SeqS_3}=
+\{
+(a, b, 0, 1),
+(a, d, 0, 1),
+(b, d, 0, 1),
+(c, a, 0, 1),
+(c, b, 0, 1),
+(c, d, 0, 1)
+\}$.
+
+The stable distance relation
+of $\mathcal{S}$ (see Def. \ref{def-DR-S})
+is $\DR{\mathcal{S}}=(\ParS{\mathcal{S}},\DF{\mathcal{S}})$, where
+$\ParS{\mathcal{S}}=\PR{\SeqS_1}\cap\PR{\SeqS_2}\cap\PR{\SeqS_3}$ is
+represented by $c-a-b$ and $c-d$, and
+ $\DF{\mathcal{S}}$ is represented by
+ $\{
+(a, b, 0, 3),
+(c, a, 0, 3),
+(c, b, 0, 3),
+(c, d, 0, 3)\}$.
+Observe that, for example, $\DF{\mathcal{S}}(a,b)=[0,3]$ is the
+smallest interval that includes $\DF{\SeqS_1}(a,b)$,
+$\DF{\SeqS_2}(a,b)$ and $\DF{\SeqS_3}(a,b)$.
+The set of projections of $\DR{\mathcal{S}}$ (see \Sec{sec-dts}) is
+$\Proj{\mathcal{S}}=\{p_1,p_2,p_3\}$, where
+$p_1$, $p_2$ and $p_3$ match $\SeqS_1$, $\SeqS_2$ and
+$\SeqS_3$, respectively.
+The distance functions of the projections in $\Proj{\mathcal{S}}$ are
+shown below:
+
+$\DF{p_1}=
+\{
+(a, b, 0, 3),
+ (c, a, 0, 3),
+(c, b, 0, 3),
+ (c, d, 0, 3),
+(d, a, 0, 3),
+(d, b, 0, 3)
+\}$,
+
+$\DF{p_2}=
+\{
+(a, b, 0, 3),
+(a, d, 0, 3),
+(c, a, 0, 3),
+(c, b, 0, 3),
+(c, d, 0, 3),
+(d, b, 0, 3)\}$,
+
+$\DF{p_3}=
+\{
+(a, b, 0, 3),
+(a, d, 0, 3),
+(b, d, 0, 3),
+(c, a, 0, 3),
+(c, b, 0, 3),
+(c, d, 0, 3)
+\}$.
+
+\noindent
+Notice that $\DF{\SeqS_1}=\DF{p_1}$, so $\SeqS_1$ is compatible with
+$\DR{\mathcal{S}}$, but $\SeqS_2$ and $\SeqS_3$ are not.
+This observation can be immediately used to divide $\mathcal{S}$
+into
+%two partitions,
+%, one that includes all members of $\mathcal{S}$ that are
+%compatible with it, and one that includes the rest:
+$\mathcal{S}_1=\{\SeqS_1\}$ and
+$\mathcal{S}_2=\{\SeqS_2,\SeqS_3\}$.
+The set $\mathcal{S}_2$ is order-closed,
+%so we construct
+its distance relation is
+$\DR{\mathcal{S}_2}=(\ParS{\mathcal{S}_2},\DF{\mathcal{S}_2})$, where
+$\ParS{\mathcal{S}_2}$ is represented by the maximal chains $c-a-b$
+and $c-a-d$, and $\DF{\mathcal{S}_2}$ is represented by
+ $\{
+(a, b, 0, 3),
+(a, d, 0, 1),
+(c, a, 0, 1),
+(c, b, 0, 3),
+(c, d, 0, 1)\}$.
+The set of projections of $\DR{\mathcal{S}_2}$,
+$\Proj{\mathcal{S}_2}$, includes two projections, $p'_2$ and $p'_3$,
+that
+are identical to $\SeqS_2$ and $\SeqS_3$, respectively, so
+$\DF{\SeqS_2}=\DF{p'_2}$ and $\DF{\SeqS_3}=\DF{p'_3}$:
+%they  are identical to their respective
+%matching projections,
+$\SeqS_2$ and $\SeqS_3$ are compatible with $\DR{\mathcal{S}_2}$.
+The set $\mathcal{S}_2$ is realised by DTS $\xi_1||\xi_2$, where
+$\xi_1=(cab,\{\TT{c}{a}\leq 1,\TT{c}{b}\leq
+3\})$ and $\xi_2=(cad,\{\TT{c}{d}\leq 1\})$.
+So ${\mathcal{S}}$ is realised by $\SeqS_1\BAR(\xi_1||\xi_2)$
+(compare this with the trivial solution shown in Example \ref{ex-with-time-1}).
+%the expression $\D(\SeqS_1)\BAR E$.
+%, where $E_2=\{\SeqS_1\}$.
+%--------------------------
+%\vspace{-0.5em}
+%\begin{obs}
+%\label{obs-realisable}
+%An order-closed set of scenarios, $\mathcal{S}$, is realisable by a DTS iff
+%all its members are compatible with $\DR{\mathcal{S}}$.
+%\end{obs}
+%\noindent
+
+In Example \ref{ex-with-time-1} we partitioned $\mathcal{S}$ into
+scenarios that are compatible with $\DR{\mathcal{S}}$, and those that
+are not. But sometimes none of the members of $\mathcal{S}$ will be
+compatible with $\DR{\mathcal{S}}$, so we need another criterion for
+partitioning.
+%---------------------------
+%\vspace{-0.5em}
+\begin{definition}
+\label{def-c-dis}
+Let $\mathcal{S}$ be an order-closed set of scenarios and
+$\SeqSC\in\mathcal{S}$.
+%and $p\in\Proj{\mathcal{S}}$,
+%such that $\SeqSC$ matches $p$.
+%and $match(\SeqSC,p)$.
+The \emph{constraint-based disagreement} between $\SeqSC$ and
+$\DR{\mathcal{S}}$
+%, denoted by $\CDis{\mathcal{S}}(\SeqSC,p)$,
+is $\CDis{\mathcal{S}}(\SeqSC)$=
+\Set{(e,e')}{e\PR{\SeqSC} e'\wedge
+  \DF{\SeqSC}(e,e')\neq\DF{p}(e,e') \text{ where }
+  p \text{ is the projection of } \DR{\mathcal{S}} \text{ that matches }
+  \SeqSC}.
+\end{definition}
+%-----------------------
+%\vspace{-1em}
+\begin{definition}
+\label{def-CBD}
+Let $\mathcal{S}$ be an order-closed set of scenarios over
+$\Sigma_{\mathcal{S}}$, such that none of its members are compatible
+with $\DR{\mathcal{S}}$ and $|\mathcal{S}|>1$. Let $e,e'\in\Sigma_{\mathcal{S}}$.
+The \emph{constraint-based division} (\emph{CBD} for short) \emph{of}
+$\mathcal{S}$ \emph{with respect to} $(e,e')$, denoted by
+$\CBD{\mathcal{S}}(e,e')$, is the unordered pair
+$(\mathcal{S}_1,\mathcal{S}_2)$, such that
+\setlist{nolistsep}
+\begin{enumerate}[(1), noitemsep]
+ % $(e,e')\in\CDis{\mathcal{S}}(\SeqS_i,p_i)$ for some $\SeqS_i\in\mathcal{S}$
+  \item
+    $\mathcal{S}_1=$\Set{\SeqSC\in\mathcal{S}}{(e,e')\in\CDis{\mathcal{S}}(\SeqSC)}
+    %{e\PR{\SeqSC}e'\wedge
+  %\DF{\SeqSC}(e,e')\neq\DF{p}(e,e'), \text{ where }
+    %p\in\Proj{\mathcal{S}}\wedge match(\SeqSC,p)}
+    and
+    $\mathcal{S}_2=\mathcal{S}\setminus\mathcal{S}_1$, or
+  \item
+    $(e,e')\not\in\CDis{\mathcal{S}}(\SeqSC)$ for any
+    $\SeqSC\in\mathcal{S}$ and there exists some $\SeqSC'\in\mathcal{S}$, where
+    $e\PR{\SeqSC'}e'\wedge\DF{\SeqSC'}(e,e')\neq[0,\infty]$,
+    %or $e'\PR{\SeqSC'}e\wedge\DF{\SeqSC'}(e',e)\neq[0,\infty]$,
+    then
+    $\mathcal{S}_1=$\Set{\SeqS\in\mathcal{S}}{e\ParS{\SeqS}e'} and
+     $\mathcal{S}_2=\mathcal{S}\setminus\mathcal{S}_1$.
+   % $\mathcal{S}_2=$\Set{\SeqS\in\mathcal{S}}{e'\ParS{\SeqS}e}.
+    \end{enumerate}
+  %  We say members of $\mathcal{S}_1$ and $\mathcal{S}_2$
+  %  \emph{disagree} on $(e,e')$.
+\end{definition}
+%\vspace{-0.5em}
+%-------------------
+\noindent
+Intuitively, if
+$\CBD{\mathcal{S}}(e,e')=(\mathcal{S}_1,\mathcal{S}_2)$ is formed by case (1)
+of Def. \ref{def-CBD}, then all the members of $\mathcal{S}_1$
+disagree with their respective
+matching projections on the interval for $(e,e')$, i.e.,
+on $\DF{}(e,e')$.
+In this case, if $\SeqS_2\in\mathcal{S}_2$, then either
+$\DF{\SeqS_2}(e,e')=\DF{p_2}(e,e')$, where $p_2$ is the
+projection that matches $\SeqS_2$, or $e\not\PR{\SeqS_2}e'$.
+Notice that $\mathcal{S}_1\neq\emptyset$, but
+$\mathcal{S}_2$ can be empty. If $\mathcal{S}_2=\emptyset$, then
+$(\mathcal{S}_1,\mathcal{S}_2)$ is \emph{not} a CBD.
+%If $\mathcal{S}_2\neq\emptyset$, we call
+%$(\mathcal{S}_1,\mathcal{S}_2)$ a \emph{non-trivial} division of
+%$\mathcal{S}$.
+
+If
+$\CBD{\mathcal{S}}(e,e')=(\mathcal{S}_1,\mathcal{S}_2)$ is formed by case (2),
+then all the members of $\mathcal{S}_1$ agree with
+their respective matching projections on the interval for $(e,e')$, however,
+at least one of them has a non-default interval on $(e,e')$.
+%-------------
+%Feliks-almost-gap
+%\vspace{-0.5em}
+\begin{example}
+\label{ex-with-time-2}
+Let $\mathcal{S}=\{\SeqS_1,\SeqS_2\}$, where
+ %over $\Sigma=\{a,b,c,d\}$, where
+$\SeqS_1=(abc,\{1\leq\TT{a}{b}\leq 2\})$ and
+$\SeqS_2=(acb,\{2\leq\TT{a}{b}\leq 3\})$.
+The partial order in $\mathcal{S}$,
+$\ParS{\mathcal{S}}=\PR{\SeqS_1}\cap\PR{\SeqS_2}$, is
+represented by $a-b$ and $a-c$.
+The distance functions of the members of $\mathcal{S}$ are
+$\DF{\SeqS_1}=
+\{
+(a, b, 1, 2),
+ (a, c, 1, \infty)
+\}$ and
+$\DF{\SeqS_2}=
+\{
+(a, b, 2, 3),
+ (a, c, 0, 3),
+  (c, b, 0, 3)
+\}$.
+
+Observe that the smallest interval that includes
+$\DF{\mathcal{\SeqS}_1}(a,b)=[1,2]$ and
+$\DF{\mathcal{\SeqS}_2}(a,b)=[2,3]$ is $[1,3]$,
+so $\DF{\mathcal{S}}(a,b)=[1,3]$.
+Similarly,
+$\DF{\mathcal{S}}(a,c)=[0,\infty]$ is the smallest interval that includes
+$\DF{\mathcal{\SeqS}_1}(a,c)=[1,\infty]$ and
+$\DF{\mathcal{\SeqS}_2}(a,c)=[0,3]$. Therefore,
+$\DF{\mathcal{S}}$ is represented by $\{(a, b, 1, 3)\}$ (recall that
+we do not show the default intervals).
+%The distance relation of $\mathcal{S}$,
+%$\DR{\mathcal{S}}=(\ParS{\mathcal{S}},\DF{\mathcal{S}})$, where
+%$\ParS{\mathcal{S}}=\{(a,b),(a,c)\}$ and
+%maximal chains, $a-b$ and $a-c$,
+
+The projections of $\DR{\mathcal{S}}$ yield
+ $\DF{p_1}=
+ \{
+ (a, b, 1, 3),
+  (a, c, 1, \infty)
+\}$
+ and
+$\DF{p_2}=
+\{
+ (a,b,1,3),
+ (a,c,0,3),
+ (c, b, 0, 3)
+\}$, where $\SeqS_1$ matches $p_1$ and $\SeqS_2$ matches $p_2$.
+%$match(\SeqS_1,p_1)$ and $match(\SeqS_2,p_2)$.
+None of the members of $\mathcal{S}$ are compatible with
+$\DR{\mathcal{S}}$:
+$\CDis{\mathcal{S}}(\SeqS_1)=\CDis{\mathcal{S}}(\SeqS_2)=\{(a,
+b)\}$.
+By case (1) of Def. \ref{def-CBD},
+$\CBD{\mathcal{S}}(a,b)=(\{\SeqS_1,\SeqS_2\},\emptyset)$.
+%Observe that $\DF{\SeqS_1}(a,b)\neq\DF{p_1}(a,b)$ and
+%$\DF{\SeqS_2}(a,b)\neq\DF{p_2}(a,b)$, so
+However,
+$\DF{\SeqS_1}(b,c)=[0,\infty]$ and
+$\DF{\SeqS_2}(c,b)=[0,3]\neq[0,\infty]$, so, by case (2) of
+Def. \ref{def-CBD},
+$\CBD{\mathcal{S}}(b,c)=(\{\SeqS_1\},\{\SeqS_2\})$.
+%Observe that $\CBD{\mathcal{S}}(c,b)=(\{\SeqS_2\},\{\SeqS_1\})$,
+\end{example}
+%------------------
+% new-crit-2
+%\vspace{-0.5em}
+%\begin{example}
+%\label{ex-with-time-4}
+%Let $\mathcal{S}=\{\SeqS_1,\SeqS_2,\SeqS_3\}$, where
+%$\SeqS_1=(adcb,\{\TT{d}{c} \leq 2,\TT{a}{b} \geq 3\})$,
+%$\SeqS_2=(dcab,\{\TT{d}{c} \geq 1,\TT{d}{a} \geq 2\})$ and
+%$\SeqS_3=(dacb,\{\TT{d}{a} \geq 2\})$.
+%%The distance functions of the members of $\mathcal{S}$ are
+%
+%\noindent
+%$\DF{\SeqS_1}=
+% \{
+%  (a, b, 3, \infty),
+%(d, c, 0, 2)
+%\}$,
+%$\DF{\SeqS_2}=
+%\{
+% (d,a,  2, \infty),
+%  (d, b, 2, \infty),
+% (d, c, 1, \infty)
+% \}$ and
+%$\DF{\SeqS_3}=
+% \{
+% (d, a, 2, \infty),
+%  (d, b, 2, \infty),
+%(d,c,  2, \infty)
+% \}$.
+%%$\DR{\mathcal{S}}=(\ParS{\mathcal{S}},\DF{\mathcal{S}})$, where
+%$\ParS{\mathcal{S}}$ is represented by $d-c-b$ and $a-b$, and
+%$\DF{\mathcal{S}}$ has only default intervals.
+% The projections of $\DR{\mathcal{S}}$ are
+% %that match the members of
+%%$\mathcal{S}$ are, respectively,
+%$p_1=(adcb,\emptyset)$,
+%$p_2=(dcab,\emptyset)$ and
+%$p_3=(dacb,\emptyset)$. Observe that
+%$\mathcal{S}$ is order-closed, but none of its members are compatible
+%with $\DR{\mathcal{S}}$.
+%%So, by Obs. \ref{obs-realisable}, $\mathcal{S}$
+%%is not realisable by a single DTS.
+%We have
+%
+%\noindent
+%$\CDis{\mathcal{S}}(\SeqS_1)=\{(a, b),(d, c)\}$,
+%$\CDis{\mathcal{S}}(\SeqS_2)=\CDis{\mathcal{S}}(\SeqS_3)=\{
+%(d, c),(d,a),(d, b)\}$.
+%%\noindent
+%%$\CDis{\mathcal{S}}(\SeqS_3,p_3)=\{ (d, a),(d,c),(d, b)\}$.
+%
+%\noindent
+%%By case (1) of \Def{def-CBD},
+%$\CBD{\mathcal{S}}(a,b)=(\{\SeqS_1\},\{\SeqS_2,\SeqS_3\})$,
+%$\CBD{\mathcal{S}}(d,a)=\CBD{\mathcal{S}}(d,b)=(\{\SeqS_2,\SeqS_3\},\{\SeqS_1\})$
+%and
+%
+%\noindent
+%$\CBD{\mathcal{S}}(d,c)=(\{\SeqS_1,\SeqS_2,\SeqS_3\},\emptyset)$.
+%%\noindent
+%%$\CBD{\mathcal{S}}(d,b)=(\{\SeqS_2,\SeqS_3\},\{\SeqS_1\})$.
+%While $\CBD{\mathcal{S}}(d,c)$ is not so useful, the other CBDs
+%effectively divide $\mathcal{S}$ into
+%%partitions
+%$\mathcal{S}_1=\{\SeqS_2,\SeqS_3\}$ and $\mathcal{S}_2=\{\SeqS_1\}$,
+%which are both
+%%Set $\mathcal{S}_1$ is
+%order-closed.
+%$\DR{\mathcal{S}_1}=(\ParS{\mathcal{S}_1},\DF{\mathcal{S}_1})$, where
+%$\ParS{\mathcal{S}_1}$ is represented by $d-a-b$ and $d-c-b$, while
+%%$\ParS{\mathcal{S}_1}=\{(a,b),(d,c),(c,b),(d,b),(d,a)\}$ and
+% $\DF{\mathcal{S}_1}$ is represented by
+% $\{
+%(d, a, 2, \infty),
+%(d, b, 2, \infty),
+%(d, c, 1, \infty)\}$.
+% The projections of $\DR{\mathcal{S}_1}$ are identical to
+% the respective members of $\mathcal{S}_1$, so
+% $\SeqS_2$ and $\SeqS_3$ are compatible with $\DR{\mathcal{S}_1}$.
+%%By Obs. \ref{obs-realisable}, $\mathcal{S}_1$ is
+%%realisable:
+%The DTS $\xi_1||\xi_2$, where $\xi_1=(dab,\{\TT{d}{a}\geq 2\})$ and
+%$\xi_2=(dcb,\{\TT{d}{c}\geq 1,\TT{d}{b}\geq 2\})$ realises
+%$\mathcal{S}_1$. So ${\mathcal{S}}$ is realised by
+%%the expression
+%$(\xi_1||\xi_2)\BAR\SeqS_1$.
+%\end{example}
+%-------------------------
+%THE THEOREM USED TO BE HERE !!!!
+%\vspace{-0.1em}
+\begin{theorem}
+\label{thm-not-locally-stable}
+Let $\mathcal{S}$ be an order-closed set of scenarios, such that
+none of its members is compatible with $\DR{\mathcal{S}}$
+%$|\ESeq{\SeqSC}|>3$, for each $\SeqSC\in\mathcal{S}$,
+and $|\mathcal{S}|>1$.
+Then there is at least one pair of events $e$ and $e'$ such that
+$\CBD{\mathcal{S}}(e,e')=(\mathcal{S}_1,\mathcal{S}_2)$, where
+$\mathcal{S}_1\neq\emptyset$ and $\mathcal{S}_2\neq\emptyset$.
+\end{theorem}
+%\vspace{-0.1em}
+%\begin{proof}
+%The proof is presented in Appendix A.
+% \end{proof}
+%---------------------------
+\noindent
+In general, $\mathcal{S}$
+might have more than one
+CBD, so we need a criterion for comparing them.
+%in which case the one with the lowest K-ranking must be
+%selected. But to break a tie
+%we must find a new criterion based on the constraints of the
+%partitions of CBDs.
+%---------------------------
+%--------------------
+%\vspace{-0.1em}
+\begin{definition}
+  \label{def-c-distance}
+  Let $\mathcal{S}$ be an order-closed set of scenarios and
+  $\SeqS_i,\SeqS_j\in\mathcal{S}$ ($i\neq j$).
+ % be two scenarios over the same set of events in $\mathcal{S}$.
+  The \emph{c-distance} of $\SeqS_i$ and $\SeqS_j$,
+ % with respect to $\mathcal{S}$,
+%  denoted by $\CD{\SeqS_i}{\SeqS_j}{\mathcal{S}}$, is
+   denoted by $\CD{\SeqS_i}{\SeqS_j}$, is
+$|\Set{\CBD{\mathcal{S}}(e,e')=(\mathcal{S}_1,\mathcal{S}_2)}
+    {\mathcal{S}_1\neq\emptyset\wedge\mathcal{S}_2\neq\emptyset\wedge
+  %  e\PR{\SeqS_i} e'\wedge e\PR{\SeqS_j} e'\wedge
+      ((\SeqS_i\in\mathcal{S}_1\wedge\SeqS_j\in\mathcal{S}_2)\vee
+ (\SeqS_i\in\mathcal{S}_2\wedge\SeqS_j\in\mathcal{S}_1))}|$.
+%$\K{\SeqS_1}{\SeqS_2}$, is the number of pairwise
+%disagreements between $\ESeq{\SeqS_1}$ and $\ESeq{\SeqS_2}$.
+\end{definition}
+\noindent
+Intuitively, the c-distance between $s_i$ and $s_j$ is the
+number of times that $s_i$ and $s_j$ would wind up in different
+partitions of CBDs.
+The smaller the c-distance, the more similar are the constraints
+of the scenarios.
+%constraint-based divisions.
+%\vspace{-0.1em}
+\begin{definition}
+\label{def-c-set-ranking}
+Let $\mathcal{S}$ be an order-closed set of scenarios.
+The \emph{c-ranking} of ${\mathcal{S}}$, denoted by $\CK{\mathcal{S}}$,
+is the average of all pairwise c-distances between its members.
+%the members of $\mathcal{S}$.
+\end{definition}
+%------------------
+%\vspace{-0.1em}
+\begin{definition}
+\label{def-c-ranking}
+Let $\mathcal{S}$ be an order-closed set of scenarios and
+$D=(\mathcal{S}_1,\mathcal{S}_2)$ be a CBD of
+$\mathcal{S}$. The \emph{c-ranking} of $D$, denoted by
+$\CK{D}$, is given by
+$\CK{\mathcal{S}_1}+\CK{\mathcal{S}_2}$.
+%$\RK{\mathcal{S}_1}*\frac{|\mathcal{S}_1|}{|\mathcal{S}|}+
+%\RK{\mathcal{S}_2}*\frac{|\mathcal{S}_2|}{|\mathcal{S}|}$.
+\end{definition}
+%\noindent
+%A low c-ranking of a CBD is an indication of similarity of the
+%constraints between members of the partitions in the CBD.
+% unknown2
+%\vspace{-0.1em}
+\begin{example}
+\label{ex-with-time-3}
+Consider the set $\mathcal{S}=\{\SeqS_1,\SeqS_2,\SeqS_3\}$, where
+ %over $\Sigma=\{a,b,c,d\}$, where
+$\SeqS_1=(acdb,\{\TT{d}{b} \geq 2\})$,
+$\SeqS_2=(adbc,\{\TT{d}{c} \geq 2\})$ and
+$\SeqS_3=(adcb,\{\TT{d}{b} \geq 2\})$.
+The set $\mathcal{S}$ is order-closed, but not realisable by a DTS.
+The distance functions of its members are
+$\DF{\SeqS_1}=
+ \{
+% (a, d, 0, \infty),
+% (a,c,  0, \infty),
+  (a, b, 2, \infty),
+(c, b, 2, \infty),
+(d, b, 2, \infty)
+%(a, b, 0, \infty)
+\}$,
+$\DF{\SeqS_2}=
+ \{
+ (a, c, 2, \infty),
+%   (d, b, 2, \infty),
+ (d,c,  2, \infty)
+%(c, a , 0, \infty),
+%(c, b, 0, \infty),
+ %(a, b, 0, \infty)
+ \}$ and
+$\DF{\SeqS_3}=
+ \{
+  (a, b, 2, \infty),
+% (d,c,  2, \infty),
+  (d, b, 2, \infty)
+%(a, c , 0, \infty),
+%(a , b, 0, \infty),
+ %(c, b, 0, \infty)
+ \}$.
+
+ %$\DR{\mathcal{S}}=(\ParS{\mathcal{S}},\DF{\mathcal{S}})$, where
+The partial order in $\mathcal{S}$, $\ParS{\mathcal{S}}$, is represented by
+$a-d-b$ and $a-c$, while $\DF{\mathcal{S}}$ has only default intervals.
+% The members of $\Proj{\mathcal{S}}$ are
+The projections of $\DR{\mathcal{S}}$ are
+$p_1=(acdb,\emptyset)$,
+$p_2=(adbc,\emptyset)$ and
+$p_3=(adcb,\emptyset)$.
+So none of the members of $\mathcal{S}$ are compatible with
+$\DR{\mathcal{S}}$.
+
+The constraint-based disagreement between members of $\mathcal{S}$ and
+$\DR{\mathcal{S}}$ are
+
+\noindent
+$\CDis{\mathcal{S}}(\SeqS_1)=\{(a,b),(c,b),(d,b)\}$,
+$\CDis{\mathcal{S}}(\SeqS_2)=\{(a,c),(d,c)\}$ and
+$\CDis{\mathcal{S}}(\SeqS_3)=\{(a,b),$\\$(d,b)\}$,
+while
+$\CBD{\mathcal{S}}(a,b)=\CBD{\mathcal{S}}(d,b)=(\{\SeqS_1,\SeqS_3\},\{\SeqS_2\})$,
+$\CBD{\mathcal{S}}(a,c)=\CBD{\mathcal{S}}(d,c)=(\{\SeqS_2\},\{\SeqS_1,\SeqS_3\})$ and
+$\CBD{\mathcal{S}}(c,b)=(\{\SeqS_1\},\{\SeqS_2,\SeqS_3\})$.
+%$\CBD{\mathcal{S}}(d,b)=(\{\SeqS_1,\SeqS_3\},\{\SeqS_2\})$,
+%$\CBD{\mathcal{S}}(d,c)=(\{\SeqS_2\},\{\SeqS_1,\SeqS_3\})$.
+
+\noindent
+This analysis leads to divisions $D_1=(\{\SeqS_2\},\{\SeqS_1,\SeqS_3\})$
+and $D_2=(\{\SeqS_1\},\{\SeqS_2,\SeqS_3\})$, which have
+equal o-rankings and K-rankings,
+so we compare their c-rankings:
+\noindent
+$\CK{\{\SeqS_2\}}= 0$,
+$\CK{\{\SeqS_1,\SeqS_3\}}=\CD{\SeqS_1}{\SeqS_3}=|\{\CBD{\mathcal{S}}(c,b)\}|=1$,
+$\CK{\{\SeqS_1\}}= 0$
+and
+$\CK{\{\SeqS_2,\SeqS_3\}}=\CD{\SeqS_2}{\SeqS_3}=
+|\{\CBD{\mathcal{S}}(a,b),\CBD{\mathcal{S}}(a,c),\CBD{\mathcal{S}}(d,b),\CBD{\mathcal{S}}(d,c)\}|=4$.
+So $\CK{D_1}=0+1=1$ and $\CK{D_2}=0+4=4$.
+
+In $D_1$, $\{\SeqS_1,\SeqS_3\}$ is realisable by the DTS
+$\xi_1||\xi_2$, where $\xi_1=(acb,\{\TT{a}{b}\geq 2\})$ and
+$\xi_2=(adb,\{\TT{d}{b}\geq 2\})$.
+So ${\mathcal{S}}$ is realised by $(\xi_1||\xi_2)\BAR\SeqS_2$.
+If we choose $D_2$ (which has the higher c-ranking), even though
+$\{\SeqS_2,\SeqS_3\}$ is order-closed, its members would not be
+compatible with the distance relation of the set. So we would have to
+divide the set once more and end up with the trivial expression
+$\SeqS_1\BAR\SeqS_2\BAR\SeqS_3$.
+\end{example}
+%-----------------
+%\begin{obs}
+%  Let $\mathcal{S}$ be an order-closed set of scenarios.
+%  All the members of $\mathcal{S}$ are compatible with
+%  $\DR{\mathcal{S}}$ iff $\CK{\mathcal{S}}=0$.
+%  \end{obs}
+\noindent
+As shown above, if none of the members of an order-closed set,
+%of scenarios,
+$\mathcal{S}$, are compatible with $\DR{\mathcal{S}}$, then we compute all the
+CBDs of $\mathcal{S}$ and
+%By Theorem \ref{obs-not-locally-stable}, there must be
+%at least one non-trivial CBD.
+choose the one with the lowest o-ranking.
+We break a tie by choosing the CBD with the lowest
+K-ranking.
+If K-rankings cannot break a tie, we
+choose a division with the lowest c-ranking, and if necessary we use
+l-rankings to break a tie.
+%whose partitions are order-closed.
+%A division with two order-closed partitions has priority over one
+%that has only one order-closed partition, and that has priority over
+%one that has no order-closed partitions.
+%If order-closedness of partitions cannot break a tie, we randomly
+%choose a division, while avoiding partitions with gaps if possible.
+%\vspace{-0.4em}
+\begin{theorem}
+\label{thm-realisable}
+%Let $\mathcal{S}$ be
+A finite set, $\mathcal{S}$, of sequential scenarios is
+realisable by a single DTS iff it is order-closed and every member of
+it is compatible with $\DR{\mathcal{S}}$.
+\end{theorem}
+%\vspace{-0.5em}
+%\begin{proof}
+%The proof is presented in Appendix B.
+%\end{proof}
+\noindent
+We now present an algorithm
+%%Next, we develop an algorithm
+that solves the problem of realisability
+of a set of scenarios as a scenario expression.
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%% GAP %%%%%%
+
+
+
+%The next example shows that given a set of sequential scenarios there
+%might be more than one expression that realises the set.

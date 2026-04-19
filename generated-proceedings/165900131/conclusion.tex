@@ -1,0 +1,12 @@
+\section{Conclusion}
+\label{sect-conclusion}
+In the aim of addressing two main concerns in current machine learning techniques -- explainability and privacy -- this paper has introduced a new framework for federated learning based on the Bach coordination language and the inductive logic programming system Popper. This framework, named Bach4Popper, consequently relies on coordination primitives to learn Horn clauses from failures in a distributed manner while preserving data locality and thus without sharing examples.
+
+Technically, the core contribution of this work lies in the federation of Popper’s internal generate-test-constrain loop. Hypothesis generation and constraint induction are performed centrally, while hypothesis evaluation is delegated to distributed clients that operate exclusively on local data. Through symbolic aggregation of local outcomes and scores, the global learning process remains logically equivalent to centralized Popper.
+
+We formally proved that, under well-defined federated partitioning assumptions, the symbolic outcomes and scores computed locally by distributed clients can be exactly aggregated to recover their centralized counterparts.
+As a result, Bach4Popper is correct with respect to centralized Popper in the sense that the same models are computed. Experimental results on standard ILP benchmarks confirm this analysis. Across all datasets, Bach4Popper converges to hypotheses that are descriptively equivalent to those learned centrally in terms of accuracy and recall. Moreover, experiments show that the computational performance of the federated setting is reasonably close to that of a centralized computation.
+
+Future work will focus on exploring larger relational domains, studying heterogeneous and noisy data distributions, and extending the theoretical results of Section~\ref{sect-experiments} to other forms of partitioning.
+
+

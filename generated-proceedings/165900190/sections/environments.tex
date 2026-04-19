@@ -1,0 +1,320 @@
+\subsection{Environments}
+\label{sec:environments}
+
+Pat's type system makes use of \emph{environments} for keeping track of types of variables while type checking terms.
+The implementation of environments depends on how variables are represented.
+For traditional strings as variables, it is common to use a map, mapping variables to types \cite{pierceTypesProgrammingLanguages2002}.
+In the case of de Bruijn indices, an environment is typically represented as a list of types where a variable indicates the position of its type in the list \cite{pierceTypesProgrammingLanguages2002,wadlerProgrammingLanguageFoundations2022a}.
+%
+For Pat, the representation of an environment as a simple list of types is
+unfortunately not enough, due to its parallel fragment and use of
+quasilinearity.  To illustrate the problem, consider the type derivation of a
+mailbox calculus term on the left-hand side:
+
+{
+    \small
+\begin{mathpar}
+    \inferrule*
+    { A_1, \emptyset \vdash \Var{0} \\ {A_2, \emptyset \vdash \Var{1}} }
+    {A_2, A_1, \emptyset \vdash \Var{0} \parallel \Var{1}}
+
+    \inferrule*
+     { \bot, A_1, \emptyset \vdash \Var{0} \\
+       A_2, \bot, \emptyset \vdash \Var{1}}
+     {A_2, A_1, \emptyset \vdash \Var{0} \parallel \Var{1}}
+\end{mathpar}
+}
+
+We assume variable $\Var{0}$ has type $A_1$ and variable $\Var{1}$ has type $A_2$.
+The term expresses that there are two processes running in parallel, each with only a single variable.
+Additionally, the current environment consists of $A_2, A_1, \emptyset$.
+By the typing rules of the mailbox calculus (read bottom-up), given by de'Liguoro and Padovani \cite{deliguoroMailboxTypesUnordered2018}, when typing parallel processes, the environment needs to be split into two.
+Assuming variable $\Var{0}$ has indeed type $A_1$, the left subtree works without problems.
+Looking up the type at position $\Var{0}$ in environment $A_1, \emptyset$ yields $A_1$.
+However, the right subtree poses a problem.
+There is no type at position $\Var{1}$ in environment $A_2, \emptyset$, as it only contains a single element.
+
+One way of solving this issue is the inclusion of entries in the environment representing the absence of a type at a certain position.
+The example on the right-hand side adds an additional $\bot$-entry, representing an empty position.
+%
+With this approach, whenever an environment is split, the size of the two new environments is equal to the size of the original one.
+%
+The \emph{dblib} library we use for managing de Bruijn indices also includes an implementation of environments based on this exact approach.
+It provides the needed definitions and operations, such as lookup and insertion, together with proofs about properties on environments.
+
+\begin{figure}[t]
+    \small
+  \textbf{Environment subtyping} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EnvironmentSubtype}) \hfill \fbox{$\Gamma_1 \subtype \Gamma_2$}
+  \begin{center}
+        \begin{prooftree}
+            \infer0{\Gamma \subtype \Gamma}
+        \end{prooftree}
+      \;
+        % \quad
+        \begin{prooftree}
+            \hypo{\Gamma_1 \subtype \Gamma_2}
+            \hypo{\Gamma_2 \subtype \Gamma_3}
+            \infer2{\Gamma_1 \subtype \Gamma_3}
+        \end{prooftree}
+      \;
+        % \quad
+        \begin{prooftree}
+            \hypo{\Gamma_1 \subtype \Gamma_2}
+            \infer1{\bot, \Gamma_1 \subtype \bot, \Gamma_2}
+        \end{prooftree}
+      \;
+        % \quad
+        \begin{prooftree}
+            \hypo{\Gamma_1 \subtype \Gamma_2}
+            \hypo{\unr{A}}
+            \infer2{A, \Gamma_1 \subtype \bot, \Gamma_2}
+        \end{prooftree}
+      \;
+        % \quad
+        \begin{prooftree}
+            \hypo{\Gamma_1 \subtype \Gamma_2}
+            \hypo{A_1 \subtype A_2}
+            \infer2{A_1, \Gamma_1 \subtype A_2, \Gamma_2}
+        \end{prooftree}
+    \end{center}
+  \textbf{Environment combination} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EnvironmentCombination}) \hfill \fbox{$\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}$}
+  \begin{center}
+        \begin{prooftree}
+            \infer0{\mbtucomb{\emptyset}{\emptyset}{\emptyset}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer1{\mbtucomb{\bot, \Gamma_1}{\bot, \Gamma_2}{\bot, \Gamma_3}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer1{\mbtucomb{A, \Gamma_1}{\bot, \Gamma_2}{A, \Gamma_3}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer1{\mbtucomb{\bot, \Gamma_1}{A, \Gamma_2}{A, \Gamma_3}}
+        \end{prooftree}
+    \end{center}
+    \begin{center}
+        \begin{prooftree}
+            \hypo{\mbtucomb{A_1}{A_2}{A_3}}
+            \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer2{\mbtucomb{A_1, \Gamma_1}{A_2, \Gamma_2}{A_3, \Gamma_3}}
+        \end{prooftree}
+    \end{center}
+  \textbf{Disjoint environment combination} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EnvironmentDisjointCombination}) \hfill \fbox{$\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma_3}$}
+  \begin{center}
+        \begin{prooftree}
+            \infer0{\disenvcomb{\emptyset}{\emptyset}{\emptyset}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer1{\disenvcomb{\bot, \Gamma_1}{\bot, \Gamma_2}{\bot, \Gamma_3}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer1{\disenvcomb{A, \Gamma_1}{\bot, \Gamma_2}{A, \Gamma_3}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer1{\disenvcomb{\bot, \Gamma_1}{A, \Gamma_2}{A, \Gamma_3}}
+        \end{prooftree}
+    \end{center}
+    \begin{center}
+        \begin{prooftree}
+            \hypo{\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+            \infer1{\disenvcomb{C, \Gamma_1}{C, \Gamma_2}{C, \Gamma_3}}
+        \end{prooftree}
+    \end{center}
+
+    \caption{The definitions of relations on environments.}
+    \label{fig:environment-relations}
+\end{figure}
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#Env}[Environment]
+%   \todo{ES}{Move this into syntax figure perhaps}
+%   An \emph{environment} $\Gamma$ is defined by the following grammar:
+%
+%   \begin{center}
+%     \begin{grammar}
+%       \firstcasesubtil{$\Gamma$}{\emptyset \hspace{-.2cm}\gralt\hspace{-.2cm} \bot, \Gamma \hspace{-.2cm}\gralt\hspace{-.2cm} A, \Gamma}{}
+%     \end{grammar}
+%   \end{center}
+% \end{linkdef}
+
+% In Rocq, an environment is a list with elements of type \coqe{option TUsage}, i.e.\ elements can either be \coqe{None} or \coqe{Some A} for some usage-annotated type \coqe{A}.
+% Note how the syntax forces an order onto the elements of an environment.
+% Reading from right to left, the first element (after $\emptyset$) corresponds to position $0$, while for any element at position $n$ its neighbor to the left has position $n+1$.
+%
+% To reason about elements at arbitrary positions in an environment, as well as inserting them at a given position, \emph{dblib} includes an \emph{insert} operation.
+%
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Dblib.Environments.html\#raw_insert}[Environment Insert]
+%   \emph{Inserting} a new variable $x$ associated with element $e$ in environment $\Gamma$ (written $\envInsert{x}{e}{\Gamma}$) is defined by the following equations:
+%   \begin{alignat*}{3}
+%     &\envInsert{0}{e}{\Gamma} &&:= e, \Gamma\\
+%     &\envInsert{x+1}{e}{(f, \Gamma)} &&:= f, (\envInsert{x}{e}{\Gamma})\\
+%     &\envInsert{x+1}{e}{\emptyset} &&:= \bot, (\envInsert{x}{e}{\emptyset})\\
+%   \end{alignat*}
+% \end{linkdef}
+
+% Essentially, what the operation $\envInsert{x}{e}{\Gamma}$ does is to move $x$ positions into $\Gamma$ and insert $e$.
+% If the empty environment $\emptyset$ is encountered while traversing, a new $\bot$ is added each time, building up the environment.
+%
+% Additionally, \emph{dblib} provides an implementation for the \emph{lookup} function, taking as arguments a variable and environment and returning either $\bot$ or a type.
+%
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Dblib.Environments.html\#lookup}[Environment Lookup]
+%   \emph{Looking up} the type for a variable $x$ in environment $\Gamma$ is defined as follows:
+%   \begin{alignat*}{3}
+%     &lookup \ x \ \emptyset &&:= \bot\\
+%     &lookup \ 0 \ (e,\Gamma) &&:= e\\
+%     &lookup \ (x + 1) \ (e,\Gamma) &&:= lookup \ x \ \Gamma
+%   \end{alignat*}
+% \end{linkdef}
+%
+
+Fowler et al. \cite{fowlerSpecialDeliveryProgramming2023} describe several relations and operations on environments, defined in Figure \ref{fig:environment-relations}.
+Our definitions are essentially equal to the original ones, with modifications to incorporate $\bot$-entries and some corrections that are further discussed at the end of this section.
+In each relation we add a rule for the case where the first entry in both environments is $\bot$.
+Similar to partial operations on types, we turn partial operations on environments into relations.
+
+% Having defined the basics for environments, we continue with relations and operations on environments, as described by Fowler et al. \cite{fowlerSpecialDeliveryProgramming2023}.
+% The following definitions are based on Pat's original definitions, with a few modifications for our environment representation.
+%
+% First, we extend subtyping to environments, which also includes a notion of \emph{weakening}.
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EnvironmentSubtype}[Environment Subtyping]
+%   \emph{Environment subtyping} (written $\Gamma_1 \subtype \Gamma_2$) is defined by the following rules:
+%   \begin{center}
+%         \begin{prooftree}
+%             \infer0{\Gamma \subtype \Gamma}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\Gamma_1 \subtype \Gamma_2}
+%             \hypo{\Gamma_2 \subtype \Gamma_3}
+%             \infer2{\Gamma_1 \subtype \Gamma_3}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\Gamma_1 \subtype \Gamma_2}
+%             \infer1{\bot, \Gamma_1 \subtype \bot, \Gamma_2}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\Gamma_1 \subtype \Gamma_2}
+%             \hypo{\unr{A}}
+%             \infer2{A, \Gamma_1 \subtype \bot, \Gamma_2}
+%         \end{prooftree}
+%     \end{center}
+%     \begin{center}
+%         \begin{prooftree}
+%             \hypo{\Gamma_1 \subtype \Gamma_2}
+%             \hypo{A_1 \subtype A_2}
+%             \infer2{A_1, \Gamma_1 \subtype A_2, \Gamma_2}
+%         \end{prooftree}
+%     \end{center}
+% \end{linkdef}
+
+% The definition for subtyping of environments includes an additional rule specifically for our representation of environments, where $\bot$ entries at the same position in both environments are skipped.
+% Otherwise, the rules follow the definition of Fowler et al., with some corrections that are further discussed in Chapter \ref{sec:rocq-mechanization}.
+% It follows directly from these rules that environment subtyping is reflexive and transitive.
+
+% In addition to environment subtyping, we also include the notion of \emph{strict environment subtyping}, where the domains of both environments must be equal.
+% Meaning that, in our representation, there is either a type or $\bot$ in both environments at the same positions.
+%
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EnvironmentSubtypeStrict}[Strict Environment Subtyping]
+%   \emph{Strict environment subtyping} (written $\Gamma_1 \strictsubtype \Gamma_2$) is defined by the following rules:
+%   \begin{center}
+%         \begin{prooftree}
+%             \infer0{\Gamma \strictsubtype \Gamma}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\Gamma_1 \strictsubtype \Gamma_2}
+%             \hypo{\Gamma_2 \strictsubtype \Gamma_3}
+%             \infer2{\Gamma_1 \strictsubtype \Gamma_3}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\Gamma_1 \strictsubtype \Gamma_2}
+%             \infer1{\bot, \Gamma_1 \strictsubtype \bot, \Gamma_2}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\Gamma_1 \strictsubtype \Gamma_2}
+%             \hypo{A_1 \strictsubtype A_2}
+%             \infer2{A_1, \Gamma_1 \strictsubtype A_2, \Gamma_2}
+%         \end{prooftree}
+%     \end{center}
+% \end{linkdef}
+
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EnvironmentCombination}[Environment Combination]
+%   \emph{Environment combination} (written $\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}$) is defined as a relation between three environments, by the following rules:
+%   \begin{center}
+%         \begin{prooftree}
+%             \infer0{\mbtucomb{\emptyset}{\emptyset}{\emptyset}}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+%             \infer1{\mbtucomb{\bot, \Gamma_1}{\bot, \Gamma_2}{\bot, \Gamma_3}}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+%             \infer1{\mbtucomb{A, \Gamma_1}{\bot, \Gamma_2}{A, \Gamma_3}}
+%         \end{prooftree}
+%     \end{center}
+%     \begin{center}
+%         \begin{prooftree}
+%             \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+%             \infer1{\mbtucomb{\bot, \Gamma_1}{A, \Gamma_2}{A, \Gamma_3}}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{\mbtucomb{A_1}{A_2}{A_3}}
+%             \hypo{\mbtucomb{\Gamma_1}{\Gamma_2}{\Gamma_3}}
+%             \infer2{\mbtucomb{A_1, \Gamma_1}{A_2, \Gamma_2}{A_3, \Gamma_3}}
+%         \end{prooftree}
+%     \end{center}
+% \end{linkdef}
+
+Pat requires subtyping on \emph{environments} rather than just types in order to
+rewrite types so that they can be used by the type combination operator.
+Sequential environment combination $\envcomb{\Gamma_1}{\Gamma_2}{\Gamma}$ makes
+use of type combination and is used when type checking let-expressions. This is
+the main rule used to ensure that subsequent uses of a mailbox variable
+``balance out''.
+Additionally, we use \emph{disjoint environment combination} to reason about
+expressions where subterms may not share mailbox-typed variables (e.g.\ a
+variable may not be used as the target of a message send and also be contained
+in its payload). Environments combined using $+$ are only allowed to share
+variables of base types and be disjoint otherwise.
+
+As our definition of environments includes $\bot$ entries, it is possible for an environment to be empty without being $\emptyset$, necessitating a new notion of emptiness of environments $\EmptyEnv{\Gamma}$ (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EmptyEnv})
+that holds when $\Gamma$ only contains $\bot$-entries.
+
+\paragraph{Mechanization.}
+Formalizing environments is, by far, the most complex part of this mechanization.
+The library \emph{dblib} reduces some of the complexity around environments by proving operations and properties on them.
+However, reasoning about environment combinations and environment subtyping still is far from trivial.
+Independent of the representation of environments that were considered, environment splitting and subtyping require dozens of technical lemmas.
+While the proofs of these properties follow the same general approach, they are lengthy and tedious to perform.
+%
+For example, for the relation $\envcomb{\Gamma_1}{\Gamma_2}{\Gamma_3}$ we have proved that
+there exists an environment that is the environment combination of both
+$\Gamma_1$ and $\Gamma_2$ with the entry at the same position replaced by $\bot$ in both environments (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#EnvironmentCombination_tes}).
+Similar lemmas had to be proven for environment subtyping and disjoint combination.
+While mechanizing subtyping for environments according to the definition of Pat \cite{fowlerSpecialDeliveryProgramming2023},
+we noticed that the relation was missing an inference rule, making environment subtyping not transitive.
+By explicitly including the transitivity rule we were able to prove desired properties of environment subtyping.
+This issue was subsequently fixed in a revised version \cite{fowlerSpecialDeliveryProgramming2025}.
+% Not the journal version yet -- still under review :)
+

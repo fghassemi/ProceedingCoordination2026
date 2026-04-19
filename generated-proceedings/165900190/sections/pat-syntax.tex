@@ -1,0 +1,70 @@
+\subsection{Syntax}
+\label{sec:syntax}
+
+The Pat syntax we are working with is close to the original definitions by
+Fowler et al.\ \cite{fowlerSpecialDeliveryProgramming2023}, making use of
+de Bruijn indices \cite{debruijnLambdaCalculusNotation1972} to represent
+variables.
+We use de Bruijn indices as they are well-studied for proof assistants, and in
+particular Rocq \cite{ambalHOPiCoq2021,starkMechanisingSyntaxBinders2019}.
+We make use of the Rocq library \emph{dblib} \cite{pottierDblib2021} that
+automatically handles de Bruijn indices and operations on them such as shifting.
+
+To ease the burden of proving properties about messages, we restrict messages to
+only carry a single payload, and consider only functions that take a single
+argument.  We expect that extending our proofs to include arbitrary numbers of
+payloads and function arguments will not significantly affect the proofs.
+
+\begin{figure}[t]
+  \centering
+  \begin{tabular}{lccl}
+    % Program definition \; & $\prog$ & & \\
+    Definition names (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Syntax.html\#IDefinitionName}) \; & $\defname$ & & \\
+    Function definitions (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Syntax.html\#FunctionDefinition}) \; & $d$ & $::=$ & $\FunctionDef$\\
+    Booleans \; & $b$ & $::=$ & $\mathsf{true} \mid \mathsf{false}$ \\
+    Values (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Syntax.html\#Value}) \; & $v$ & $::=$ & $b \mid \unitvalue \mid \Var{n}$ \\
+    Terms (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Syntax.html\#Term}) \; & $t$ & $::=$ & $v \mid \TLet{t_1}{t_2} \mid \defname(v) \mid \TSpawn{t}$\\
+    & & $\mid$ & $\TNew \mid \TSend{v_1}{m}{v_2} \mid \TGuard{v}{E}{\overrightarrow{g}}$\\
+    Guards (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Syntax.html\#Guard}) \; & $g$ & $::=$ & $\GFail \mid \GFree{t} \mid \GReceive{m}{t}$\\
+    Environments (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Environment.html\#Env}) \; & $\Gamma$ & $::=$ & $\emptyset \mid \bot,\Gamma \mid A,\Gamma$
+  \end{tabular}
+
+  \caption{The syntax of Pat}
+  \label{fig:pat-syntax}
+\end{figure}
+
+Figure \ref{fig:pat-syntax} shows our syntax of Pat.
+A value $v$ is either a Boolean value, the unit value $\unitvalue$, or a variable $\Var{n}$ represented as a de Bruijn index, with natural number $n$.
+Including variables into the definition of values is fairly nonstandard.
+The inspiration for this approach is the \emph{fine-grain call-by-value} evaluation strategy \cite{levyModellingEnvironmentsCallbyvalue2003},
+that makes a syntactic difference between values and computations.
+Values, including variables that can also represent mailbox names, are immutable and cannot be reduced, while
+other terms produce values and can be reduced further.
+
+A term is either a value, a let-expression or a function application $\defname(v)$ of function $\defname$ on value $v$.
+Additionally, there are terms specifically for interacting with mailboxes and processes.
+The term $\TSpawn{t}$ can be used to create a new process running term $t$.
+Dynamic mailbox name creation is done with the $\TNew$ keyword, generating a fresh mailbox name.
+Term $\TSend{v_1}{\msg{m}}{v_2}$ sends message $\msg{m}$ with payload value $v_2$ to the mailbox with name $v_1$.
+A guard term $\TGuard{v}{E}{\overrightarrow{g}}$ asserts that the mailbox associated with name $V$ has pattern $E$, and invokes some guard from the list of guards $\overrightarrow{g}$.
+Guards perform actions on a mailbox:
+the guard $\GFail$ is triggered when a mailbox receives an unexpected message,
+and should be evaluated by a well-typed program.
+In contrast, guard $\GFree{t}$ is triggered when a mailbox is empty and not
+referenced elsewhere in the system;
+the corresponding mailbox is freed and we proceed with continuation $t$.
+Finally, the guard $\GReceive{m}{t}$ is triggered when a mailbox contains the message $m$.
+The contents of the message are then available in the continuation $t$.
+
+A Pat program $\mathcal{P} = (\mathcal{S}, \mathcal{D}, t_0)$ (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Syntax.html\#Prog}) is a tuple consisting of a signature $\mathcal{S}$ for mapping messages to their payload type,
+a mapping $\mathcal{D}$ from definition names to function definitions, and an initial term $t_0$.
+For simplicity, given a program $\mathcal{P}$, we write $\mathcal{S}_\mathcal{P}$ for the signature, and $\mathcal{D}_\mathcal{P}$ for the function definitions.
+
+\paragraph{Mechanization.}
+The mechanization of the syntax of Pat is close to its pen-and-paper counterpart,
+with the exception of using de Bruijn indices.
+Defining the syntax poses no problem after settling on the representation of variables.
+While the choice of using de Bruijn indices is standard \cite{ambalHOPiCoq2021,tiroreMultipartyAsynchronousSession2025,starkMechanisingSyntaxBinders2019}, it comes with the downside of extensive reasoning about indices and lifting.
+While \emph{dblib} alleviates some of this burden, a substantial amount of manual work is still required.
+
+Definition names are treated similar to message tags, being represented as an arbitrary type equipped decidable equality.

@@ -1,0 +1,159 @@
+\section{Logic Programming}
+\label{appendix-lp}
+
+Logic programming is a programming paradigm based on formal logic. The main idea is that, instead of providing the computer with instructions on how to solve a problem, as in procedural languages like C or Java, one specifies by logical rules the problem to be solved and let execution models execute them so as to actually solve the problem. This idea assumes the existence of two semantics, called declarative semantics and operational semantics, which provide meanings to programs either according to a (declarative) logical viewpoint or to an operational (execution-based) viewpoint. It is the equivalence between the two semantics that allow the user to specify the problem to be solved and let the computer executes the necessary computational steps. To be complete a third component needs to be addressed: the syntax according to which well-formed formulae are written. These three components are the subjects of the following
+three subsections.
+
+\subsection{Syntax}
+
+Any first-order logic theory is built upon three classes of symbols: a set of variables, a set of function names together with their arities
+and a set of predicate names together with their arities. In the following, we shall use the Prolog syntax. Variables are therefore represented as strings of characters starting with an uppercase letter
+and function names as well as predicate names are represented as strings characters starting with a lower case letter.
+The three classes of symbols are assumed to be disjoint two by two. Constants are a special case of function names of arity
+$0$.
+
+Terms are inductively defined as being either of a variable, a constant or a construct of the form $f(t_1,\cdots,t_n)$ with $f/n$ a function name of arity $n$, and $t_1$, \ldots, $t_n$ terms. 
+Atoms are constructs of the form $p(t_1,\cdots,t_n)$ with $p/n$ a predicate name of arity $n$ and $t_1$, \ldots, $t_n$ terms. A
+literal is an atom or the negation of an atom.
+
+A clause is a universally quantified disjunction of the form:
+\[ \forall X_1 \cdots \forall X_n \; L_1 \vee \cdots \vee L_m \]
+where $L_1$, \ldots, $L_m$ are literals and $X_1$, \ldots, $X_n$ are all the variables appearing in them. 
+Very often the universal quantification is taken as implicit and is not
+written.  Special forms are worth mentioning.
+A Horn clause is a clause containing at most one positive literal. A
+definite clause is such a clause that contain one positive
+literal. By using classical reasoning, 
+it can be rewritten as
+\( h \leftarrow b_1 \wedge \cdots \wedge b_n \)
+with $h$, $b_1$, \ldots $b_n$ (positive) atoms.
+A fact is a definite clause that contains no atoms $b_i$. It is simply rewritten as \( h \).
+A goal is a clause that contains no positive literals. It is often rewritten as 
+\( \leftarrow b_1 \wedge \cdots \wedge b_n \).
+
+Substitutions are a means to give values to variables. They are defined as sets of the form 
+\( \{ X_1/t_1, \cdots, X_n/t_n \} \)
+where $X_1$, \ldots, $X_n$ are distinct variables,
+$t_1$, \ldots, $t_n$ are terms, and where $t_i$ is distinct from $X_i$,
+for any $i$. They are typically denoted by greek letters, such as $\theta$ and $\sigma$.
+
+The application of a substitution to a term, an atom or a clause, say $t$ consists in simultaneously replacing each occurrence of $X_i$ by
+$t_i$. This is subsequently denoted as $t\theta$. 
+This notion finds a direct application in unification.
+Two terms (or atoms) $ta_1$ and $ta_2$ are said to unify if there is a
+substitution $\theta$ such that \( ta_1\theta = ta_2\theta \).  In
+that case, $\theta$ is said to be a unifier of $ta_1$ and $ta_2$.
+Another application consists in applying substitutions
+successively. This leads to composing substitutions.
+Given two substitutions $\theta = \{ X_1/t_1, \cdots, X_m/t_m \}$ and
+$\sigma = \{ Y_1/u_1, \cdots, Y_n/u_n \}$, the composition of $\theta$ by $\sigma$, denoted
+$\theta\sigma$, is the substitution obtained from the set
+$\{ X_1/(t_1\sigma), \cdots, X_m/(t_m\sigma), Y_1/u_1, \cdots, Y_n/u_n \}$
+by removing any binding $X_i/(t_i\sigma)$ for which $X_i = t_i\sigma$
+and any binding $Y_j/u_j$ for which $Y_j \in \{ X_1, \cdots, X_m \}$.
+A substitution  
+$\theta$ is then said to be more general than another one $\sigma$ if there exists a substitution $\gamma$ such
+that $\sigma = \theta\gamma$. A particular application concerns mgus. Given two terms (or atoms) $t$ and $u$, the substitution $\theta$ is
+said to be a more general unifier (mgu for short) of $t$ and $u$ if it
+is a unifier of $t$ and $u$ and if it is more general than any other
+unifier.
+
+\subsection{Declarative Semantics}
+
+The declarative semantics of logic programs defines their meaning
+purely in logical terms without any reference to any execution
+model. It is based on the notions of interpretation and model. A full
+treatment of this semantics is out of the scope of this paper. We
+refer the interested reader to \cite{Lloyd} for a complete
+overview. However the key points may be described on Horn clauses
+through the notion of Herbrand universe and Herbrand base.
+
+A term, atom or clause is said to be ground if it contains no
+variable. The Herbrand universe, denoted $U_H$, is defined as the set
+of all ground terms. The Herbrand base, denoted $B_H$, is defined as
+the set of ground atoms.
+An Herbrand interpretation is a subset of the Herbrand base $B_H$.
+The intuition behind an Herbrand interpretation is that it defines as
+true the atoms it contains and as false the other ground atoms. Then,
+by using the classical truth tables, it is easy to determine whether a
+given ground clause is true. This allows us to define the notion of of a model of a set of Horn clauses $S$ as an interpretation that gives true as the truth value 
+of any ground instance of a clause os $S$. 
+A goal $G$ is the defined as a logical consequence of a set of Horn clauses $S$ iff
+every Herbrand model of $S$ is also a Herbrand model of $G$. This is
+subsequently denoted as $S \models G$.
+
+A major result of model theory in the case of Horn clauses is that the
+set $M_P$ of logical consequences of a set of Horn clauses $P$ can be determined
+as the intersection of all its Herbrand models and may be further
+characterized as the least fixed point of the immediate consequence
+operator $T_P$.
+Obviously, by construction, one has $T_P(M_P) = M_P$. It turns out
+that this result can be generalized for Horn clauses extended with
+negative literals in their body. We refer the reader to \cite{AptBol} for
+more explanations. For this introduction, it sufficient to say that,
+under some conditions, the stable semantics developped by M. Gelfond
+and V. Lifschitz has allowed to identify stable models in the sense
+that they are fixed points of (suitable extensions) of the $T_P$
+operator. This has lead to develop so called answer set programming,
+which is a framework in which one computes stable models for logic
+programs, potentially extended to include constraints and optimization.
+
+
+\subsection{Operational Semantics}
+
+\begin{sloppypar}
+From an operational perspective, the computation proceeds
+as a succession of steps that transform a goal (or conjunction of atoms)
+into another one. Given a goal, say
+\( \leftarrow A_{1}, \cdots, A_{n} \),
+one selects non-deterministically an atom, say $A_i$, and then a
+definite clause\footnote{%
+  When need be, the variables of the clause are previously
+  renamed so that none of them appears earlier in the computation.
+}
+\( H \leftarrow B_{1},  \cdots , B_{k} \)
+whose head $H$ unifies with $A_i$.
+Let $\theta$ be the most general unifier of $A_{i}$ and $H$.  The
+conjunction
+\( \leftarrow A_{1}, \cdots, A_{n} \)
+is then transformed into the new conjunction 
+ \( \leftarrow ( A_{1}, \cdots, A_{i-1}, B_{1},
+ \cdots, B_{k}, A_{i+1}, \cdots, A_{n} ) \theta.  \)
+ Such a transformation step is called a \textit{reduction step} and any
+ sequence of reduction steps is called a \textit{SLD-derivation}.  The
+ reduction process ends when the current conjunction is empty or when
+ no reduction step can take place. In the first case, the composition of the successive mgus $\theta$'s delivers the so-called computation answer substitution. If $\sigma$ denotes it, we shall use the notation
+\( \jmjderiv{P}{\mfm{G}}{\sigma} \).
+ to denote the existence of the corresponding a successful {\em SLD-derivation of\/} \mf{G} with respect to \mf{P}
+ yielding $\sigma$ as a computed answer substitution. 
+ \end{sloppypar}
+
+The equivalence between the declarative and operational semantics is
+an attractive feature of logic programming.  It
+is stated by the following theorem, for which a proof can be found in
+\cite{Lloyd}.
+
+
+\begin{thm}
+Let $P$ be a set of definite clauses and $G$ be a goal.
+
+\begin{thmprop}
+
+\item
+{\em Soundness.\/}
+For any substitution $\theta$, if 
+\( \jmjderiv{ \mfm{P} }{ \mfm{G} }{ \theta } \)
+holds, then so does
+\( \jmjlogcons{ \mfm{P} }{ \mfm{G} }{ \theta } \).
+
+\item
+{\em Completeness.\/}
+For any substitution $\theta$ such that
+\( \jmjlogcons{ \mfm{P} }{ \mfm{G} }{ \theta } \)
+holds, there are two substitutions $\gamma$ and $\mu$ such that 
+\( \jmjderiv { \mfm{P} }{ \mfm{G} }{ \mu } \)
+and
+\( \mfm{G}\theta = \mfm{G}\mu\gamma \).
+
+\end{thmprop}
+\end{thm}

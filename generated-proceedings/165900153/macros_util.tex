@@ -1,0 +1,554 @@
+% \overfullrule=1mm
+
+%%% The following setting enable figures not to float too much
+
+\newcommand*\hw[1]{\small\fontfamily{augie}\selectfont {#1}}
+\newcommand*\circled[1]{
+     \tikz[baseline=(char.base)]{
+          \node[shape=circle,draw,inner sep=0.5pt,fill=black] (char) {{\color{white} #1}};
+     }\!\!
+}
+
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\floatpagefraction}{0.7}
+%%%%%%%%%%%%%%%%%%%
+
+%%% Macros useful almost everywhere
+\newcommand{\fnrestriction}[1]{\lvert_{#1}}
+\usepackage{xargs}
+\usepackage[normalem]{ulem} % underline command breaks over line ends
+% \usepackage[UKenglish]{babel}
+% \usepackage{bm}  some strange fonts needed somewhere
+
+\usepackage{xifthen}        % for conditional commands
+\newcommand{\ifempty}[3]{%
+  \ifthenelse{\isempty{#1}}{#2}{#3}%
+}
+
+\DeclareGraphicsExtensions{%
+  .png,.PNG,%
+  .pdf,.PDF,%
+  .jpg,.mps,.jpeg,.jbig2,.jb2,.JPG,.JPEG,.JBIG2,.JB2
+}
+
+\newcommand{\singleton}[1]{\textbf{#1}}
+
+%%% My flags
+\newif\ifemi
+%%% My flags end
+
+\newcommandx{\preprint}[3][1=preprint,2=Springer]{
+  \ifempty{#1}{}{
+	 \ \\[1em]\noindent
+	 \textbf{Disclaimer}
+    The published version of this paper is~\cite{#1} (\copyright\ #2).
+  }
+}
+
+%% Meta-comments
+\usepackage{fixme}
+\fxusetheme{color}
+\FXRegisterAuthor{eM}{aeM}{\color{orange} {\underline{eM}}}
+%\usepackage[disable]{todonotes}
+\newcommand{\eMtodo}[1]{\todo[fancyline,color=orange!10]{\tiny eM: \color{Navy}#1}}
+\usepackage[most]{tcolorbox}
+\newtcolorbox{markbox}{
+  enhanced,
+  breakable,
+  size=minimal,
+  parbox=false,
+  after={\par},
+  before upper={\indent},
+  colback=white,
+  overlay = {
+	 \draw[line width=2pt]
+	 (frame.north east) -| ([xshift=3mm]frame.east) |-(frame.south east);
+  },
+  overlay first={\draw[line width=2pt] (frame.north east) -| ([xshift=3mm]frame.south east);},
+  overlay middle={\draw[line width=2pt] ([xshift=3mm]frame.north east) -- ([xshift=3mm]frame.south east);},
+  overlay last={\draw[line width=2pt] ([xshift=3mm]frame.north east) |- (frame.south east);},
+}
+
+\usepackage{todonotes}
+\newcommand{\eMcomm}[2][check]{%
+  \ifthenelse{\equal{#1}{new}}{{\color{red}#2}}{%
+	 \ifthenelse{\equal{#1}{changed}}{{\color{teal}{#2}}}{%
+		\ifthenelse{\equal{#1}{rm}}{\todo[color=black!3]{\tiny eM: removed\\'{#2}'}}{%
+		  \todo[color=orange!20]{\tiny eM: \color{NavyBlue}#1}%
+		  {\color{OliveGreen}{#2}}%
+		}%
+	 }%
+  }%
+}
+\newcommand{\CLPcomm}[2][check]{%
+  \ifthenelse{\equal{#1}{new}}{{\color{red}#2}}{%
+	 \ifthenelse{\equal{#1}{changed}}{{\color{teal}{#2}}}{%
+		\ifthenelse{\equal{#1}{rm}}{\todo[color=black!3]{\tiny CLP: removed\\'{#2}'}}{%
+		  \todo[color=orange!20]{\tiny CLP: \color{NavyBlue}#1}%
+		  {\color{OliveGreen}{#2}}%
+		}%
+	 }%
+  }%
+}
+\newenvironment{eMenv}[1][new]{
+  \ifthenelse{\equal{#1}{new}}{\color{red}}{%
+	 \ifthenelse{\equal{#1}{changed}}{\color{teal}}{%
+		\todo[color=orange!20]{\tiny eM: \color{NavyBlue}#1}%
+		\color{OliveGreen}%
+	 }%
+   }%
+  \vspace{2em}\hrule\vspace{.5em}
+}{\vspace{.5em}\hrule\vspace{2em}}
+\newcommand{\revision}[3]{% example: \revision{R3 asks to change an example with x}{The new text for x}{text of the old example}
+  {\textcolor{NavyBlue}{#2}}\xspace\todo[fancyline,color=orange!10]
+}
+\newcommand{\nota}[2][TODO]{::\textcolor{red}{#1}:: \color{cyan} #2}
+\newcommand{\okey}{\dSmiley}
+\newcommand{\yeko}{\dXey}
+\newcommand{\hidden}[1]{}
+\newcommand{\hide}[1]{}
+
+\newcommand{\cf}[2]{
+  \fontsize{#1}{#1}{\selectfont{#2}}
+}
+
+\makeatletter
+\newcommand{\dolist}[2]{%
+  %%% \dolist{+}{a,b,c} = a+b+c
+  \def\nextitem{\def\nextitem{#1}}%
+  \@for \el:=#2\do{\nextitem\textbf{\el}}%
+}
+
+\newcommand{\domathlist}[2]{%
+  %%% like dolist, in math mode
+  \def\nextitem{\def\nextitem{\ensuremath{#1}}}%
+  \@for \el:=#2\do{\ensuremath{\nextitem}\textbf{\el}}%
+}
+
+\def\mktest#1{
+  \def\transform##1+##2+##3{##1 piu' ##2 * ##3\penalty0}%
+  \do{\expandafter\transform#1}%
+}
+\def\mksubscript#1{
+  \def\transform##1[##2]{##1_{##2}\penalty0}%
+  \do{\expandafter\transform#1}%
+}
+\newcommand{\mapcmd}[3][{, }]{%
+  %%% \mapcmd[\&]{\emph}{uno,due,tre}
+  \def\nextitem{\def\nextitem{#1}}%
+  \@for \el:=#3\do{\nextitem{#2{\el}}}%
+}
+\makeatother
+
+
+\ifemi
+\usepackage{showlabels}
+\renewcommand{\showlabelsetlabel}[1]{
+  {\textcolor{ForestGreen}{
+		\showlabelfont{\tiny #1}}
+  }
+}
+\newcommand{\emi}[2]{
+  \marginpar{\fcolorbox{red}{shadecolor}{\cf{#1}{{#2}}}}
+}
+\newcommand{\emic}[2]{\par
+  \fcolorbox{red}{shadecolor}{\parbox{\linewidth}{ 
+      \color{gray}
+      \begin{description}
+      \item[{\color{blue} #2}]{\sf #1}
+      \end{description}}}
+}
+\else
+\newcommand{\emi}[2]{}
+\newcommand{\emic}[2]{}{}
+\fi
+
+\newcommand{\marginnote}[1]{
+  {\makebox[0pt]{\color{orange}}}
+  \marginpar{\parbox{2cm}{\flushleft \tiny \color{orange}{#1}}}
+}
+\newcommand{\side}[2][6]{
+  \marginpar{\cf{#1}{\hl{#2}}}
+}
+\newcommand{\HSLtag}{\scalebox{1.25}{%
+  \begin{tikzpicture}
+  \draw (0.1,0.2) -- (0.2,0.115) -- (0.3,0.2) ;
+  %
+  \draw (0.1,0.2) -- (0.15,0.1) ;
+  \draw (0.3,0.2) -- (0.25,0.1) ;
+  %
+  \draw (0.12,0.1) -- (0.2,0.05) -- (0.28,0.1) ;
+  %
+  \draw (0.2,0) circle (0.12) ; 
+  \draw (0.16,0.04) circle (0.01) ;
+  \draw (0.24,0.04) circle (0.01) ;
+  \draw (0.15,-0.07) -- (0.25,-0.07) ;
+  \end{tikzpicture}
+}}
+\newcommand{\HSLbox}{\rule{1ex}{1ex}}
+\newcommand{\hsl}[1][]{\par
+  {\color{red}\vbox{\medskip\noindent\hrulefill \\[5pt]
+  \HSLtag \hspace{\stretch{1}}\ifempty{#1}{HIC SUNT
+  LEONES}{{#1}\hspace{\stretch{1}}} \HSLtag \\ \smallskip\noindent\hrulefill \\}}\par
+}
+%%% Meta-comments end
+
+
+%%% Thanking projects
+
+\newcommand{\tnxbehapi}[1][partly]{%
+  Research {#1} supported by the EU H2020 RISE programme under the
+  Marie Sk{\l}odowska-Curie grant agreement No 778233%
+}
+
+\newcommand{\tnxastra}[1][partly]{%
+  Research {#1} supported by the PRO3 MUR project
+  Software Quality, and PNRR MUR project VITALITY (ECS00000041), Spoke
+  2 ASTRA - Advanced Space Technologies and Research Alliance%
+}
+
+\newcommand{\tnxindam}[1][partly]{%
+  Research {#1} supported by INdAM as members of GNCS (Gruppo
+  Nazionale per il Calcolo Scientifico)%
+}
+
+\newcommand{\tnxpro}[1][Work partially funded]{%
+   #1 by the PRO3 MUR project Software Quality%
+}
+
+\newcommand{\tnxgssi}{%
+  The authors acknowledge the support of the PRO3 MUR project Software Quality,
+  and PNRR MUR project VITALITY (ECS00000041), Spoke 2 ASTRA - Advanced Space Technologies and Research Alliance%
+}
+%%% Thanking projects end
+
+
+%%% Maths & logic
+\newcommand{\proofcase}[1]{\ \newline\noindent\fbox{#1}}
+\newcommand{\Set}[1]{\left\{\,#1\,\right\}}
+\newcommand{\SET}[1]{\big\{\,#1\,\big\}}
+\def\colorFun{\color{orange}}
+\newcommand{\noarg}{}
+\newcommand{\mkfun}[4][\colorFun]{
+  \newcommand{#2}[1][#4]{%
+    {#1\ensuremath{\mathsf{#3}}}%
+    \ifempty{##1}{\noarg}{%
+      ({##1})}%
+  }%
+}
+
+\mkfun{\head}{hd}{}
+\mkfun{\tail}{tl}{}
+
+\newcommand{\mkuop}[4][\colorFun]{
+  \newcommand{#2}[1][#4]{
+    {#1\textsf{#3}}
+    \ifempty{##1}{}{
+      \, {##1}}
+  }
+}
+\newcommand{\mkset}[1]{\big\{ {#1} \big\}} %%% formerly called \ASET
+\newcommand{\partsof}[1]{2^{#1}} %%% formerly called \ASET
+\newcommand{\setof}[1]{\mkset{#1}}
+\newcommand{\setdef}[2]{\mkset{#1 \sst #2}}
+\newcommand{\card}[1]{\|{#1}\|}
+\newcommand{\sst}{\;\big|\;}
+\newcommand{\qst}{\;\colon\;} %such that
+\newcommand{\dom}[1]{\operatorname{dom} {#1}}
+\newcommand{\cod}[1]{\operatorname{cod} {#1}}
+\newcommand\myenddef{~\hfill \ensuremath{\diamond}}
+\newcommand{\conf}[1]{\ensuremath{\langle {#1} \rangle}}
+\newcommand{\tuple}[1]{\conf{#1}}
+\newcommand{\acsconf}[2]{\conf{{#1} \ ; \ {#2}}}
+%\renewcommand{\vec}[1]{\overset{\to}{#1}}
+\newcommand{\ith}[2]{\vec{#1}[{#2}]}
+\newcommand{\emptyword}{\varepsilon}
+\newcommand{\aword}{\varphi}
+\newcommand{\langof}[1]{\mathcal{L}(#1)}
+\newcommand{\sem}[2][]{\mbox{\ensuremath{\llbracket{#2}\rrbracket_{#1}}}}
+\newcommand{\qmmdef}{\quad \mmdef \quad}
+\newcommand{\qqmmdef}{\qquad \mmdef \qquad}
+\newcommand{\qqand}[1][and]{\qquad\text{#1}\qquad}
+\newcommand{\qand}[1][and]{\quad\text{#1}\quad}
+\newcommand{\avalue}[1][v]{
+  \ensuremath{
+	 \mathtt{#1}
+  }
+}
+\newcommand{\verum}{\avalue[true]}
+\newcommand{\falsus}{\avalue[false]}
+\newcommand{\nat}{\mathbb{N}}
+\newcommand{\upd}[3]{{#1}[{#2} \mapsto {#3}]}
+\newcommand{\grmeq}{\; ::= \;}
+\newcommand{\bnfdef}{\ ::=\ }
+\newcommand{\grmor}{\; \big| \;}
+\newcommand{\bnfmid}{\;\ \big|\ \;}
+\newcommand{\sep}{\;\bnfmid\;}
+\newcommand{\subs}[2]{\left[^{#1}/_{#2}\right]}
+%%% Maths & logic end
+
+
+
+%%% Typographic style
+\newcommand{\defrule}[1]{%
+  % \hypertarget{rule:{#1}}
+  {%
+    \text{\scriptsize[\textbf{#1}]}%
+  }%
+}
+\newcommand{\ie}{\text{i.e.,}\xspace}
+\newcommand{\cfw}{\text{cf.}\xspace}
+\newcommand{\eg}{\text{e.g.,}\xspace}
+\newcommand{\aka}{\text{a.k.a.}\xspace}
+\newcommand{\mypar}[1]{\noindent\paragraph{\textbf{#1}}\ }
+\newcommand{\secref}[1]{\S~\ref{#1}}
+\newcommand{\figref}[1]{Fig.~\ref{#1}}
+\newcommand{\exref}[1]{Ex.~\ref{#1}}
+\newcommand{\defref}[1]{Definition~\ref{#1}}
+\newcommand{\exeref}[1]{Exercise~\ref{#1}}
+\newcommand{\rmkref}[1]{Remark~\ref{#1}}
+\newtheorem{rmk}{Remark}{\bfseries}{\rmfamily}
+\newtheorem{exe}{Exercise}{\bfseries}{\rmfamily}
+\newcommand{\sidebyside}[2]{
+  \begin{tabular}{ll}
+    \begin{minipage}{.5\linewidth} {#1}  \end{minipage}
+    &
+    \begin{minipage}{.5\linewidth} {#2}  \end{minipage}
+  \end{tabular}
+}
+\newcommand{\eqdef}{\ \triangleq\ }
+\newcommand{\mmdef}{\eqdef}
+%%% Typographic style end
+
+
+
+%%% Arrows
+%%%%%
+%% Extensible dashed arrow
+%%%%%
+\makeatletter
+\newcommand*{\da@rightarrow}{\mathchar"0\hexnumber@\symAMSa 4B }
+\newcommand*{\da@leftarrow}{\mathchar"0\hexnumber@\symAMSa 4C }
+\newcommand*{\xdashrightarrow}[2][]{%
+  \mathrel{%
+    \mathpalette{\da@xarrow{#1}{#2}{}\da@rightarrow{\,}{}}{}%
+  }%
+}
+\newcommand{\xdashleftarrow}[2][]{%
+  \mathrel{%
+    \mathpalette{\da@xarrow{#1}{#2}\da@leftarrow{}{}{\,}}{}%
+  }%
+}
+\newcommand*{\da@xarrow}[7]{%
+  % #1: below
+  % #2: above
+  % #3: arrow left
+  % #4: arrow right
+  % #5: space left 
+  % #6: space right
+  % #7: math style 
+  \sbox0{$\ifx#7\scriptstyle\scriptscriptstyle\else\scriptstyle\fi#5#1#6\m@th$}%
+  \sbox2{$\ifx#7\scriptstyle\scriptscriptstyle\else\scriptstyle\fi#5#2#6\m@th$}%
+  \sbox4{$#7\dabar@\m@th$}%
+  \dimen@=\wd0 %
+  \ifdim\wd2 >\dimen@
+    \dimen@=\wd2 %   
+  \fi
+  \count@=2 %
+  \def\da@bars{\dabar@\dabar@}%
+  \@whiledim\count@\wd4<\dimen@\do{%
+    \advance\count@\@ne
+    \expandafter\def\expandafter\da@bars\expandafter{%
+      \da@bars
+      \dabar@ 
+    }%
+  }%  
+  \mathrel{#3}%
+  \mathrel{%   
+    \mathop{\da@bars}\limits
+    \ifx\\#1\\%
+    \else
+      _{\copy0}%
+    \fi
+    \ifx\\#2\\%
+    \else
+      ^{\copy2}%
+    \fi
+  }%   
+  \mathrel{#4}%
+}
+\makeatother
+
+\def\ured{\rightarrow}
+\def\tred#1{\overstackrel{\rightarrowfill}{#1}}
+\def\iured#1{\rightarrow_{\descr{\scriptstyle #1}}}
+\def\itred#1#2{\mathrel{{\overstackrel{\rightarrowfill}{#2}}_{\descr
+      {\scriptstyle #1}}}}
+\def\sytr#1{\overstackrel{\longmapsto}{#1}}
+\def\tr#1{\overstackrel{\rightarrowfill}{#1}}
+\def\actr#1#2{\overstackrel{\rightarrowfill}{\act {#1}{#2}}}
+\def\iactr#1#2#3{\overstackrel{\rightarrowfill}{\act {#2}{#3}}_{\descr
+    {\scriptstyle #1}}}
+\def\dlarrow#1#2{\overunderstackrel{\rightarrowfill}{#1}{#2}}
+\def\ddlarrow#1#2{\overunderstackrel{\longmapsto}{#1}{#2}}
+\def\Dlarrow#1#2{\overunderstackrel{\Longrightarrow}{#1}{#2}}
+\def\dmtarrow#1#2{\overunderstackrel{\longmapsto}{#1}{#2}}
+\def\mtarrow#1{\overstackrel{\longmapsto}{#1}}
+\newcommand{\mylarrow}[1]{\overstackrel{\rightarrowfill}{#1}}
+
+\newcommand{\partarrow}[2]{\overunderstackrel{\rightarrowfill}{\ \ \mbox{\scriptstyle $#1$}\ \ }{\ \mbox{\scriptstyle $#2$}\ }\!\!\!>}
+\newcommand{\arw}[1]{\overstackrel{\rightarrowfill}{#1}}
+\newcommand{\newpartarrow}[2]{\partarrow{#1}{}}
+\newcommand{\spartarrow}[1]{\overstackrel{\rightarrowfill}{\ \ \mbox{\scriptstyle $#1$}\ \ \ }\!\!\!\!\!>}
+\newcommand{\trlts}[1]{\overstackrel{\rule[.8mm]{7mm}{.2mm}}{#1}\!\!\blacktriangleright}
+\newcommand{\trred}{\overstackrel{\rule[.8mm]{7mm}{.2mm}}\!\!\vartriangleright}
+\newcommand{\arro}[2][{}]{\xrightarrow[{#1}]{\ {#2}\ }}
+%%% Arrows end
+
+%%% Others
+\newcommand{\squo}[1]{\lq {#1}\rq}
+\newcommand{\quo}[1]{\lq\lq {#1}\rq\rq}
+\def\finex{{\unskip\nobreak\hfil
+\penalty50\hskip1em\null\nobreak\hfil$\diamond$
+\parfillskip=0pt\finalhyphendemerits=0\endgraf}}
+\newenvironment{myex}{\begin{example}\it}{\finex\end{example}}
+\newcommand{\asort}[1][s]{\mathtt{#1}}
+\newcommand{\typeof}[2]{\ensuremath{
+	 \vdash \varid[{#1}] \colon \asort[{#2}]
+  }\xspace
+}
+%%% Others end
+
+
+%%% Some colors
+\definecolor{shadecolor}{rgb}{1,0.99,0.9}
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\newcommand{\newgreen}{green!50!blue!100}
+%%% Some colors end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%           ABC           %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\abc}{\textsf{AbC}\xspace}
+\newcommand{\abcST}{\textsf{ABeT}\xspace}
+\newcommand{\abcattr}[1][a]{\textsf{#1}}
+\newcommand{\abccond}[1][\rho]{#1}
+\newcommand{\abcval}[1][v]{\texttt{#1}}
+\newcommand{\abcvar}[1][x]{#1}
+\def\colorExp{\color{NavyBlue}}
+\def\colorTuple{\color{Black}}
+\newcommand{\abcexp}[1][e]{\colorExp #1}
+\newcommandx{\abctuple}[1][1 = t]{\llparenthesis{#1}\rrparenthesis}
+\newcommandx{\abcget}[2][1=a,2={id},usedefault=@]{
+  \ptp[{#1}]{\colorOp .}\abcattr[{#2}]
+}
+\newcommandx{\abcptp}[2][1=a,2=\abccond,usedefault=@]{\ifempty{#1}{}{\ptp[{#1}] \ifempty{#2}{}{{\colorOp \shortmid}}} {#2}}
+\newcommandx{\abcint}[6][1=a,2=\abccond,3=e,4=e',5=b,6=\abccond',usedefault=@]{
+  \abcptp[{#1}][{#2}]
+  \ {\colorOp \xrightarrow{\scriptstyle \abcexp[#3]\quad\abcexp[#4]}}\ 
+  \abcptp[{#5}][{#6}]
+}
+\newcommandx{\mkabcint}[8][3=a,4=\abccond,5=e,6=e',7=b,8=\abccond',usedefault=@]{
+  \node[bblock, #1] (#2) {$\abcint[{#3}][{#4}][{#5}][{#6}][{#7}][{#8}]$};
+}
+
+\tikzset{
+    abccallout/.style={
+      fill=green!10,
+		opacity=.5,
+		overlay,
+		align=center,
+      cloud callout,
+		cloud puffs=15,
+		aspect=2.5,
+		cloud ignores aspect,
+		cloud puff arc=100,
+		shading=ball
+    }
+  }
+
+\newcommandx{\abcP}[6][1=P,2=K,3=.1cm,4=1cm,5=north east,6=proc,usedefault=@]{
+  \begin{tikzpicture}
+	 \node[fill=blue!10, shape=circle] (#6) {$\p[#1]$};
+	 \node[abccallout, above = #3 of #6, xshift=#4, callout absolute pointer={(#6.#5)}] {$#2$}
+	 ;	 
+	 \draw[decorate,decoration={expanding waves,angle=7,segment length = .05cm}] (#6.east) -- ++(.5cm,0)
+	 ;
+  \end{tikzpicture}
+}
+
+
+\ExplSyntaxOn
+\NewDocumentCommand{\ucgreek}{m}
+ {
+  \str_case:nn { #1 }
+   {
+    {A}{\mathrm{A}}
+    {B}{\mathrm{B}}
+    {C}{\Sigma}
+    {D}{\Delta}
+    {E}{\mathrm{E}}
+    {F}{\Phi}
+    {G}{\Gamma}
+    {H}{\mathrm{H}}
+    {I}{\mathrm{I}}
+    {J}{\Theta}
+    {K}{\mathrm{K}}
+    {L}{\Lambda}
+    {M}{\mathrm{M}}
+    {N}{\mathrm{N}}
+    {O}{\mathrm{O}}
+    {P}{\Pi}
+    {Q}{\mathrm{X}}
+    {R}{\mathrm{P}}
+    {S}{\Sigma}
+    {T}{\mathrm{T}}
+    {U}{\Upsilon}
+    %{V}{}
+    {W}{\Omega}
+    {X}{\Xi}
+    {Y}{\Psi}
+    {Z}{\mathrm{Z}}
+   }
+ }
+\NewDocumentCommand{\lcgreek}{m}
+ {
+  \str_case:nn { #1 }
+   {
+    {a}{\alpha}
+    {b}{\beta}
+    {c}{\varsigma}
+    {d}{\delta}
+    {e}{\varepsilon}
+    {f}{\varphi}
+    {g}{\gamma}
+    {h}{\eta}
+    {i}{\iota}
+    {j}{\vartheta}
+    {k}{\kappa}
+    {l}{\lambda}
+    {m}{\mu}
+    {n}{\nu}
+    {o}{o}
+    {p}{\pi}
+    {q}{\chi}
+    {r}{\rho}
+    {s}{\sigma}
+    {t}{\tau}
+    {u}{\upsilon}
+    %{v}{}
+    {w}{\omega}
+    {x}{\xi}
+    {y}{\psi}
+    {z}{\zeta}
+   }
+ }
+\ExplSyntaxOff
+
+\newcommand{\alphabetname}[1]{\uppercase{\ucgreek{#1}}}

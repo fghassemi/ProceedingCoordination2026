@@ -1,0 +1,286 @@
+\section{Inductive Logic Programming}
+\label{section-popper}
+\label{sect-ilp}
+
+Inductive Logic Programming lies at the intersection of machine learning and logic programming. In brief, it aims to learn logical
+rules from positive and negative examples, as well as from background knowledge. All of these elements, rules, examples, and background
+knowledge are expressed within the framework of logic programming. 
+
+\subsection{Logic Programming}
+
+A full introduction to the concepts underlying logic programming is outside the scope of the current paper. 
+We assume the reader is familiar with these concepts, in particular with the notions of term and predicate, and refer him to \cite{Lloyd} for a comprehensive overview.
+%
+%We refer the reader to Appendix A for a summary or to e.g.~\cite{Lloyd} for a more complete overview.
+%
+%Page constraints prevent us to provide a detailed exposition of the core elements of logic programming. We thus refer the reader to \cite{Lloyd} for a complete
+%overview of them. Appendix~\ref{appendix-lp} gives in addition a summary of them. 
+In this section, we will just mention that programs we shall consider consist of implications (or Horn clauses) of the form 
+\( \; \forall X_1 \cdots \forall X_n \; H \Leftarrow B_1 \wedge \cdots \vee B_m \; \)
+and that two semantics are given to them. 
+
+On the one hand, 
+the declarative semantics of logic programs defines their meaning
+purely in logical terms without any reference to an 
+% any 
+execution
+model. Central to this semantics is the notion of logical consequence, which is defined by stating that a goal $G$ is a logical consequence of a set of Horn clauses $S$ iff
+every model of $S$ is also a model of $G$. This is
+subsequently denoted as $S \models G$.
+
+A major result of model theory in the case of Horn clauses is that the
+set $M_P$ of logical consequences of a set of Horn clauses $P$ can be determined
+as the intersection of all its so-called Herbrand models and may be further
+characterized as the least fixed point of the immediate consequence
+operator $T_P$.
+Obviously, by construction, one has $T_P(M_P) = M_P$. It turns out
+that this result can be generalized for Horn clauses extended with
+negative literals in their body. We refer the reader to \cite{AptBol} for
+more explanations. For this introduction, it is sufficient to say that,
+under some conditions, the stable semantics developed by M. Gelfond
+and V. Lifschitz has allowed to identify stable models in the sense that they are fixed points of (suitable extensions) of the $T_P$ operator dealing with negation. This has led to the development of so called answer set programming \cite{lifschitz2002answer}, 
+which is a framework in which one computes stable models for logic programs, potentially extended to include constraints and optimization.
+
+On the other hand, the operational semantics defines the semantics of Horn clauses through the successive derivation of a goal, each derivation producing a computed answer substitution, i.e. a single substitution summarizing the values given to the variables along the derivation path. In case the computation is successful, we shall use the notation 
+\( \jmjderiv{P}{\mfm{G}}{\sigma} \)
+ denote the existence of this successful derivation of the goal \mf{G}
+ yielding $\sigma$ as a computed answer substitution. 
+
+The two semantics are established equivalent. See for instance 
+\cite{Lloyd} for a proof.
+
+
+% \begin{thm}
+% Let $P$ be a set of definite clauses and $G$ be a goal.
+% 
+% \begin{thmprop}
+%
+%\item
+% {\em Soundness.\/}
+% For any substitution $\theta$, if 
+% \( \jmjderiv{ \mfm{P} }{ \mfm{G} }{ \theta } \)
+% holds, then so does
+% \( \jmjlogcons{ \mfm{P} }{ \mfm{G} }{ \theta } \).
+% 
+% \item
+% {\em Completeness.\/}
+% For any substitution $\theta$ such that
+% \( \jmjlogcons{ \mfm{P} }{ \mfm{G} }{ \theta } \)
+% holds, there are two substitutions $\gamma$ and $\mu$ such that 
+% \( \jmjderiv { \mfm{P} }{ \mfm{G} }{ \mu } \)
+% and
+% \( \mfm{G}\theta = \mfm{G}\mu\gamma \).
+% 
+% \end{thmprop}
+% \end{thm}
+
+
+\subsection{Inductive Logic Programming}
+
+Inductive Logic Programming (ILP for short)~\cite{muggleton1995inverse}
+aims to learn a hypothesis $H$
+describing a predicate as a logic program, using positive examples $E^+$ of this predicate, negative
+examples $E^-$ of this predicate, and a background knowledge $B_k$, and this in a way such that
+$H \cup B_k$ entails all positive examples and none of the negative ones.
+ILP is typically applied in a centralized setting 
+in which all examples are available on a single machine.
+
+Several concepts need to be introduced to further characterize ILP.
+The background knowledge $B_k$ is used to provide a context for
+learning. It contains a set $B$ of facts and rules that describe
+relationships already understood about the domain. It also includes a
+so-called declaration bias $D$, which aims at restricting the
+hypotheses that can be constructed. Examples include predicate
+declarations, which specify which predicate names can appear in the
+head of clauses, in particular the form of the arguments, as well as body
+declarations, which do the same for predicates appearing in the body
+of clauses. It is assumed that no predicate symbol in the body of a
+clause in $B_k$ appears in a head declaration of D. In other words, we
+assume that $B_k$ does not depend on any hypothesis.
+
+\begin{sloppypar}
+It is worth noting that predicate declarations can be expressed as constraints at the
+level of a meta-language. This is one of the core properties of the
+language Popper~\cite{cropper2021learning} 
+we shall use. Assuming such a meta-language ${\cal L}$, 
+a hypothesis constraint is a constraint expressed in ${\cal L}$. For instance, 
+the atom \texttt{head\_literal(Clause,Pred,Arity,Vars)} is used in Popper to denote that the clause
+\texttt{Clause} has a head literal with the predicate symbol \texttt{Pred}, is of arity \texttt{Arity}, and has the
+arguments \texttt{Vars}. As a further use
+\end{sloppypar}
+
+\begin{lstlisting}
+  :- head_literal(_,p,2,_).
+\end{lstlisting}
+
+\noindent
+states that a predicate symbol \texttt{p} of arity 2 cannot appear in the head of any clause in a hypothesis.
+
+The input of the inductive learning problem can then be formulated as composed of the following ingredients.
+
+
+\begin{definition}
+\label{ilp-problem}
+The ILP problem input is a tuple $(B, D, C, E^+, E^-)$ where
+
+\begin{itemize}
+\item $B$ is a Horn program denoting background knowledge
+\item $D$ is a declaration bias
+\item $C$ is a set of hypothesis constraints
+\item $E^+$ is a set of ground atoms denoting positive examples of the predicate to be learnt
+\item $E^-$ is a set of ground atoms denoting negative examples of the predicate to be learnt.
+\end{itemize}
+\end{definition}
+
+\noindent
+We now define what constitutes a valid hypothesis for an ILP problem.
+
+\begin{definition}
+Let $(B, D, C, E^+, E^-)$ be an ILP problem input and $H$ be a hypothesis. Then $H$ is:
+
+\begin{itemize}
+    \item complete when \( B \cup H \models e^+ \) for any $e^+ \in E^+$
+    \item consistent when \( B \cup H \nvDash e^- \) for any $e^- \in E^-$ 
+\end{itemize}
+
+\noindent
+A hypothesis is a solution when it is both complete and consistent.
+\end{definition}
+
+\begin{example}
+% \textbf{Example (Zendo).}
+The \textit{Zendo} dataset~\cite{bramley2018grounding} is one of the benchmarks used ILP. 
+%
+The target predicate is \texttt{zendo/1}, whose argument is a state. The background knowledge $B$ encodes properties and relations between objects. A fragment of $B$ includes typically facts such as:
+\[
+\begin{aligned}
+B = \{\ & \texttt{piece(s1,p1)},\ \texttt{piece(s1,p2)}, \texttt{size(p1,1)},\ \texttt{small(1)},\ \texttt{red(p2)}\ \}
+\end{aligned}
+\]
+
+\noindent
+The declaration bias $D$ constrains the hypothesis space by specifying admissible predicates and structural limits on candidate clauses. A simplified example of such a bias is:
+\[
+\begin{aligned}
+D = \{ \texttt{head\_pred(zendo,1)},\ \texttt{body\_pred(piece,2)},  \texttt{max\_clauses(4)}\}
+\end{aligned}
+\]
+
+\noindent
+Positive and negative examples are given as ground atoms over states:
+\[
+E^+ = \{\texttt{zendo(s1)},\ \texttt{zendo(s7)}\}
+\quad
+E^- = \{\texttt{zendo(s2)},\ \texttt{zendo(s6)}\}
+\]
+
+\noindent
+The constraint set $C$ is progressively refined during the learning process to prune the hypothesis space. For example, it may contain auxiliary rules and hard constraints such as:
+\[
+\begin{array}{@{}l@{}}
+\texttt{included\_clause(h,Cl) :- head\_literal(Cl,zendo,1,(A)),} \\
+\qquad \texttt{body\_literal(Cl,piece,2,(A,D)).} \\[0.4em]
+\texttt{:- included\_clause(h,C0), body\_size(C0,5), C0 >= 0.}
+\end{array}
+\]
+
+\noindent
+Here, \texttt{Cl} denotes a clause identifier used internally by Popper to represent candidate hypotheses. The auxiliary predicate \texttt{included\_clause(h,Cl)} identifies clauses matching a given syntactic pattern, while the hard constraint excludes clauses of this form from the search space. This illustrates how $C$ is refined to eliminate unpromising hypotheses.
+
+\noindent
+An example of an explainable and human-readable hypothesis H learned on the \textit{Zendo} dataset is:
+\[
+H = \{
+\texttt{zendo(A):-piece(A,B),contact(B,D),size(D,C),small(C),red(B).}\ \}
+\]
+\noindent
+This rule states that a state $A$ satisfies the target concept \texttt{zendo/1} if it contains a piece $B$ that is in contact with another piece $D$ whose size is small, and where $B$ is red.
+\end{example}
+
+In practice there can be many solutions to an inductive learning problem input. One is thus naturally interested by optimal solutions, which are typically defined by minimizing the number of literals used.
+
+\begin{definition}
+The size of a hypothesis $H$, denoted $size(H)$, is the total number of literals
+employed in $H$. Given an inductive learning problem input, an optimal solution is defined as
+a solution $H$ such that any other solution $H'$ verifies $size(H) \leq size(H')$.
+\end{definition}
+
+It is not always possible to find a complete and consistent
+hypothesis. In that case, one tries to get the best hypothesis in the
+sense that it 
+% covers 
+entails the largest number of positive examples and the smallest number of negative examples. This leads to 
+the notions of confusion matrix and score.
+% the notions of the confusion matrix and the score.
+
+\begin{definition}
+\label{confusion-matrix}
+Let $(B, D, C, E^+, E^-)$ be an input tuple and $H$ be a
+hypothesis. Then the confusion matrix for $H$, denoted
+$\mathit{conf\_matrix(H)}$, is the tuple $(TP,FN,TN,FP)$ whose components are defined as follows:
+
+\begin{itemize}
+
+\item $TP$ is the number of positive examples correctly entailed by $B \cup H$ (true positives) 
+\item $FN$ is the number of positive examples not entailed by $B \cup H$ (false negatives) 
+\item $TN$ is the number of negative examples not entailed by $B \cup H$ (true negatives)
+\item $FP$ is the number of negative examples incorrectly entailed by $B \cup H$ (false positives)
+
+\end{itemize}
+
+\noindent
+The score of $H$, denoted $score(H)$, is defined as $TP + TN$.
+\end{definition}
+
+In the past thirty years, many inductive logic 
+%languages 
+systems have been introduced. The reader is referred to~\cite{cropper2022inductive} for a detailed description. 
+Pioneer languages, such as Progol and Metagol, have explored subsumption lattices, amounting to trees of rules. In contrast, Popper has taken a meta-language approach which allows generating hypotheses by using Answer Set Programming (ASP) and which allows to learn from failures. It is generally considered as very appealing since it allows to find globally optimal hypotheses whereas Progol and Metagol may produce only locally optimal hypotheses. We shall turn in this paper to Popper. Its main algorithm is described in Algorithm~\ref{alg:popper} as a Python function inspired by the one presented in~\cite{cropper2021learning}. The function takes as arguments the sets $E^+$, $E^-$, $D$, $C$ described in Definition~\ref{ilp-problem}. Three other arguments are added to limit the search space: the maximum number of variables, literals and clauses in a hypothesis. The Python function returns a hypothesis: either a solution, if there is one, or an hypothesis that maximizes the score function otherwise. The algorithm mainly consists of two loops. The outer one (starting on line 9 of Algorithm~\ref{alg:popper}) is responsible for searching hypotheses which increasingly add literals. For a fixed number of literals, the inner loop (starting on line 12) embodies the Popper generate-test-constraint loop. Given a current set \texttt{CC} of constraints, the call to the \texttt{generate} function (line 13) generates a hypothesis. This is obtained through Answer Set Programming acting over the constraints \texttt{CC} of a meta-language. The produced solution, if there is one, is a hypothesis meeting the constraints of \texttt{CC}. In case there is no solution then the variable \texttt{c\_solvable} is set to false (line 15) which leads to finish the inner loop. Otherwise the solution is tested against the positive and negative examples by additionally using the background knowledge of \texttt{B}. This is operated by the call to the function \texttt{test} (line 17). This results in a confusion matrix as specified in Definition~\ref{confusion-matrix}. Two outputs are computed therefrom: an \texttt{outcome} and a \texttt{score} (lines 18 and 19). The outcome summarizes how many positive and negative examples are covered. For the positive examples, either all of them are covered (which is denoted as ``all''), or  some are covered (which is denoted by ``some'') or none are covered (which is denoted by ``none''). For the negative examples, either some are covered (which is denoted by ``some'', this including the case where all are covered) or none are covered (which is denoted by ``none''). Obviously a solution is found in case (all,none) is produced. In the other cases, the article~\cite{cropper2021learning} explains which constraints are to be added to the \texttt{CC} constraints. Note that this is operated so as to exclude answer sets in the ASP resolution, which makes the algorithm converge. Technically in the algorithm this is achieved by the call to the function \texttt{learn\_constraints} (line 26). The important point for our work is that the added constraints can be determined in view of the outcome and do not need the knowledge of positive nor negative examples. It is also worth noting that, having computed its score, the new hypothesis is retained as the best one if its score is better than the one memorized in variable \texttt{best\_hyp} (line 25). 
+
+
+
+\begin{algorithm}[t]
+  \caption{Popper (inspired by \cite{cropper2021learning})}
+  \label{alg:popper}
+  \small
+\begin{lstlisting}[breaklines=true, breakatwhitespace=true]
+1 def popper(E+, E-, B, D, C, max_vars, max_literals, max_clauses):
+2 
+3   best_score = 0
+4   best_hyp = { }
+5   end_popper = false
+6   num_literals = 0
+7   CC = C
+8 
+9   while not end_popper and num_literals <= max_literals:
+10    c_solvable = true
+11    num_literals += 1
+12    while not end_popper and c_solvable:
+13       hyp = generate(D, CC, max_vars, num_literals, 
+                                          max_clauses)
+14       if not hyp: 
+15         c_solvable = false
+16       else:
+17         conf_matrix = test(E+, E-, B, hyp)
+18         outcome = compute_outcome(conf_matrix)
+19         score = compute_score(conf_matrix)
+20         if outcome == ('all', 'none'):
+21            best_hyp = hyp
+22            end_popper = true
+23         else:
+24            if best_score < score: 
+25               best_hyp = hyp
+26            CC += learn_constraints(hyp, outcome)
+27
+28   return best_hyp
+\end{lstlisting}
+\end{algorithm}
+
+
+
+
+
+
+
+
+

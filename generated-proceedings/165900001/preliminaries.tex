@@ -1,0 +1,73 @@
+Let $\Sigma$ be a finite set of symbols called \emph{events}.  A
+\emph{behaviour}\footnote{The notion of ``behaviour'' is equivalent to
+that of Alur's ``timed word'' \cite{alur94}.
+%We found the term ``behaviour'' more suitable and intuitive in the
+%context of timed scenarios.
+}
+over $\Sigma$ is a non-empty
+  sequence $(e_0, t_0)(e_1, t_1)(e_2, t_2)\dots$ , such that
+  $e_i \in \Sigma$, $t_i \in \mathbb{R}^{\geq
+  0}$ and $t_{i-1}\leq t_i$ for $i \in \{1, 2 \dots\}$.
+ For a finite behaviour $\Behaviour{B} = (e_0,t_0) (e_1,t_1) \ldots
+(e_{n-1},t_{n-1})$ of length $n$ ($n \in \mathbb{N}^{>0}$), and for any $0 \leq i < j < n$,
+  the \emph{distance}, in time units, of
+event $j$ from event $i$ in $\Behaviour{B}$ is denoted by
+$\T{i}{j}^\Behaviour{B}$.  That is,
+$\T{i}{j}^\Behaviour{B} = t_j - t_i$.
+
+A \emph{sequential timed scenario} (\emph{scenario} for short) of length
+$n \in \mathbb{N}$ over $\Sigma$ is a pair $(\E, \C)$,
+where $\E = e_o e_1 ... e_{n-1}$ is a non-empty sequence of events
+from $\Sigma$, and
+$\C \subset \Phi(n)$ is a finite set of constraints.
+A constraint in $\Phi(n)$ is
+  of the form $b \sim a$, where  $b$ is the symbol \TT{i}{j} (for some
+  integers
+     $0 \leq i < j < n$), $\sim\in\{\leq,\geq,=\}$\footnote{To keep the presentation compact, we do not allow sharp
+    inequalities.
+    %: allowing them would complicate our definitions,
+    %without affecting the general principles.
+    %Notice that    Sharp inequalities
+    They are mostly of theoretical interest: in practice we can measure time only
+    with some finite granularity $\gamma$, so $x < c$ is for all practical
+    purposes equivalent to $x \leq c - \gamma$.}
+    %To keep the presentation compact, we do not allow strict
+    %inequalities \cite{neda-2018-2}.}
+    and $a\in\mathbb{Q}$ is a constant.
+The interpretation is that \TT{i}{j} is the time distance
+between the $i$-th and the $j$-th events in the behaviours described
+by a scenario.
+% ARE DEFAULT CONSTRAINTS NECESSARY?
+The constraints $\TT{i}{j} \geq 0$ and $\TT{i}{j} \leq \infty$
+are called \emph{default constraints}.
+
+We use $\Sigma_{\xi}= \{e_0, e_1, \dots, e_n \} \subseteq \Sigma$ to
+denote the set of events in $\E$.
+
+A behaviour $\Behaviour{B} =
+(e_0,t_0)(e_1,t_1)\ldots(e_{n-1},t_{n-1})$ over $\Sigma$
+is \emph{allowed} by scenario $\xi = (\E, \C)$ iff $ \E = e_0 \dots
+e_{n-1}$ and every  $\TT{i}{j} \sim a$ in \C{} evaluates to true
+after $\TT{i}{j}$ is replaced by \TB{i}{j}{\Behaviour{B}}.
+The \emph{semantics} of scenario $\xi$, denoted by \Sem{\xi}, is the
+set of behaviours that are allowed by $\xi$.
+%NEDA: RESTORE IF NEEDED:
+%Additionally, if $\mathcal{S}=\{\xi_1,\dots,\xi_n\}$ is a finite set of
+%sequential scenarios, the semantics of $\mathcal{S}$ is
+%$\Sem{\mathcal{S}} = \bigcup_{1\leq i \leq n} \Sem{\xi_i}$.
+A scenario $\xi$ is \emph{consistent} iff $\Sem{\xi} \neq \emptyset$.
+
+For example, $\xi = (a b c, \{ \TTC{0}{1} \geq
+3, \TTC{0}{2} \leq 7\})$ is a consistent scenario:
+$\Sem{\xi} =
+\Set{(a,t_0)(b,t_1)(c,t_2)}{t_0 \leq t_1 \leq t_2
+  \wedge t_1 - t_0 \geq 3
+  \wedge t_2 - t_0 \leq 7}$.
+%-----------------------------------------
+% NEDA: Do we need equivalent in this paper?
+%Two scenarios $\xi = (\E, \C_1)$ and $\eta = (\E, \C_2)$
+%are \emph{equivalent} iff $\Sem{\xi} = \Sem{\eta}$. For example, $\gamma$
+%and $\eta$ of \Fig{equality-rightleg} are equivalent.
+
+%In the rest of the paper every time we write ``scenario'' without
+%qualifications we mean sequential scenario.

@@ -1,0 +1,196 @@
+%!TEX root = newmain.tex
+
+To enable formal verification of a {\Stipula} contract with {\KeY}, we
+define a systematic translation into {\Java} code annotated with
+{\JML} specifications. As discussed in~\cite{iFM25}, {\Stipula}
+contracts are translated into classes where functions and events are
+modelled by stateful {\Java} methods, assets and fields are modelled
+by suitable {\Java} fields.  The definition of the translation is
+given in Listing~\ref{tab:translate}.
+
+We begin by analysing the declaration component of the translation.
+As mentioned in Section~\ref{subsect:stipula}, we assume all {\Stipula}
+fields, assets, and auxiliary variables are of type \jml{int} which
+preserves the operational semantics of the original
+contracts.\footnote{{\Stipula} itself is type-free: concrete types
+  (e.g., integers, doubles, strings, Booleans) are inferred statically
+  and at run time~\cite{CrafaLSV23}.}
+%
+Verification involves a trade-off between precision and generality:
+parameters may be assigned concrete values, thereby analysing a
+specific execution scenario, or left symbolic to reason about all
+possible executions.  The translation in Listing~\ref{tab:translate}
+adopts the former approach, targeting a single scenario.
+%
+Accordingly, fields $\vect{{\tt x}}$ are initialised to constant
+values $\vect{u}$ (the values the fields have after the agreement),
+and formal parameters of functions are likewise instantiated to fixed
+values
+($\vect{\tt y_1} = \vect{v_1}, \vect{\tt k_1} = \vect{v_1'}, \ldots,
+\vect{\tt y_n} = \vect{v_n}, \vect{\tt k_n} = \vect{v_n'}$).
+
+{\small
+\begin{lstlisting}[frame=none,numbers=none,language={[JML]Java},mathescape=true,caption={The {\sc translate} function for a {\Stipula} contract},label={tab:translate}]
+$\mbox{\sc translate}$( stipula C { assets $\vect{\tt h}$  fields $\vect{\tt x}$   agreement( $\vect{\tt A}$ ) {  $\cdots$ } $\tostate$ $\Qwithat$   F  ) $\eqdef$
+  public final class C {
+     public static int $\vect{\tt A}$, $\vect{\tt h}$, $(A{\unds}h)^{A \in \vect{\tt A}, h \in \vect{\tt h}}$ ;
+     public static int $\vect{\tt x}$ = $\vect{u}$ ;
+                    // $\textcolor{commentColor}{\vect{u}}$ are the values the fields $\textcolor{commentColor}{\vect{x}}$ have after the agreement
+     public static int now = 0 ;
+     public static int u_Q1, ..., u_Qm, w_Q1, ..., w_Qm ; 
+                    // auxiliary variables: Q1, ..., Qm are the states of C
+     public static int[] DT = new int[N] ;
+                    // DT is the dispatch table, N is the number of events in C   
+     public static int $\vect{\tt y_1} = \vect{v_1}, \vect{\tt k_1} = \vect{v_1'}$,..., $\vect{\tt y_n} = \vect{v_n}, \vect{\tt k_n} = \vect{v_n'}$ ; 
+                    // formal parameters of functions and their initialization                                       
+     public static invariant $\assetInv{\C}$ ;
+     public static invariant 1 <= w_Q1 <= max_Q1 && $\cdots$ && 1 <= w_Qm <= max_Qm ;
+        // max_Q1,...,max_Qm are the number of functions starting at Q1,...,Qm
+     public static invariant 0 <= u_Q1 <= max_tv && $\cdots$ && 0 <= u_Qm <= max_tv ;
+                    // max_tv is a constant, see Section 4
+     $\translate{F}$
+     
+     /*@ public normal_behaviour
+       @ requires $\vect{\tt h}$ == 0 ; DT[0] == -1 && ... && DT[N-1] = -1 ;   
+         // assets of C are initially 0, DT is empty (encoded by value -1)
+       @ requires OTHER PRE-CONDITIONS ;
+       @ ensures THE POST-CONDITION ;       // the property we want to prove
+       @*/
+
+     public final static void behaviour(){  $\genscenario{\C}{\Q}$  }
+}
+\end{lstlisting}
+}
+
+The translation introduces auxiliary variables: The dispatch table
+\jml{DT} is an array of size \jml{N}, where \jml{N} is the number of
+events in the contract.  For each contract state \jml{Q1}, $\ldots$,
+\jml{Qm}, the variable \jml{u_Qi} tracks time progression and ranges
+over non-negative values bounded by \jml{max_tv}, the largest constant
+(plus one) appearing in time expressions (in principle, a single
+variable would suffice).  For each state \jml{Qi}, the variable
+\jml{w_Qi} counts function invocations and ranges between 0 and
+\jml{max_Qi} (the number of functions whose initial state is
+\jml{Qi}).
+
+Assets satisfy a non-duplication property: \emph{the total amount of a
+  given asset in the system} -- that is, in the contract and in all
+the parties -- \emph{must remain constant}.  To enforce this property,
+we introduce a field $A\_h$ for every party $A$ and every asset
+\jml{h} in class $\C$. Moreover, we enforce a static invariant
+$\assetInv{\C}$ that holds for every method in $\C$ as follows:
+
+{\small
+\begin{lstlisting}[frame=none,numbers=none,language={[JML]Java}, mathescape=true]
+ $\assetInv{\C}$ $\eqdef$ 
+      $h_1$ + $A_1{\unds}h_1$ + $\cdots$ + $A_k{\unds}h_1$ == \old($h_1$) + \old($A_1{\unds}h_1$) + $\cdots$ + \old($A_k{\unds}h_1$)
+      && $\cdots$ &&
+      $h_r$ + $A_1{\unds}h_r$ + $\cdots$ + $A_k{\unds}h_r$ == \old($h_r$) + \old($A_1{\unds}h_r$) + $\cdots$ + \old($A_k{\unds}h_r$)
+\end{lstlisting}
+} 
+
+In \JML\ the \jml{old} construct is used to refer to the values of
+fields \emph{prior to method execution}. This allows us to precisely
+relate the post-state of a method to its pre-state, which is essential
+for enforcing the non-duplication property.
+%
+For example, $\assetInv{{\sf License}}$, the invariant of the {\sf
+  License} contract is
+
+{\footnotesize
+\begin{lstlisting}[frame=none,numbers=none,language={[JML]Java},mathescape=true]
+   balance + Licensor_balance + Licensee_balance ==
+       \old(balance) + \old(Licensor_balance) + \old(Licensee_balance)
+&& token + Licensor_token + Licensee_token ==
+       \old(token) + \old(Licensor_token) + \old(Licensee_token)
+\end{lstlisting}
+}
+
+When assets are transferred directly from one party to another without
+being stored in a contract's asset (for example, the \stipula{buy}
+function in the \stipula{Deposit} contract), we also add the invariant
+
+{\small
+\begin{lstlisting}[frame=none,numbers=none,language={[JML]Java}, mathescape=true]
+   $\A_1$ + $\cdots$ + $\A_k$ = \old($\A_1$) + $\cdots$ + \old($\A_k$)
+\end{lstlisting}
+} 
+
+\noindent
+modeling that, in these cases, assets are transferred directly to the
+party's identifier (which was introduced for this
+purpose).\footnote{In~\cite{iFM25}, assets are classified as
+  \emph{divisible} (\emph{e.g.}, digital currencies) or
+  \emph{indivisible} (\emph{e.g.}, non-fungible tokens), thus
+  generating appropriate invariants to enforce the intended asset
+  semantics. Here, for simplicity, we assume that every asset is
+  divisible.}
+
+Functions and events are modeled as static {\Java} methods annotated
+with {\JML} specifications consisting of three clauses. Consider a
+{\Stipula} function declared as
+$ \Qwithat \,\A\,\texttt{:}\,\f\texttt{(} \wt{\tt y} \texttt{)[}
+\wt{\tt k} \texttt{]\,(} E {\tt )}\,{\tt \{}\,S\,W\,{\tt \}} \tostate
+\Qwithat' $. Its translation, defined in
+Listing~\ref{tab:translatefun}, includes:
+%
+\begin{itemize}
+\item A \jml{requires} clause expressing that guard $E$ that must hold
+  in the initial state for the function to execute.
+\item An \jml{ensures} clause specifying the resulting state
+  transition, including field updates and asset transfers. This clause
+  is defined via the strongest postcondition $\StrongPostCond{E,S}$
+  computed from the pre-state (see~\cite{KeYTutorial24} for details
+  about strong post-conditions).
+\item An \jml{assignable} clause listing the variables that may be
+  modified, determined by a simple static ``writes-to'' analysis
+  $\LhsVar{\A}{S}$.
+  % 
+\end{itemize}
+
+The body of each method corresponding to a {\Stipula} function invoked
+by a party {\A}, as well as the bodies of events declared within that
+function, are generated via the function $\StipulaToJava{\A}{S}$. This
+function maps a {\Stipula} statement $S$ to a sequence of {\Java}
+statements, yielding a compositional encoding of the function's
+operational semantics into executable {\Java} code.
+
+{\small
+\begin{lstlisting}[frame=none,numbers=none,language={[JML]Java},mathescape=true,caption={The {\sc translate} function for {\Stipula} functions and events},label={tab:translatefun}]
+$\mbox{\sc translate}$( $\Qwithat \,\A\,\texttt{:}\,\f\texttt{(} \wt{\tt y} \texttt{)[} \wt{\tt k} \texttt{]\,(} E {\tt )}\,{\tt \{}\,S\,W\,{\tt \}} \tostate \Qwithat'$ ) $\eqdef$
+ /*@ public normal_behaviour
+   @ requires $E$ ;
+   @ ensures  $\StrongPostCond{E,S}$ && $\ensureDT_\f$ ; 
+   @ assignable $\LhsVar{\A}{S}$, DT ;
+   @*/
+ public final static void f($\wt{{\tt int \; y}}$, $\wt{{\tt int \; k}} $) {
+     $\StipulaToJava{\A}{S}$ 
+     $\updateDT{}{W}$    
+}
+ /*@ public normal_behaviour        // for every $\textcolor{commentColor}{{\tt now}+{\tt t}_i \,\event\, \Qwithat_i\, \{ \, S_i \,\} \,\tostate\, \Qwithat_i' \in W}$
+   @ ensures  $\StrongPostCond{{\tt true},S_i}$ ;
+   @ assignable $\LhsVar{\A}{S_i}$ ;
+   @*/
+ public final static void event_i() {
+     $\StipulaToJava{\A}{S_i}$ 
+}
+\end{lstlisting}
+}
+
+  The definition of $\StipulaToJava{\A}{S}$ follows a well-established
+  and standard formulation. For readability, the definition is
+  relegated to the Addendum~\ref{sec:stipula2java} at the end of the paper.
+%
+
+The discussion about the
+% preamble clause $\ensureDT_\f$ and the
+function $\genscenario{\C}{\Q}$ (in
+Listing~\ref{tab:translate}) and the functions $\updateDT{}{W}$ and
+\ensureDT$_\f$ (in Listing~\ref{tab:translatefun})
+are deferred to the next section, as they
+rely on the dispatch table mechanism.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "newmain"
+%%% End:

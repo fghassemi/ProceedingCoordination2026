@@ -1,0 +1,101 @@
+\documentclass[runningheads]{llncs}
+
+\usepackage[obeyspaces]{url}
+\urldef{\maildoujmjmba}\path|{doha.ouardi,manel.barkallah,jean-marie.jacquet}@unamur.be|
+
+\usepackage{localdef}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{latexsym}
+
+\usepackage{graphicx}
+
+\usepackage{listings}
+\lstset{basicstyle=\small,
+        morekeywords={eset,map,proc,eqn,scene}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,snakes,backgrounds}
+
+\usepackage{wrapfig}
+\setlength{\intextsep}{2pt}
+\setlength{\columnsep}{20pt}
+
+
+\begin{document}
+
+\title{The B2Scala Tool: integrating Bach in Scala with Security in Mind}
+\titlerunning{The B2Scala Tool}
+
+\author{Doha Ouardi\inst{1}\orcidID{0009-0007-0213-0748} \and \\
+        Manel Barkallah\inst{1}\orcidID{0000-0003-2608-5658} \and \\
+        Jean-Marie Jacquet\inst{1}\orcidID{0000-0001-9531-0519}
+}
+\authorrunning{D. Ouardi et al.}
+
+\institute{Nadi Research Institute,
+           Faculty of Computer Science, University of Namur\\
+           Rue Grandgagnage 21, 5000 Namur, Belgium\\
+\maildoujmjmba
+}
+
+\maketitle
+
+\begin{sloppypar}
+\begin{abstract}
+Although many research efforts have been spent on the theory and
+implementation of data-based coordination languages, not much effort
+has been devoted to constructing programming environments to analyze
+and reason on programs written in these languages. This paper proposes
+an incarnation in Scala of a Linda-like language, called Bach,
+developed by the authors. It consists of a Domain Specific Language,
+internal to Scala, that allows to experiment programs developed in
+Bach while benefiting from the Scala eco-system, in particular from
+its type system as well as program fragments developed in
+Scala. Moreover, we introduce a Hennessy-Milner like logic that allows
+to restrict the executions of programs to those meeting these logic
+formulae. Our work is illustrated on the Needham-Schroeder security
+protocol, for which we manage to rediscover the man-in-the-middle
+attack first put in evidence by G. Lowe.
+
+\keywords{Coordination \and Bach \and Scala \and Hennessy-Milner Logic \and security protocols.}
+\end{abstract}
+\end{sloppypar}
+
+
+% -------------------------------------------------------------- %
+
+% Introduction
+\input{introduction.tex}
+
+% Background
+\input{background.tex}
+
+% B2Scala
+\input{b2scala.tex}
+
+% Constrained executions
+\input{constrained_executions.tex}
+
+% Applications
+\input{solution_needham_schroeder.tex}
+
+% % Comparison with related work
+% \input{related_work.tex}
+
+% Conclusion
+\input{conclusion.tex}
+
+% Acknowledgment
+\input{ack.tex}
+
+% -----------------------------------------------------------%
+
+\bibliographystyle{splncs04}
+\bibliography{biblio}
+
+  
+\end{document}
+

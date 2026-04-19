@@ -1,0 +1,164 @@
+In our earlier work \cite{DTS-2025} we addressed the question of whether
+a set $\mathcal{S}$ of normalised (sequential) scenarios, whose
+sequences of events are different permutations of the same set, can be
+realised as a single DTS that is
+semantically equivalent to $\mathcal{S}$, i.e., describes the same set of
+behaviours as $S$. This can be done only if there is a distance
+relation whose set of projections is the same as $\mathcal{S}$. We
+showed how to obtain such a distance relation and a corresponding
+DTS \cite{DTS-2025}.
+%(see \Sec{sec-dts} for a brief summary).
+
+In this section we tackle the problem of realisability of
+scenarios \emph{as expressions}: given a set, $\mathcal{S}$,
+of scenarios, we want to find an expression that realises
+$\mathcal{S}$.
+Despite similarities, there is a fundamental difference between
+this problem and the one previously solved \cite{DTS-2025}: the
+members of $\mathcal{S}$ could be projections that are obtained from
+extended distance relations of different distributed
+scenarios, in which case $\mathcal{S}$ cannot be realised by a single
+DTS, but by a choice expression that involves more than one DTS. The
+challenge is to divide $\mathcal{S}$ in such a way that each
+partition could be realised by a DTS, while trying to avoid the trivial
+solution in which every member of S is a separate alternative.
+More precisely:
+\vspace{-0.5em}
+\begin{quote}
+Given a finite set $\mathcal{S}=\{\SeqS_1,\dots,\SeqS_n\}$ of
+scenarios of \emph{possibly different lengths} over
+$\Sigma$, such that
+(i) $\ESeq{\SeqS_i}\neq \ESeq{\SeqS_j}$ (for $1\leq
+i,j\leq n$ and $i\neq j$)\footnote{In \Sec{sec-relax} we
+show how to relax the assumption.}, and (ii)
+each event of $\SeqS_i$ ($1\leq i\leq n$) has a
+unique occurrence in $\SeqS_i$,
+we want to obtain an expression $E$
+over $\Sigma$, such that $\Sem{E} = \Sem{\mathcal{S}}=\bigcup_{1\leq
+i \leq n} \Sem{\SeqS_i}$.
+In general, $\mathcal{S}$ can be realised by more than one
+expression.
+Our goal is to find an expression with a
+reasonably small number of alternatives, while decreasing the number
+of trivial alternatives.
+\end{quote}
+\vspace{-0.6em}
+We say $\mathcal{S}$ is \emph{realisable by} $E$, or
+$E$ is a \emph{realisation} of $\mathcal{S}$, if $\mathcal{S}$ is
+realised by $E$.
+\vspace{-0.2em}
+\begin{example}
+\label{ex-one-flag}
+Given the set, $\mathcal{S}=\{\SeqS_1,\SeqS_2,\SeqS_3,\SeqS_4\}$, of
+scenarios, where
+
+\noindent
+$\SeqS_1=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{finish_2}~ \mathtt{flag_1},\emptyset)$,
+$\SeqS_2=(\mathtt{start}~ \mathtt{finish_1}~  \mathtt{flag_1}~ \mathtt{finish_2},\emptyset)$,
+$\SeqS_3=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{finish_1}~ \mathtt{flag_2},\emptyset)$,
+%and
+$\SeqS_4=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{flag_2}~ \mathtt{finish_1},\emptyset)$,
+there is no DTS that realises $\mathcal{S}$.
+But $\mathcal{S}$ can be divided into two sets
+$\mathcal{S}_{1}=\{\SeqS_1,\SeqS_2\}$ and
+$\mathcal{S}_2=\{\SeqS_3,\SeqS_4\}$ based on the sets of events of its
+members. The set ${\mathcal{S}}_{1}$ can be realised by DTS
+$E=\D(\xi_1,\xi_2)=\xi_1||\xi_2$, where
+$\xi_1=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{flag_1},\emptyset)$
+and
+$\xi_2=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{finish_2},\emptyset)$.
+Similarly, $\mathcal{S}_2$ is realised by DTS
+$E'=\xi_3||\xi_4$, where
+$\xi_3=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{flag_2},\emptyset)$
+and
+$\xi_4=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{finish_1},\emptyset)$.
+So $\mathcal{S}$ is realised by the expression
+$E\BAR E'=(\xi_1||\xi_2)|(\xi_3||\xi_4)$.
+\end{example}
+\vspace{-0.5em}
+%------------------------
+\begin{definition}
+  \label{def-DR-S}
+Let $\mathcal{S}=\{\SeqS_1,\dots,\SeqS_n\}$ be a finite set of
+normalised scenarios
+%over $\Sigma_{\mathcal{S}}$
+and
+$\{\DR{\SeqS_1},\dots,\DR{\SeqS_n}\}$ be the set of
+corresponding stable distance relations, where
+$\DR{\SeqS_i}=(\PR{\SeqS_i},\DF{\SeqS_i})$ ($1\leq i\leq n$).
+\emph{The distance relation of} $\mathcal{S}$, $\DR{\mathcal{S}}$, is
+the pair $(\ParS{\mathcal{S}},\DF{\mathcal{S}})$, where
+$\ParS{\mathcal{S}}=\bigcap_{1\leq i\leq n} \PR{\SeqS_i}$ and,
+for every $(e,e')$ in $\ParS{\mathcal{S}}$,
+$\DF{\mathcal{S}}(e,e')$ is
+the smallest interval that includes each $\DF{\SeqS_i}(e,e')$.
+%$\DR{\mathcal{S}}$ is stable and cannot be extended.
+\end{definition}
+\vspace{-0.3em}
+\noindent
+The first step\label{initial-partitioning-step}
+ in solving the problem posed at the beginning of this
+section is to divide
+$\mathcal{S}$ in such a way that all the members of each partition are
+scenarios of equal lengths over the same set of events.
+Then we solve the problem for each partition, independently.
+Our general strategy is the following: whenever a partition is not
+realisable by a single DTS, we divide it
+%If a partition is not realisable by a single DTS, we divide it
+repeatedly, so that at the end each partition will be realised by a
+DTS and will correspond to one alternative in the overall choice expression.
+This process is guided by the results of our analysis based on
+$\PR{\mathcal{S}}$ and
+%the constraints of $\mathcal{S}$,
+$\DF{\mathcal{S}}$,
+described in sections \ref{sec-no-time}
+and \ref{sec-full}. Additionally, some divisions are simply necessary, as
+described below.
+%But first, an important definition:
+%-------------
+\vspace{-1em}
+\subsubsection{Gaps}\label{paragraph-gaps}
+Let $S_{(e, e')}=\{s_i\in \mathcal{S}|e\PR{\SeqS_i}e'\}$.
+Let $s_1,\dots,s_m$ be a sequence of members of $S_{(e, e')}$ such
+that, for every $1\leq i\leq m$, $[l_i, h_i]=\DF{s_i}(e, e’)$
+and $l_i \leq l_{i+1}$.
+Let $H_{r}=\max \{h_j|1\leq j \leq r\}$.
+If there is a $k$, $1 \leq k < m$, such that
+$H_{k} < l_{k+1}$, $\DF{S}(e, e’)$ contains a gap.
+Then $\mathcal{S}$ is said to be \emph{with gaps}.
+An $\mathcal{S}$ with gaps cannot be realised by a single DTS:
+this is because the interval between $e$ and $e'$ in
+$\DF{\mathcal{S}}$ would be
+$[l_1,H_{m}]$, which would allow also behaviours
+ in which the time distance
+ between $e$ and $e'$ is between $H_k$ and $l_{k+1}$. Such behavious are
+  allowed by none of the members of $\mathcal{S}$.
+  So $\mathcal{S}$ must be divided into partitions with no gaps.
+%, but would be allowed by any expression that realises $\mathcal{S}$.
+
+Whenever a partition is divided into finer partitions (see \Sec{sec-no-time}
+ and \Sec{sec-full}), we must check for the existence of gaps in any
+ newly formed partition.%  (see \Sec{sec-algo}).% and divide accordingly.
+
+
+% In general, it might be necessary to divide a partition further into
+% subgroups (see \Sec{sec-no-time}
+% and \Sec{sec-full}). So we must check for the existence of gaps in
+% any newly formed partition and divide accordingly.
+
+In the rest of the paper we assume that all scenarios in
+$\mathcal{S}$ are over the same set, $\Sigma_{\mathcal{S}}$, of
+events, and that each $\SeqS\in\mathcal{S}$
+contains all the events from $\Sigma_{\mathcal{S}}$.
+Moreover, we assume that any divisions necessitated by
+gaps have already been carried out, so that $\mathcal{S}$ is without gaps.
+%, and moreover the intervals of $\DF{\mathcal{S}}$ are without gaps.
+We describe our method in two steps:
+%in the first step
+first, we tackle the
+problem \emph{without accounting for constraints}.
+Because constraints will not play a role,
+in our examples we will discuss scenarios with only default constraints.
+%we assume each member of $\mathcal{S}$ is of the form
+%$(\E,\emptyset)$: it has only default constraints.
+%---------------

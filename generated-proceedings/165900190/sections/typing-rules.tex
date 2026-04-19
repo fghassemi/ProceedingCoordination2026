@@ -1,0 +1,297 @@
+
+\begin{figure}[t]
+    {\small
+    \textbf{Pattern normal form} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#PNFLit}) \hfill \fbox{$E \pnf F$}
+    \begin{center}
+          \begin{prooftree}
+            \infer0{E \pnf \mbzero}
+          \end{prooftree}
+          \qquad
+          \begin{prooftree}
+            \infer0{E \pnf \mbone}
+          \end{prooftree}
+          \qquad
+          \begin{prooftree}
+            \hypo{\mbpres{E}{m}{E'}}
+            \hypo{F \mbpeq E'}
+            \infer2{E \pnf \mbmsg{m} \mbcomp F}
+          \end{prooftree}
+          \qquad
+          \begin{prooftree}
+            \hypo{E \pnf F_1}
+            \hypo{E \pnf F_2}
+            \infer2{E \pnf F_1 \mbchoice F_2}
+          \end{prooftree}
+      \end{center}
+  }
+    \vspace{-1em}
+
+\caption{Pattern normal form.}
+\label{fig:pnf}
+\end{figure}
+
+\subsection{Pattern Normal Form}
+When reasoning about the typing of guards, both the Mailbox Calculus and Pat
+require the type of a mailbox to be in \emph{pattern normal form} (PNF), which
+is a particular structure of pattern that reflects the subpatterns expected by
+each guard clause.
+%
+Specifically, a pattern $E$ is in PNF if it is a sum of subpatterns of the form
+$\mbzero$ (for a
+$\keyword{fail}$ guard), $\mbone$ (for a $\keyword{free}$ guard) and $\mbmsg{m}
+\mbcomp F$ (for a $\keyword{receive}$ guard), where $F$ is equivalent to the
+residual of $E$ with respect to $\msg{m}$. This allows a correct type to be
+given to a re-bound mailbox name after receiving.
+
+Figure~\ref{fig:pnf} shows the formal definitions for PNF; we write $\pnf E$ for
+$E \pnf E$.
+%
+The following example derivation shows that
+pattern $(\mbmsg{m} \mbcomp \mbone) \mbchoice \mbone$ is in PNF:
+
+\vspace{-0.3cm}
+\begin{center}
+\scalebox{0.80}{
+\begin{prooftree}
+  \infer0{\mbpres{\mbmsg{m}}{m}{\mbone}}
+  \infer0{\mbpres{\mbone}{m}{\mbzero}}
+  \infer2{\mbpres{(\mbmsg{m} \mbcomp \mbone) \mbchoice \mbone}{m}{(\mbone \mbcomp \mbone) \mbchoice (\mbmsg{m} \mbcomp \mbzero)}}
+  \hypo{\mbone \mbpeq (\mbone \mbcomp \mbone) \mbchoice (\mbmsg{m} \mbcomp \mbzero)}
+  \infer2{(\mbmsg{m} \mbcomp \mbone) \mbchoice \mbone  \pnf (\mbmsg{m} \mbcomp \mbone)}
+  \infer0{(\mbmsg{m} \mbcomp \mbone) \mbchoice \mbone  \pnf \mbone}
+  \infer2{(\mbmsg{m} \mbcomp \mbone)\mbchoice \mbone \pnf (\mbmsg{m} \mbcomp \mbone) \mbchoice \mbone}
+\end{prooftree}
+}
+\end{center}
+\vspace{-0.7cm}
+
+
+
+\subsection{Typing Rules}
+\label{sec:typing-rules}
+We now have all the necessary definitions for specifying the typing rules of Pat.
+These rules are similar to the original ones by Fowler et al.
+\cite{fowlerSpecialDeliveryProgramming2023}, with a few modifications to fit our
+definitions of variables, environments and terms.
+
+\begin{figure}[!t]
+    \footnotesize
+  \textbf{Typing rules for programs and functions}
+  (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.TypingRules.html\#WellTypedProgram})
+  (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.TypingRules.html\#WellTypedDefinition}) \;
+  \hfill \fbox{$\WellTypedProg$} \fbox{$\WellTypedDef{\FunctionDef}$}
+\begin{mathpar}
+\inferrule
+{
+\mathcal{P} = (\mathcal{S}, \mathcal{D}, t_0) \\
+\forall \defname .\ \WellTypedDef{\mathcal{D}(\defname)} \\
+\WellTypedTerm{\emptyset}{t_0}{\unittype}
+}
+{\WellTypedProg}
+
+\inferrule*
+{
+\WellTypedTerm{A, \emptyset}{t}{B}
+}
+{\WellTypedDef{\FunctionDef}}
+
+\end{mathpar}
+
+\textbf{Typing rules for terms} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.TypingRules.html\#WellTypedTerm})
+\hfill
+\fbox{$\WellTypedTermP{\Gamma}{\mathcal{P}}{t}{A}$}
+%
+\begin{mathpar}
+\inferrule[\VAR]
+{
+\EmptyEnv{\Gamma}
+}
+{\WellTypedTerm{\envInsert{x}{A}{\Gamma}}{\Var{x}}{A}}
+
+\inferrule[Bool]
+{
+\EmptyEnv{\Gamma}
+}
+{\WellTypedTerm{\Gamma}{b}{\booltype}}
+
+\inferrule[\UNIT]
+{
+\EmptyEnv{\Gamma}
+}
+{\WellTypedTerm{\Gamma}{()}{\unittype}}
+
+\inferrule[\APP]
+{
+\mathcal{D}_{\mathcal{P}}(\defname)
+ = \keyword{def} \ \defname(A) : B \ \{t\} \\\\
+\WellTypedTerm{\Gamma}{v}{A}
+}
+{\WellTypedTerm{\Gamma}{\defname(v)}{B}}
+
+\inferrule[\LET]
+{
+\envcomb{\Gamma_1}{\Gamma_2}{\Gamma} \\
+\WellTypedTerm{\Gamma_1}{t_1}{\returnableop{A}} \\\\
+\WellTypedTerm{\envInsert{0}{\returnableop{A}}{\Gamma_2}}{t_2}{B}
+}
+{\WellTypedTerm{\Gamma}{\TLet{t_1}{t_2}}{B}}
+%
+\quad
+%
+\inferrule[\NEW]
+{
+\EmptyEnv{\Gamma}
+}
+{\WellTypedTerm{\Gamma}{\TNew}{\mbtin{\mbone}^\ureturnable}}
+%
+\quad
+%
+\inferrule[\SEND]
+{
+\mathcal{S}_{\mathcal{P}}(\msg{m}) = T \\
+\WellTypedTerm{\Gamma_1}{v_1}{\mbtout{\mbmsg{m}^\usecondclass}} \\\\
+\WellTypedTerm{\Gamma_2}{v_2}{\secondclassop{T}} \\
+\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma}
+}
+{\WellTypedTerm{\Gamma}{\TSend{v_1}{m}{v_2}}{\unittype}}
+
+\inferrule[\GUARD]
+{
+E \mbpinc F \\
+\pnf F \\
+\WellTypedTerm{\Gamma_1}{v}{\mbtin{F^\ureturnable}} \\\\
+\WellTypedGuards{\Gamma_2}{\overrightarrow{g}}{A}{F} \\
+\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma}
+}
+{\WellTypedTerm{\Gamma}{\TGuard{v}{E}{\overrightarrow{g}}}{A}}
+
+\inferrule[\SUB]
+{
+\Gamma \subtype \Gamma' \\\\
+A \subtype B \\
+\WellTypedTerm{\Gamma'}{t}{A}
+}
+{\WellTypedTerm{\Gamma}{t}{B}}
+
+\inferrule[\SPAWN]
+{
+\secondclassop{\Gamma} = \Gamma' \\\\
+\WellTypedTerm{\Gamma'}{t}{\unittype}
+}
+{\WellTypedTerm{\Gamma}{\TSpawn{t}}{\unittype}}
+\end{mathpar}
+
+  \textbf{Typing rules for guard sequences} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.TypingRules.html\#WellTypedGuards})
+  \hfill \fbox{$\WellTypedGuardP{\Gamma}{\overrightarrow{g}}{A}{E}$}
+  \begin{center}
+    \begin{prooftree}
+      \hypo{\WellTypedGuard{\Gamma}{g}{A}{E}}
+      \infer1[$\SINGLE$]{\WellTypedGuards{\Gamma}{\{g\}}{A}{E}}
+    \end{prooftree}
+    \qquad
+    \begin{prooftree}
+      \hypo{\WellTypedGuard{\Gamma}{g}{A}{E}}
+      \hypo{\WellTypedGuards{\Gamma}{\overrightarrow{g_s}}{A}{E'}}
+      \infer2[$\SEQ$]{\WellTypedGuards{\Gamma}{\{g, \overrightarrow{g_s}\}}{A}{E \mbchoice E'}}
+    \end{prooftree}
+  \end{center}
+  \textbf{Typing rules for guards} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.TypingRules.html\#WellTypedGuard})
+  \hfill \fbox{$\WellTypedGuardP{\Gamma}{g}{A}{E}$}
+    \begin{mathpar}
+        \inferrule
+        [Fail]
+        { }
+        {\WellTypedGuard{\Gamma}{\GFail}{A}{\mbzero}}
+
+        \inferrule
+        [Free]
+        { \WellTypedTerm{\Gamma}{t}{A} }
+        { \WellTypedGuard{\Gamma}{\GFree{t}}{A}{\mbone} }
+
+        \inferrule
+        [Receive]
+        { \mathcal{S}_{\mathcal{P}}(\msg{m}) = T \\
+          \mathsf{base(T)} \lor \mathsf{base(\Gamma)} \\\\
+          \WellTypedTerm
+            {\envInsert{0}{\secondclassop{T}}{(\envInsert{0}{\mbtin{E}^\ureturnable}{\Gamma})}}
+            {t}
+            {B}
+        }
+        { \WellTypedGuard{\Gamma}{\GReceive{m}{t}}{B}{\mbmsg{m} \mbcomp E}}
+    \end{mathpar}
+
+  \caption{Pat typing rules}
+  \label{fig:typing-rules}
+\end{figure}
+
+Figure \ref{fig:typing-rules} shows the typing rules for Pat, parameterised by a
+program $\mathcal{P}$; we omit $\mathcal{P}$ in the rules for readability.
+We highlight some of the typing rules.
+Whenever an empty environment is required, we use predicate $\EmptyEnv{\Gamma}$ instead of checking for the empty environment $\emptyset$.
+The insertion operation $\envInsert{x}{A}{\Gamma}$ ensures that $\Gamma$ contains type $A$ at position $x$.
+
+The $\SEND$ rule types a send expression $\TSend{v_1}{m}{v_2}$, where message $\msg{m}$ with payload $v_2$ is sent to mailbox $v_1$.
+The mailbox associated with $v_1$ has to be of type $\mbtout{\mbmsg{m}^\usecondclass}$, i.e.\ it must be capable of sending the message $\msg{m}$.
+Payload $v_2$ is required to be of the type given by the message's signature with second-class usage.
+Both derivations for $v_1$ and $v_2$ must occur under separate environments $\Gamma_1$ and $\Gamma_2$, i.e.\ they are only share base types and their combination yields $\Gamma$.
+
+% The typing rule for a guard expression $\TGuard{v}{E}{\overrightarrow{g}}$ ensures that the pattern $E$ is a subpattern of some pattern $F$ in PNF.
+% Additionally, mailbox $v$ must have type $\mbtin{F^\ureturnable}$ under environment $\Gamma_1$, ensuring that it is capable of receiving messages according to $F$.
+% The requirement for the returnable usage avoids use-after-free errors.
+
+Rule $\RECEIVE$ types the receive guard $\GReceive{m}{t}$, retrieving message $\msg{m}$ from the mailbox, with type $B$ and pattern $\mbmsg{m} \mbcomp E$.
+Either $\Gamma$ must only consist of base types or the payload's type $T$ is a base type.
+This is a syntactic restriction, ensuring that no existing mailbox name is shadowed by a message's payload.
+The continuation $t$ must be typeable under $\Gamma$ extended by $\mbtin{E^\ureturnable}$ and $\secondclassop{T}$.
+Type $\mbtin{E^\ureturnable}$ represents the mailbox after $\msg{m}$ is consumed.
+Because of the usage of de Bruijn indices, the order in which the types are inserted into the environment is important.
+Since inserting a type at position $0$ corresponds to simply adding it to the front of the environment,
+the environment $\envInsert{0}{\secondclassop{T}}{(\envInsert{0}{\mbtin{E}^\ureturnable}{\Gamma})}$ is equal to $\secondclassop{T}, \mbtin{E}^\ureturnable, \Gamma$.
+Thus, a variable $0$ would map to type $\secondclassop{T}$ and a variable $1$ would map to type $\mbtin{E}^\ureturnable$.
+
+The typing relation for a sequence of guards enables us to
+typecheck each guard individually, while also ensuring the correct pattern
+structure of the overall expression.  
+In the original definition of typing for guard sequences, Fowler et al. \cite{fowlerSpecialDeliveryProgramming2023} provide only a single rule of the following form:
+
+{\small
+    \vspace{-0.5em}
+\begin{center}
+  \begin{prooftree}
+    \hypo{(\WellTypedGuard{\Gamma}{g_i}{A}{E_i})_i}
+    \infer1{\WellTypedGuards{\Gamma}{\overrightarrow{g}}{A}{E_1 \mbchoice \dots \mbchoice E_n}}
+  \end{prooftree}
+\end{center}
+}
+
+By splitting this single rule into two distinct ones ($\SINGLE$ and $\SEQ$), we
+provide a recursive definition for typing of sequences.  This avoids using lists
+of well-typed relations as a premise in the rule, and in turn, Rocq is able to
+automatically come up with appropriate inductive schemes.
+
+\ifappendix
+An example of a type derivation in Pat can be found in Appendix \ref{sec:type-checking-example}.
+\fi
+
+% SJF: I think this is way more detail than necessary.
+%   Rule $\SINGLE$ types a sequence $\{g\}$, consisting of a single guard, by
+%   requiring $g$ to be typable using the typing rules for guards.  The other rule,
+%   $\SEQ$, types a sequence $\{g, \overrightarrow{g_s}\}$ consisting of a guard $g$
+%   followed by a sequence of guards $\overrightarrow{g_s}$.  If guard $g$ is
+%   typable with type $A$ and pattern $E$, then $\overrightarrow{g_s}$ must be
+%   typable under the same environment with the same type and some pattern $E'$.
+%   The pattern of $\{g, \overrightarrow{g_s}\}$ is the combination of both patterns
+%   by choice: $E \mbchoice E'$.  This way, for a sequence of guards $\{g_1, g_2,
+%   \dots, g_n\}$, its pattern is required to be of the form $E_1 \mbchoice E_2
+%   \mbchoice \dots \mbchoice E_n$, corresponding to the notion that any available
+%   guard within a guard expression can be triggered.
+%
+
+\paragraph{Mechanization.}
+The mechanization of Pat's typing rules closely follows the pen-and-paper definitions.
+However, proving properties about well-typed terms requires technical lemmas, such as inversion lemmas or
+canonical forms of terms.
+For example, we had to prove that every well-typed Boolean value under environment $\Gamma$ implies that
+$\Gamma$ is a subenvironment of an empty environment (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.TypingRules.html\#weak_BTBool_2}).
+These types of proofs would usually be omitted in classical pen-and-paper proofs, but in our case,
+even these kinds of proofs required technical lemmas such as properties about environment subtyping.

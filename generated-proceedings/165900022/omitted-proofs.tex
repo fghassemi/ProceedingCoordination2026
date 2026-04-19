@@ -1,0 +1,139 @@
+\setcounter{lemma}{0}
+\setcounter{proposition}{0}
+\begin{lemma}
+Let $G=(H,\rightarrow)\in\algoneset_m,m\in\mathbb{N}$. Then, for all $\opa\in H$, \mbox{$deg_{out}(\opa) \leq m$}.
+\end{lemma}
+\begin{proof}
+In the algorithm, line 5 marks the beginning of the iteration over all operations in $\textsl{ord}(H)$.
+Let $\opa$ denote the operation currently being processed in the algorithm. Between lines 7 and 12, the algorithm may add up to $m$ out-going edges from $\opa$, since by definition $\sigma(\opa)\leq |\mathbb{P}|=m$.
+
+As each vertex has its out-going edges built as above, all vertices of $G$ have an out-going degree of at most $m$.
+
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{proposition}
+Let $H\in\historyset$ be a history. For $\opa,\opb \in H$,
+
+\begin{center}
+$\opa\rb\opb \Leftrightarrow $ there exists a tuple $(\oph_1,...,\oph_q),\; \oph_i \in H, q\in\mathbb{N}$ such that 
+$\opa \dsucp{p} \oph_1 \dsucp{p} \hdots \dsucp{p} \oph_q \dsucp{p} \opb$ with  $p:=\opb.proc$.
+\end{center}
+\end{proposition}
+
+\begin{proof}\slshape
+$\Rightarrow)$
+
+Let $\opa,\opb \in H$ with $\opa\rb\opb$, and let $T$ denote the tuple we aim to construct. We distinguish two main cases.
+\begin{itemize}
+	\item[$\ast$] if $\opb$ is a direct successor of $\opa$; that is, there exists $p \in \mathbb{P}$ such that $\opa\dsucp{p}\opb$, then we set $T=()$
+	\item[$\ast$]  if $\opb$ is not a direct successor of $\opa$, we proceed as follows.
+\end{itemize}
+
+Let $p=\opb.proc$. Having $\opa\rb\opb$ implies that on process $p$ there are none or some operations executed after $\opa$ returns and before $\opb$ starts. We build $T$ by collecting all of those successive operations, starting with $\oph_1$ such that \mbox{$\opa\dsucp{p}\oph_1$}, and then $\oph_2,...,\oph_q$ with 
+\mbox{$\opa\dsucp{p} \oph_1 \dsucp{p} \oph_2 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$}. We set $T=(\oph_1,\oph_2,...,\oph_q)$.
+
+$\Leftarrow)$
+
+Let $\opa,\oph_1,...,\oph_q,\opb \in H$ with 
+\mbox{$\opa \dsucp{p} \oph_1 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$} and  $p:=\opb.proc$. By definition of $\dsucp{p}$, we have for all \mbox{$1 \leq i \leq q$}, $\oph_i.rtime<\oph_{i+1}.stime$ as well as \mbox{$\opa.rtime<h_1.stime$} and \mbox{$\oph_q.rtime<\opb.stime$}. We recall that for all \mbox{$1 \leq i \leq q$}, $h_i.stime<h_i.rtime$. By the transitivity of $<$, we have $\opa.rtime<\opb.stime$ which means $\opa \rb\opb$ by definition.
+
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{proposition}
+Let $G=(H,\rightarrow)\in\algoneset_m,m\in\mathbb{N}$. For \mbox{$\opa,\opb \in H$},
+\begin{center}
+$\opa\rb\opb \Leftrightarrow \opa\patharrow\opb$.
+\end{center}
+\end{proposition}
+\begin{proof}\slshape
+$\Rightarrow)$
+
+Let $G=(H,\rightarrow)\in\algoneset_m$, and $\opa,\opb \in H$ such that $\opa\rb\opb$. By Proposition~\ref{prop:finishesBeforeCollection}, there exists a tuple \mbox{$T=(\oph_1,...,\oph_q),\; \oph_i \in H, q\in\mathbb{N}$} such that 
+\begin{center}
+\mbox{$\opa\dsucp{p} \oph \dsucp{p} \oph_2 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$}
+
+\end{center}
+with  $p=\opb.proc$. 
+
+Lines 7 and 8 of the algorithm ensure that a path always exists from any operation to its direct successor on a given process, if such a successor exists. And since $\oph_i \dsucp{p} \oph_{i+1}$  is defined to mean that  $\oph_{i+1}\in\sigma(\oph_i)$, we have
+
+\begin{center}
+$\opa \patharrow \oph_1 \patharrow \oph_2 \patharrow ... \patharrow \oph_{q-1} \patharrow \oph_q \patharrow \opb$.
+\end{center}
+
+Thus, $\opa\patharrow\opb$ by transitivity of $\patharrow$.
+
+
+$\Leftarrow)$
+
+We have $\opa\patharrow\opb$. Let the $\oph_1,...,\oph_q$ be the vertices on the path from $\opa$ to $\opb$ such that
+
+\begin{center}
+$
+\opa \rightarrow \oph_1 \rightarrow \oph_2 \rightarrow ... \rightarrow \oph_{q-1} \rightarrow \oph_q \rightarrow \opb
+$
+\end{center}
+
+%By Observation~\ref{obs:directPREDandSUCC}, with  $p=\opb.proc$,
+
+By construction, $\forall \opc,\opd\in H:\opc\rightarrow\opd\Rightarrow \opc\dsucp{\opd.proc}\opd$. Thus, for $p=\opb.proc$,
+
+\begin{center}
+$
+\opa \rightarrow \oph_1 \rightarrow \oph_2 \rightarrow ... \rightarrow \oph_{q-1} \rightarrow \oph_q \rightarrow \opb
+ \quad\Rightarrow\quad$
+\mbox{$\opa \dsucp{p} \oph_1 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$} 
+\end{center}
+
+$\Rightarrow \opa \rb \opb$ by Proposition~\ref{prop:finishesBeforeCollection}.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{lemma}
+Let $G=(H,\rightarrow)\in\algoneset_m,m\in\mathbb{N}$. Then, for all $\opa\in H$, \mbox{$deg_{in}(\opa) \leq m$}.
+\end{lemma}
+\begin{proof} 
+
+We proceed by showing that each vertex has at most one incoming edge from each process. Formally, we aim to prove that for all $\opc \in H$, no $\opa,\opb\in H$ exist such that $\opa\ssrel\opb\land\opa\rightarrow\opc \land \opb\rightarrow\opc$~. We proceed by contradiction. Suppose that there exists $\opa,\opb\in H$ such that $\opa\rightarrow\opc\land\opb\rightarrow\opc\land\opa\ssrel\opb$. As $\opa$ and $\opb$ are executed on the same process, we either have $\opa \rb \opb$ or $\opb \rb \opa$. Let $\opa \rb \opb$ without loss of generality. We also have $\opa \rb \opc$ and $\opb \rb \opc$ as $\opc$ starts after both $\opa$ and $\opb$ finish by definition of $\rightarrow$. Our algorithm traverses $\textsl{ord}(H)$ in reverse order; meaning that our operations will be treated in the following order: first $\opc$, then $\opb$ and finally $\opa$. Between each, other operations may be processed, though not impacting our reasoning, so we will ignore them. Let $p$ be the process on which $\opa$ and $\opb$ are executed. Here is how our algorithm will proceed:
+\begin{itemize}
+	\item[$\ast$] Processing operation $\opc$: adding the needed out-going edges (will not matter in our proof as those edges are towards operations that occured after $\opc$ finished, and we are focused of $\opa$ and $\opb$ that occur before $\opc$)
+	\item[$\ast$] Processing operation $\opb$: for the moment there are no out-going edges from $\opb$. We supposed the existence of the edge $\opb\rightarrow\opc$ which we therefore add to the graph, and which implies $\opb\rb\opc$
+	\item[$\ast$] Processing operation $\opa$: as we supposed $\opa\rightarrow\opc$ to be at some point an edge of the graph we have by construction that $\opc$ is a direct successor of $\opa$. Let $\opf \in H$ be the operation such that $\opa \dsucp{p} \opf$; then either $\opf\rb\opb$ or $\opf=\opb$. In either case, the proof holds. Upon the completion of the processing of operation $\opa$, we have $\opa \patharrow \opf$ as well as $\opf \patharrow \opb$. Since $\opb\rightarrow\opc$ implies $\opb \patharrow \opc$, by transitivity of $\patharrow$ we have $\opa \patharrow \opc$. Since there already exists a path from $\opa$ to $\opc$, the edge $\opa\rightarrow\opc$ will not be added during the processing of $\opa$.
+	
+Hence the contradiction.
+\end{itemize}
+We have thus proven that each vertex has at most one in-coming edge from each process. Consequently, across all processes, each vertex can have at most $m$ in-coming edges.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{lemma}
+Let a history $H\in\historyset$ and a graph \mbox{$G=(H,\rightarrow)\in\algone(H)$}. For a cut 
+\mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with \mbox{$1\leq\ell\leq|H|$}, there is no edge that crosses the cut $\ell$ from $R$ to $L$. That is, $\nexists\; \opa,\opb\in H:\; \opa\rightarrow\opb\;\land\;\opa\in R\;\land\;\opb\in L$.
+\end{lemma}
+
+\begin{proof}
+We proceed by contradiction. Suppose there is such an edge $ \opa\rightarrow\opb$ with $\opa\in R$ and $\opb\in L$. The algorithm is designed so that any edge $\opc\rightarrow\opd$ implies $\opd\in\sigma(\opc)$, and therefore $\opc$ must return before $\opd$ starts. In particular, $\opa\rightarrow\opb$ implies $\opa.rtime<\opb.stime$.
+However, by the definition of the cut $Cut_\ell(\textsl{ord},G)$, since $\opa\in R$ and $\opb\in L$, we also have \mbox{$\opb.stime\leq\opa.stime$}. Combining these inequalities, we obtain \mbox{$\opa.rtime<\opb.stime\leq\opa.stime$} which is a contradiction, as it violates the property that $\opa.stime<\opa.rtime$. Hence, such an edge cannot exist.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{lemma}
+Let a history $H\in\historyset$ and the graph \mbox{$G=(H,\rightarrow)\in\algone(H)$}. For a cut 
+\mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with \mbox{$1\leq\ell\leq|H|$}, there is no edge that crosses the cut $\ell$ from $L_\ell(G)$ to $R_\ell(G)$. That is, \mbox{$\nexists\; \opa,\opb\in H:\; \opa\rightarrow\opb\;\land\;\opa\in L_\ell(G)\;\land\;\opb\in R_\ell(G)$}.
+\end{lemma}
+\begin{proof}
+We proceed by contradiction. Let suppose the existence of $\opa\in L_\ell(G),\opb\in R_\ell(G)$ such that $\opa\rightarrow	\opb$, and let $p=\opa.proc$ and $q=\opb.proc$. 
+As $\opa\notin \Gamma_\ell(G)$, there exists a vertex $\opc\in \Gamma_\ell(G)$ executed after $\opa$ on the same process $p$ . And as $\opb\notin \Lambda_\ell(G)$, there exists a vertex $\opd\in \Lambda_\ell(G)$ executed before $\opb$ on the same process $q$. By definition of $\Lambda_\ell(G)$ and $\Gamma_\ell(G)$ we have $\opa.rtime<\opc.stime<\opd.stime<\opb.stime$.
+Having $\opa\rightarrow\opb$ implies that $\opb$ is a direct successor of $\opa$, meaning that $\opb$ is the first operation to occur on its process $q$ after $\opa$ finishes. But there exists $\opd$ on process $q$ which starts after $\opa$ finishes, and occurs before $\opb$. This implies that $\opb$ is not a direct successor of $\opa$. By construction of the algorithm, if $\opb$ is not a direct successor of $\opa$, then the edge $\opa\rightarrow\opb$ cannot exist. This leads to a contradiction.
+Thus, there is no edge in $L_\ell(G)\times R_\ell(G)$ that crosses the cut~$\ell$.
+\end{proof}
+

@@ -1,0 +1,49 @@
+\subsubsection{Related Work}
+In our earlier work \cite{DTS-2025} we developed an algorithm for
+solving the problem
+of realisability of sets of (sequential) scenarios as distributed scenarios.
+Given a set of scenarios, our algorithm determines whether
+the set is realisable by a \emph{single} DTS, i.e.,
+whether there is a DTS whose semantics is identical
+to the union of the behaviours described by the members of
+the set. If so, the algorithm produces such a DTS.
+Despite some similarities, the problem that we tackle in the current
+paper is fundamentally different.
+
+%----------------------
+The comparison of our sequential timed scenarios
+with simple temporal networks (STNs) \cite{DECHTER1991}, as well as
+with message sequence charts (MSCs) \cite{Harel2003,MSCs}, is presented
+elsewhere \cite{DTS-2025}.
+Similarities between
+%our distance relations and timed partial
+%orders (TPOs) of Watanabe et al. \cite{watanabe2023}, as well as
+%between
+the distributed behaviours of distributed timed scenarios and the
+timed traces of Balaguer et al. \cite{hal-2012} are also discussed
+in our earlier work \cite{DTS-2025}.
+
+%The comparison of our stable distance tables with Difference Bounds
+%Matrices is presented elsewhere \cite{neda-2017,neda-2018-2}.
+
+The problem of realisability has been investigated in a variety of settings,
+%of global models
+%has been investigated
+e.g., for message sequence
+charts \cite{Alur-2003}, global session
+types \cite{BEJLERI-2009,Castagna-2011,Honda-2016,Hans-2016},
+pomsets \cite{GUANCIALE201969},
+global labelled transition systems \cite{Beek-2023},
+%more recently for
+choreography languages \cite{Franco-2022} and team
+automata \cite{Beek-2024}. Unlike in all
+these works the realisability of our sets of sequential scenarios as
+scenario expressions is
+determined by precise time analysis enabled by our distance
+relations.
+%The distance relations enable us to reason about the underlying partail
+%order, as well as the time constraints between various events in
+%scenarios, both of which are essential for realisability of
+That is, in our setting we are able to directly reason
+about realisability of models that include explicit time constraints
+and produce realisations that involve time constraints.

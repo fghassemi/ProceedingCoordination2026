@@ -1,0 +1,140 @@
+The problem of realisability of global models, e.g., global (session)
+types \cite{BEJLERI-2009,Castagna-2011,Honda-2016,Hans-2016}, global
+choreographies \cite{Franco-2022}, global labelled transition
+systems \cite{Beek-2023} and global languages
+has attracted many researchers over the past several years.
+A realisation of a global model is a set of
+collaborating computing entities which
+are executed concurrently, and whose behaviours, obtained from their
+(synchronous or asynchronous) interactions, are exactly those that are
+obtained from the global models.
+For example, a global model can be the parallel composition of a set
+of labelled transition systems, each of which models the local
+behaviour of a component.
+An interesting, but challenging question is how to determine whether a
+global model is realisable and, if so, how to obtain a realisation.
+
+We are interested in the problem of realisability for global
+models that take the form of sets of sequential timed
+scenarios. Given such a set, our goal is to
+obtain a \emph{timed scenario expression} that realises the set.
+
+In earlier work we developed the notions of sequential
+timed scenarios (scenarios for short) \cite{neda-2018-2} and
+distributed timed scenarios \cite{DTS-2025}.
+A scenario is a sequence of (names of) events along with a set of
+constraints on the times at which these events occur
+(see \Sec{sec-seq} for more details).
+A distributed timed scenario (DTS) is a collection of
+components, each of which is a timed
+scenario (see \Sec{sec-dts} for more details).
+Each component performs its specified actions, represented as a
+sequence of events, concurrently with
+other components. Components can communicate or
+synchronise with each other by performing the same action
+simultaneously.
+%The idea is that each component performs its specified
+%actions, represented as a sequence of events, independently from
+%other components. However, from time to
+%time, the components communicate or synchronise with each other
+%by performing the same action simultaneously.
+A DTS, $\DScenario$, is viewed as a parallel composition of its components and its
+semantics is defined as a set of distributed behaviours, i.e., the set
+of all possible interleavings of events in the components of
+$\DScenario$ that satisfy the constraints and the synchronising
+requirements of $\DScenario$.
+
+Given a set, $\mathcal{S}$, of scenarios over a set of events,
+$\Sigma_{\mathcal{S}}$,
+the stable distance relation \cite{DTS-2025} of $\mathcal{S}$
+is $\DR{\mathcal{S}}=(\ParS{\mathcal{S}},\DF{\mathcal{S}})$.
+The partial order $\ParS{\mathcal{S}}$
+captures all the ordering dependencies between events in
+$\mathcal{S}$, while the distance function, $\DF{\mathcal{S}}$,
+expresses constraints on the time between
+every pair of events $e$ and $e'$,
+where $e\ParS{\mathcal{S}}e'$. A projection of
+$\DR{\mathcal{S}}$ is a scenario over $\Sigma_{\mathcal{S}}$ whose
+sequence of events agrees with
+$\ParS{\mathcal{S}}$ and whose constraints satisfy
+%includes the tightest constraints that satisfy
+the constraints captured by $\DF{\mathcal{S}}$.
+
+In the current paper we introduce \emph{timed scenario expressions}
+and solve the problem of realisability of sets of
+scenarios as scenario expressions.
+%That is, given a global model of the behaviours of a system, captured
+%by a set of scenarios, $\mathcal{S}$, we produce a scenario expression that expresses
+%the same set of behaviours that are allowed by the members of $\mathcal{S}$.
+So our contribution is twofold:
+%\subsubsection{Contributions}
+% \setlist{nolistsep}
+%\begin{enumerate}[noitemsep]
+%\item
+
+First, we introduce a limited form of timed scenario expressions (expressions
+for short), as a means
+of constructing hierarchical models of complex systems, whose constituent
+parts are distributed systems (\Sec{sec-exp}). Intuitively, an expression is built by
+repeatedly applying three operators, namely choice,
+concatenation and parallel composition (denoted by $\BAR$, $\circ$ and
+$||$\footnote{We do not consider the Kleene star ($*$) operator here, as its
+introduction opens up interesting questions that cannot
+be addressed in the confines of the current paper.}, respectively), to
+distributed scenarios. In its simplest form an
+expression is just a single DTS.
+Given an expression $E$, we
+define its semantics, denoted by $\Sem{E}$, in terms of the set
+of distributed behaviours that are expressed by $E$.
+%\item
+
+Second, we tackle the problem of realisability of sets of (sequential)
+scenarios as expressions (\Sec{sec-realize}). Given a finite
+set, $\mathcal{S}$, of scenarios, we produce a scenario
+expression, $E$, that realises $\mathcal{S}$,
+i.e., $\Sem{E}$ is identical to the union of the sets of behaviours
+specified by the members of $\mathcal{S}$.
+
+We identify two criteria for realisability of $\mathcal{S}$ as a
+single DTS: $\mathcal{S}$ is realisable by a DTS iff (i) it
+is \emph{order-closed}, and (ii) all its members are \emph{compatible}, in
+terms of their constraints, with $\DR{\mathcal{S}}$.
+Intuitively,
+$\mathcal{S}$ is order-closed if, for every projection of
+$\DR{\mathcal{S}}$, there is a scenario in $\mathcal{S}$
+with that exact sequence of events, and vice versa.
+A scenario $\SeqSC\in\mathcal{S}$ is compatible with
+$\DR{\mathcal{S}}$ if its set of constraints is equivalent to the set
+of constraints of the projection of $\DR{\mathcal{S}}$ that
+has the same sequence of events as $\SeqSC$.
+
+If $\mathcal{S}$ is not realisable by a single DTS,
+then it must be divided into
+partitions, in such a way that each partition is order-closed and all
+its members are compatible with the distance relation of the
+partition. Once every partition is realisable by a single DTS, the
+resulting expression will be a choice between these
+distributed scenarios.
+
+The novelty of our work is primarily in the use of (stable) distance
+relations \cite{DTS-2025} as a linchpin of an efficient method
+%, confirmed by our experimental results,
+for the realisation problem.
+By identifying the necessary and sufficient conditions for the
+realisability of a set of scenarios as a DTS, we address the problem
+that was left open in our earlier work \cite{DTS-2025}.
+
+
+
+%The reason we do not consider the Kleene star ($*$) operator in our
+%expressions in the current paper is that they make the realisation
+%problem significantly more complex.
+%To fully address the problem of realisability where the
+%resulting expressions involve $*$
+%would require developing new apparatus and
+%techniques (in addition to what is developed in the current paper),
+%which could not be presented in the current paper due to
+%the page limitation.
+%\end{enumerate}
+%\vspace{-1.4em}
+\input{related-work}

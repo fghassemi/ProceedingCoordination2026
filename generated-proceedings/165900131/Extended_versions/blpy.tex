@@ -1,0 +1,241 @@
+\section{The BLPy coordination language}
+\label{sect-BLPy}
+
+\subsection{The Bach Coordination Language}
+
+Bach is a Linda-like coordination language developped at the
+University of Namur~\cite{jacquet2007coordinating}. It has been conceived in a
+constraint logic programming flavor. As a result, Linda tuples are
+replaced by ground logic programming terms, also called si-terms, the
+shared space is referenced as the store and Linda primitives are
+reformulated as the following primitives: $\mathit{tell(t)}$ to place an
+occurrence of $t$ on the store, $\mathit{ask(t)}$ to verify that $t$
+is present on the store, $\mathit{get(t)}$ to proceed similarly but by
+consuming one occurrence of $t$, and $\mathit{nask(t)}$ to check that
+$t$ is absent from the store. Note that the last three primitives
+suspend until their associated condition is met. For instance, if $t$
+is present on the store, then $\mathit{nask(t)}$ is suspended until
+the store contains no occurrences of $t$.
+
+Matching is operated in Bach as syntactic equality. We
+shall soften it in this paper by allowing a partially specified
+si-term to match a more complete si-term.  This will be very useful
+later to get values from non specified arguments.  The precise
+definition is as follows.
+
+\begin{definition}
+Let $t=f(t_1,\cdots,t_m)$ and $u=g(u_1, \cdots, u_n)$ be two
+si-terms. Then $t$ matches $u$ iff, on the one hand, their functors
+are the same ie $f=g$ and, on the other hand, the list
+$[t_1,\cdots,t_m]$ of arguments of $t$ is a prefix of the list
+$[u_1,\cdots,u_n]$ of arguments of $u$. This is subsequently denoted by
+$t \triangleleft u$. On the point of terminology, in that case, it is also said that $u$ is matched by $u$.
+\end{definition}
+
+\begin{example}
+As examples, one has $f(a) \triangleleft f(a,b)$ and
+$f \triangleleft f(a,b)$.
+\end{example}
+
+
+
+\begin{figure}[t]
+%
+\[ \begin{array}{r@{\hspace*{0.25cm}}c}
+     {\bf(T)}
+& 
+     \langle \; tell(t) \; \vert \; \sigma \;\rangle
+     \xrightarrow{+t}
+     \langle \; E \;\vert \; \sigma \cup \lbrace t\rbrace \;\rangle
+\\ \\ 
+%% 
+     {\bf(A)}        
+& 
+     \dfrac{t \triangleleft u
+          }{\langle \; ask(t) \;\vert\; \sigma \cup \lbrace u \rbrace \;\rangle
+                \xrightarrow{*u}
+                \langle\; E \;\vert\; \sigma \cup \lbrace u\rbrace \;\rangle
+          } 
+\\ \\ 
+%% 
+     {\bf(G)}        
+& 
+     \dfrac{t \triangleleft u
+          }{\langle\; get(t)\;\vert\; \sigma \cup \lbrace u \rbrace \;\rangle
+               \xrightarrow{-u}
+               \langle\; E \;\vert\; \sigma \;\rangle
+           }\\
+\\ \\ 
+%% 
+      {\bf(N)}        
+& 
+      \dfrac{t \ntriangleleft u, \mbox{ for any } u \in \sigma
+           }{\langle\; nask(t)\;\vert\; \sigma \;\rangle
+                \xrightarrow{\sim t}
+                \langle\; E \;\vert\; \sigma \;\rangle
+            }
+\\ \\
+%
+     {\bf(S) }
+   & 
+     \infrulemath{  \xtransm{ \conf{ A }{ \sigma }
+                           }{ l
+                           }{ \conf{ A' }{ \sigma' } 
+                            } 
+                }{ 
+                    \xtransm{ \conf{ \seqcc{A}{B} }{ \sigma }
+                           }{ l
+                           }{ \conf{ \seqcc{A'}{B} }{ \sigma' } 
+                            } 
+                 } 
+\\ \\
+%
+     {\bf(P) }
+   & 
+     \infrulemath{  \xtransm{ \conf{ A }{ \sigma } 
+                           }{ l
+                           }{ \conf{ A' }{ \sigma' } 
+                           } 
+                }{ 
+                    \begin{array}{c} 
+                     \xtransm{ \conf{ \paracc{A}{B} }{ \sigma } 
+                            }{ l
+                            }{ \conf{ \paracc{A'}{B} }{ \sigma' } 
+                            } 
+                  \\ 
+                     \xtransm{ \conf{ \paracc{B}{A} }{ \sigma } 
+                            }{ l
+                            }{ \conf{ \paracc{B}{A'} }{ \sigma' } 
+                            } 
+                  \end{array} 
+                } 
+\end{array}
+\] 
+\caption{Transition rules for Bach agents.
+\label{fig-bach-rules}}
+\end{figure}
+
+Primitives are composed in Bach to form more complex instructions,
+called agents, by using traditional composition operators from
+concurrency theory: sequential composition, parallel composition and
+non-deterministic choice. We shall only use the two first subsequently.
+Figure~\ref{fig-bach-rules} formally defines the operational semantics
+of agents.  Configurations are composed of two parts: the agent to be
+executed and the current multi-set of si-terms, denoting the current
+state of the store. In order to express the termination of the
+computation, a special terminating symbol $E$ is used and it is assumed that agents of the form
+$E ; A$, $E \parac A$ and $A \parac E$ are rewritten as $A$.
+
+Rules (T) to (N) follow the informal explanation given
+above. Accordingly, rule (T) expresses that the execution of the
+primitive $tell(t)$ always succeeds\footnote{Following the logic programming tradition, an execution is said to succeed if it has been performed. In contrast, the execution is said to fail in case it is suspended.} 
+and adds an occurrence of $t$ to
+the store. Rule (A) requires $ask(t)$ to succeed that a si-term $u$
+that is matched by $t$ is present on the store. As this primitive just makes a
+test, the contents of the store is unchanged. According to rule (G),
+the primitive $get(t)$ acts similarly, but removes one occurrence of
+$u$. Finally, as specified by rule (N), the primitive $nask(t)$
+succeeds in case no si-term $u$ of the store is matched by $t$. It will be
+useful later to remember the action being performed. This is achieved by placing a label on the transitions with $+t$, $*u$, $-u$, $\sim t$ indicating respectively the addition of $t$, the check of the presence of $u$, the removal of an occurrence of $u$ and the absence of si-terms matched by $t$.
+Rules (S) and
+(P) follow the conventional meaning for sequential and parallel
+compositions.
+
+
+\subsection{The BLPy implementation}
+
+For the purpose of exploiting federated inductive logic programming
+using Bach, an implementation of the version of Bach considered in this paper  has been developed in Python. It is based on sockets and 
+thus is mainly organized around, on the one hand, 
+a server, managing the store and the actions of primitives, and, on the other hand,
+clients, interacting with the store by means of the primitives. The
+use of sockets is quite classical. Taking 127.0.0.1 as local ip address
+and 8000 as port number, the server and client exchange messages of at
+most 1024 bytes, in loops basically consisting of sending and receiving
+these messages. That being said, the core part is threefold : it
+consists in defining a grammar to parse the messages, in implementing
+the store, and in designing an interpreter. As regards the grammar,
+our work is based in the parsimonious module, which provides fast
+arbitrary-lookahead parsers written in pure Python. The store is
+implemented by using three data structures:
+
+\begin{sloppypar}
+\begin{itemize}
+
+\item a dictionary, named \texttt{theStore}, which represent the real
+  contents of the store. For each functor it contains as a key it
+  associates a dictionary mapping si-terms formed with this functor to
+  integers, denoting the numbers of occurrences of the considered si-terms
+  currently on the store;
+
+\item a dictionary, named \texttt{theWaitingList}, that registers
+  process identifiers waiting for the presence of
+  si-terms. Technically, it associates with a functor name a list of
+  triples, composed of a process identifier, the si-term on
+  which the process is suspended and the destructive nature of the operation 
+  (according to the fact that the process is suspended on a ask or a get request);
+
+\item a dictionary, named \texttt{theNWaitingList}, that registers
+  process identifiers waiting for the absence of si-terms. Its
+  structure is similar to that of \texttt{theWaitingList} except that
+  processes are there waiting for the absence of the corresponding
+  si-terms and that no destructive feature is recorded.
+
+\end{itemize}
+\end{sloppypar}
+
+\noindent
+That being said, the implementation of the primitives is as follows:
+
+\begin{itemize}
+
+\item the execution of $tell(t)$ consists in checking whether the
+  functor of $t$, say $f$, is registered in \texttt{theStore}. It this
+  is the case and if $t$ already appears as a key of
+  \texttt{theStore[f]} then the number of associated occurrences is
+  increased by one. If $f$ is a key of \texttt{theStore} but $t$ is
+  not a key of \texttt{theStore[f]} then a new entry is added for $t$
+  with 1 as associated integer. If $f$ is not a key of
+  \texttt{theStore} then it is introduced in \texttt{theStore} keys
+  with a mapping from $t$ to $1$ as associated value. In all the
+  cases, the processes of \texttt{theWaitingList} are looked at to see
+  whether processes can be waken up.
+
+\item the execution of $ask(t)$ is dual. It succeeds in case the
+  functor $f$ of $t$ is a key of \texttt{theStore} and if there is a
+  si-term matching $t$ in \texttt{theStore[f]}. If this is not the
+  case then the identifier of the process running $ask(t)$ together
+  with $t$ is added to \texttt{theWaitingList}.
+
+\item the execution of $get(t)$ is similar but consists of removing an
+  occurrence of a matching $u$ is case such a si-term is present. In a
+  dual perspective as $tell(t)$ processes of \texttt{theNWaitingList}
+  are inspected to determine whether they can be waken up.
+
+\item finally the execution of $nask(t)$ is dual to that of $ask(t)$,
+  asking for the absence of si-terms $u$ matched by $t$ and resulting to
+  the process identifier being added to \texttt{theNWaitingList}
+  together with $t$ in case of suspension.
+  
+\end{itemize}
+
+Sequential and parallel compositions are not implemented directly but rather are treated at the Python level.
+
+As a proof of concept, a Python package, named BLPy, has been developped. It can be downloaded at the address xxx \mytodo{Manel to add the reference}. Besides the necessary files for handling the grammar, for executing the interpreter and for implementing the store and the primitives acting on it, the BLPy module is composed of two main files. On the one hand, a file, called \texttt{blsrv.py}, allows to execute the server. It basically creates an instance of a store, of a parser and of an interpreter. On that basis, it then listens for primitives transmitted by clients, executes them, and sends the results of the execution to the clients. On the other hand, a file, named \texttt{blcli.py}, allows to execute a client. It basically consists of a REPL thanks to which the user can introduce primitives to be executed and receive results from the server. Figure~\ref{blpy-test} shows the execution of three terminals, with the top left one launching the server and the two others clients. 
+
+\begin{figure}[t]
+\mytodo{Figure to be given by Manel}
+\caption{Sample of execution in BLPy
+\label{blpy-test}}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+

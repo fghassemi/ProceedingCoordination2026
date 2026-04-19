@@ -1,0 +1,504 @@
+\subsection{Types}
+\label{sec:mailbox-types}
+
+\begin{figure}[t]
+    \small
+  \centering
+    \begin{tabular}{lccl}
+      Mailbox types (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#MType}) \; & $J, K$ \; & $::=$ \; & $\mbtin{E} \mid \mbtout{E}$\\
+      Base types (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#BType}) \; & $C$ \; & $::=$ \; & $\unittype \mid \booltype$\\
+      Types (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#TType}) \; & $T, U$ \; & $::=$ \; & $C \mid J$\\
+    \end{tabular}
+  \caption{The syntax of types.}
+  \label{fig:type-syntax}
+\end{figure}
+
+A mailbox type (Figure \ref{fig:type-syntax}) consists of a capability and a pattern.
+A capability is either \emph{input} $\mbtin{}$ or \emph{output} $\mbtout$.
+Together, capability and pattern describe what messages are expected to be received from ($\mbtin$) or stored in ($\mbtout$) the mailbox.
+To build an intuition for mailbox types, consider the following examples:
+A mailbox with mailbox type $\mbtin{\mbmsg{m}}$ gives a process the right to receive a message \msg{m} from that mailbox,
+while a mailbox with type $\mbtout{\mbmsg{m}}$ requires the process to send a message $\msg{m}$ to that mailbox.
+% must store a $\msg{m}$ message in its mailbox, while a process with type $\mbtin{\mbmsg{m}}$ expects to receive a $\msg{m}$ message.
+For a mailbox with mailbox type $\mbtout{(\mbmsg{m} \mbchoice \mbmsg{n})}$, a process may choose whether to send message $\msg{m}$ or $\msg{n}$,
+whereas a mailbox with type $\mbtin{(\mbmsg{m} \mbchoice \mbmsg{n})}$ allows a process to receive either message $\msg{m}$ or $\msg{n}$ from that mailbox.
+% A process with mailbox type \mbtout{(\mbmsg{m} \mbchoice \mbmsg{n})} is able to choose whether to store message $\msg{m}$ or $\msg{n}$,
+% whereas a process using type \mbtin{(\mbmsg{m} \mbchoice \mbmsg{n})} needs to be able to receive both messages.
+The type $\mbtin{(\mbmsg{m} \mbcomp \mbmsg{n})}$ is associated to a mailbox that
+allows a process to receive both $\msg{m}$ and $\msg{n}$, while a mailbox with mailbox type $\mbtout{(\mbmsg{m} \mbcomp \mbmsg{n})}$ requires a process to send both $\msg{m}$ and $\msg{n}$ to the mailbox, in whichever order.
+Finally, a mailbox with type $\mbtout{(\mbstar{\mbmsg{m}})}$ allows a process
+to send an arbitrary number of $\msg{m}$ messages to the mailbox,
+while $\mbtin{(\mbstar{\mbmsg{m}})}$ describes a mailbox from which a process is able to receive an arbitrary number of $\msg{m}$ messages.
+% is able to decide how many $\msg{m}$ messages its mailbox stores, while $\mbtin{(\mbstar{\mbmsg{m}})}$ describes a mailbox which must be able to receive an arbitary amount of $\msg{m}$ messages.
+
+In addition to mailbox types, we also include \emph{base types}.
+While the unit type $\unittype$ is required by the type system, additional base types can be added.
+For demonstration purposes we also include a Boolean type $\booltype$.
+A type $T$ is then either some base type or a mailbox type.
+
+% To deal with the challenges of name aliasing and cyclic dependencies, described in Section \ref{sec:pat-intro}, Pat's solution is to use quasi-linear types.
+% To this end, mailbox types with \emph{usage annotations} are used.
+% Base types are not equipped with usage, as they do not suffer from the problems as mailbox types do.
+% There are two usage annotations: \emph{second class} ($\usecondclass$) and \emph{returnable} ($\ureturnable$).
+% Values of second class types can be used several times within the scope they are defined, however cannot leave that scope.
+% On the other hand, values of returnable types are consumed once and are allowed to appear in the return type of an expression.
+% Usage types ensure the following properties \cite{fowlerSpecialDeliveryProgramming2023}:
+% \begin{enumerate}
+%   \item There exists only a single returnable reference for each mailbox name in a process
+%   \item It is only possible to rename returnable references, thus avoiding aliasing problems with mailbox names
+%   \item A returnable reference is the final use of a mailbox name in a process
+% \end{enumerate}
+
+% For modifying usage-annotated types, we introduce several operators acting on such types, as seen in Figure \ref{fig:type-syntax}.
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#type_def}[Type Operators]
+%   The operators $\secondclassop{\;\cdot\;}$ and $\returnableop{\;\cdot\;}$ transform a type into a second class or returnable type, respectively.
+%   Additionally, the operator $\eraseop{\;\cdot\;}$ removes usage annotations from a type.
+%
+%   \vspace{-.4cm}
+%   \begin{minipage}[t]{.32\linewidth}
+%     \begin{align*}
+%       \secondclassop{C} &= C\\
+%       \secondclassop{T} &= T^\usecondclass\\
+%       \secondclassop{T^\eta} &= T^\usecondclass
+%     \end{align*}
+%   \end{minipage}
+%   \begin{minipage}[t]{.32\linewidth}
+%     \begin{align*}
+%       \returnableop{C} &= C\\
+%       \returnableop{T} &= T^\ureturnable\\
+%       \returnableop{T^\eta} &= T^\ureturnable\\
+%     \end{align*}
+%   \end{minipage}
+%   \begin{minipage}[t]{.32\linewidth}
+%     \begin{align*}
+%       \eraseop{C} &= C\\
+%       \eraseop{T^\eta} &= T
+%     \end{align*}
+%   \end{minipage}
+% \end{linkdef}
+
+% \subsubsection{Subtyping}
+% \label{sec:subtyping}
+%
+% \begin{figure}[t]
+%   \centering
+%   \begin{center}
+%         \begin{prooftree}
+%             \infer0{C \subtype C}
+%         \end{prooftree}
+%         \quad
+%         \begin{prooftree}
+%             \hypo{E \mbpinc F}
+%             \infer1{\mbtin{E} \subtype \mbtin{F}}
+%         \end{prooftree}
+%         \quad
+%         \begin{prooftree}
+%             \hypo{F \mbpinc E}
+%             \infer1{\mbtout{E} \subtype \mbtout{F}}
+%         \end{prooftree}
+%     \end{center}
+%   % \begin{minipage}[t]{0.6\textwidth}\vspace{0pt}
+%   %   \textbf{Subtyping} \hfill \fbox{$A \subtype B$}
+%   %   \begin{center}
+%   %         \begin{prooftree}
+%   %             \infer0{C \subtype C}
+%   %         \end{prooftree}
+%   %         \quad
+%   %         \begin{prooftree}
+%   %             \hypo{E \mbpinc F}
+%   %             \hypo{\eta_1 \subtype \eta_2}
+%   %             \infer2{\mbtin{E^{\eta_1}} \subtype \mbtin{F^{\eta_2}}}
+%   %         \end{prooftree}
+%   %         \quad
+%   %         \begin{prooftree}
+%   %             \hypo{F \mbpinc E}
+%   %             \hypo{\eta_1 \subtype \eta_2}
+%   %             \infer2{\mbtout{E^{\eta_1}} \subtype \mbtout{F^{\eta_2}}}
+%   %         \end{prooftree}
+%   %     \end{center}
+%   % \end{minipage}\hfill
+%   % \begin{minipage}[t]{0.37\textwidth}\vspace{0cm}
+%   %   \textbf{Usage subtyping} \hfill \fbox{$\eta_1 \subtype \eta_2$}
+%   %   \begin{align*}
+%   %     \eta \subtype \eta\\
+%   %     \ureturnable \subtype \usecondclass
+%   %   \end{align*}
+%   % \end{minipage}
+%
+%   \caption{The semantics of subtyping}
+%   \label{fig:subtyping-definition}
+% \end{figure}
+
+% \todo{ES}{Maybe move this entire subsection into the Pat section. We don't really need the definition of subtyping here.}
+% We now turn to one of the most complex aspects of mailbox types: \emph{subtyping}.
+% It is needed in mailbox typing to transform types into suitable forms, for example for guard expressions.
+% Subtyping (Figure \ref{fig:subtyping-definition}) is \emph{covariant} for mailbox types with receive capability and \emph{contravariant} for mailbox types with send capability \cite{deliguoroMailboxTypesUnordered2018}.
+% Intuitively, this means that a receiving mailbox can be replaced by another mailbox that can receive more messages, and a sending mailbox can be replaced by a another mailbox that can send fewer messages.
+% As an example, a mailbox with type $\mbtin{\mbmsg{m}}$ can safely be replaced with one having type $\mbtin{(\mbmsg{m} \mbchoice \mbmsg{n})}$, since it is allowed to receive more messages.
+% Similarly, for a mailbox with type $\mbtout{(\mbmsg{m} \mbchoice \mbmsg{n})}$ can safely be replaced with one of type $\mbtout{\mbmsg{m}}$, since it sends a smaller amount of messages.
+
+% Before defining subtyping on mailbox types, we have to define subtyping for usage-annotations.
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#UsageSubtype}[Usage Subtyping]
+%   \emph{Usage subtyping} (written $\eta_1 \subtype \eta_2$) is defined by the following axioms:
+%   $$\eta \subtype \eta \hskip0.2\textwidth \ureturnable \subtype \usecondclass.$$
+% \end{linkdef}
+
+% Subtyping on usage annotations only allows reflexivity, or for returnable types to be subtypes of second class types.
+% If we would also also subtyping in the other direction, i.e.\ $\usecondclass \subtype \ureturnable$, it would be possible to escape the restrictions of second class types using subtyping.
+% With subtyping defined on usage annotations, we can continue with subtyping on types.
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#Subtype}[Subtyping]
+%   \emph{Subtyping} (written $A \subtype B$) is defined by the rules:
+%   \begin{center}
+%         \begin{prooftree}
+%             \infer0{C \subtype C}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{E \mbpinc F}
+%             \hypo{\eta_1 \subtype \eta_2}
+%             \infer2{\mbtin{E^{\eta_1}} \subtype \mbtin{F^{\eta_2}}}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%             \hypo{F \mbpinc E}
+%             \hypo{\eta_1 \subtype \eta_2}
+%             \infer2{\mbtout{E^{\eta_1}} \subtype \mbtout{F^{\eta_2}}}
+%         \end{prooftree}
+%     \end{center}
+% \end{linkdef}
+
+% Base types can only be subtypes of themselves.
+% As mentioned previously, subtyping receive capabilities is covariant and subtyping send capabilities is contravariant.
+% Thus, in the subtyping rules for $\mbtin$ and $\mbtout$, the pattern inclusion requirement is flipped.
+
+\paragraph{Type Combination.}
+\label{sec:type-combiation}
+To model the dynamic nature of mailboxes receiving and sending messages, mailbox types should be able to be combined to create a new mailbox type.
+Mailbox types need to ensure that sends and receives are matched, i.e.\ a send is required to have a corresponding receive.
+For example, given mailbox types $\mbtout{\mbmsg{m}}$ and $\mbtin{(\mbmsg{m} \mbcomp \mbmsg{n})}$,
+the resulting type from the type combination should be $\mbtin{\mbmsg{n}}$.
+
+\begin{figure}[t]
+    {\small
+  \begin{minipage}[t]{0.55\textwidth}
+  \textbf{Pattern permutation} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#PatternEq}) \hfill \fbox{$E \sim F$}
+  \begin{center}
+        \begin{prooftree}
+            \infer0{(E \mbcomp F) \mbpeqca (F \mbcomp E)}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+          \hypo{F \mbpeqca F'}
+          \infer1{E \mbcomp F \mbpeqca E \mbcomp F'}
+        \end{prooftree}
+    \begin{center}
+        \begin{prooftree}
+            \infer0{E \mbpeqca E}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+          \hypo{F \mbpeqca E}
+          \infer1{E \mbpeqca F}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+          \hypo{E \mbpeqca F'}
+          \hypo{F' \mbpeqca F}
+          \infer2{E \mbpeqca F}
+        \end{prooftree}
+    \end{center}
+  \end{center}
+  \begin{center}
+        \begin{prooftree}
+            \infer0{E \mbcomp (F \mbcomp F') \mbpeqca (E \mbcomp F) \mbcomp F'}
+        \end{prooftree}
+  \end{center}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.44\textwidth}
+    \textbf{Type permutation} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#TypeEq}) \hfill \fbox{$T \sim U$}
+  \begin{center}
+        \begin{prooftree}
+            \infer0{C \mbpeqca C}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+          \hypo{E \mbpeqca F}
+          \infer1{\mbtout{E} \mbpeqca \mbtout{F}}
+        \end{prooftree}
+  \end{center}
+  \begin{center}
+        \begin{prooftree}
+          \hypo{E \mbpeqca F}
+          \infer1{\mbtin{E} \mbpeqca \mbtin{F}}
+        \end{prooftree}
+    \end{center}
+  \end{minipage}
+
+  \vspace{.5cm}
+
+  \textbf{Type combinations} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#TypeCombination}) \hfill \fbox{$\mbtcomb{T}{U}{T'}$}
+  \begin{center}
+    \begin{prooftree}
+        \infer0{\mbtcomb{C}{C}{C}}
+      \end{prooftree}
+      \qquad
+      \begin{prooftree}
+        \infer0{\mbtcomb{\mbtout{E}}{\mbtout{F}}{\mbtout{(E \mbcomp F)}}}
+      \end{prooftree}
+      \qquad
+      \begin{prooftree}
+        \infer0{\mbtcomb{\mbtout{E}}{\mbtin{(E \mbcomp F)}}{\mbtin{F}}}
+      \end{prooftree}
+    \end{center}
+    \begin{center}
+      \begin{prooftree}
+        \infer0{\mbtcomb{\mbtin{(E \mbcomp F)}}{\mbtout{E}}{\mbtin{F}}}
+      \end{prooftree}
+      \qquad
+      \begin{prooftree}
+        \hypo{\mbtcomb{T_1'}{T_2'}{T_3'}}
+        \hypo{T_1 \mbpeqca T_1'}
+        \hypo{T_2 \mbpeqca T_2'}
+        \hypo{T_3 \mbpeqca T_3'}
+        \infer4{\mbtcomb{T_1}{T_2}{T_3}}
+      \end{prooftree}
+    \end{center}
+}
+
+    \caption{The definitions of pattern and type permutations, as well as type combinations.}
+    \label{fig:permutations-definition}
+\end{figure}
+
+% Before formally defining type combinations, we require some preliminary definitions.
+In the original definitions of type combinations \cite{deliguoroMailboxTypesUnordered2018,fowlerSpecialDeliveryProgramming2023}, types are identified up to commutativity and associativity.
+In practice, this means that types such as $\mbtout{(\mbmsg{m} \mbcomp \mbmsg{n})}$ and $\mbtout{(\mbmsg{n} \mbcomp \mbmsg{m})}$ are considered to be equivalent.
+While this is true from a semantic point of view, syntactically these are different types
+and assuming equality up to a certain property creates problems when mechanizing such definitions.
+We require a way to express equivalence up to commutativity and associativity in
+the context of type combinations.  To this end, we define a relation between
+mailbox types, holding if they are permutations of each other.
+
+The relation $E \mbpeqca F$ (Figure \ref{fig:permutations-definition}) is expressing that two patterns can be rewritten into each other using commutativity and associativity of the $\mbcomp$ operator.
+% These rules are inspired by Rocq's definition of permutations of lists \cite{teamRocqStandardLibrary}, extended to be an equivalence relation.
+Note how these rules do not include the $\mbchoice$ operator.
+This is because type combination only considers type composition, and it is not required to include pattern choice in the definition of $\sim$ to achieve the desired properties.
+Note the difference between the relations $E \sim F$ and $E \mbpeq F$.
+The former is expressing that $E$ and $F$ can be rewritten into each other by swapping around patterns that appear between the composition operator.
+The latter relates two semantically equal patterns.
+For example, consider pattern $\mbmsg{m} \mbcomp \mbmsg{n}$.
+Both $\mbmsg{m} \mbcomp \mbone \sim \mbone \mbcomp \mbmsg{m}$ and $\mbmsg{m} \mbcomp \mbone \mbpeq \mbone \mbcomp \mbmsg{m}$ hold,
+while $\mbmsg{m} \mbcomp \mbone \mbpeq \mbmsg{m}$, but $\mbmsg{m} \mbcomp \mbone \not\sim \mbmsg{m}$.
+% With pattern equality we are additionally able to express $\mbmsg{m} \mbcomp \mbone \mbpeq \mbmsg{m}$, but $\mbmsg{m} \mbcomp \mbone \not\sim \mbmsg{m}$.
+
+% We now are able to extend $\mbpeqca$ to actual types, not just patterns.
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#TypeEq}
+%   Two types are considered \emph{permutations} (written $T \mbpeqca U$) if it derivable using the following rules:
+%
+%   \begin{center}
+%         \begin{prooftree}
+%             \infer0{C \mbpeqca C}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%           \hypo{E \mbpeqca F}
+%           \infer1{\mbtout{E} \mbpeqca \mbtout{F}}
+%         \end{prooftree}
+%         \qquad
+%         \begin{prooftree}
+%           \hypo{E \mbpeqca F}
+%           \infer1{\mbtin{E} \mbpeqca \mbtin{F}}
+%         \end{prooftree}
+%     \end{center}
+% \end{linkdef}
+
+The relation $\sim$ is extended to mailbox types by relating the underlying patterns.
+Base types are always considered to be permutations of each other.
+
+% As was the case with some previous definitions, type combination is originally defined as a partial operator on types \cite{deliguoroMailboxTypesUnordered2018,fowlerSpecialDeliveryProgramming2023}.
+% Again, instead of defining a function, we use a relation to capture the process of type combination.
+
+% \begin{figure}[t]
+%   % \textbf{Type combinations} \hfill \fbox{$\mbtcomb{T}{U}{T'}$}
+%   \begin{center}
+%     \begin{prooftree}
+%         \infer0{\mbtcomb{C}{C}{C}}
+%       \end{prooftree}
+%       \qquad
+%       \begin{prooftree}
+%         \infer0{\mbtcomb{\mbtout{E}}{\mbtout{F}}{\mbtout{(E \mbcomp F)}}}
+%       \end{prooftree}
+%       \qquad
+%       \begin{prooftree}
+%         \infer0{\mbtcomb{\mbtout{E}}{\mbtin{(E \mbcomp F)}}{\mbtin{F}}}
+%       \end{prooftree}
+%     \end{center}
+%     \begin{center}
+%       \begin{prooftree}
+%         \infer0{\mbtcomb{\mbtin{(E \mbcomp F)}}{\mbtout{E}}{\mbtin{F}}}
+%       \end{prooftree}
+%       \qquad
+%       \begin{prooftree}
+%         \hypo{\mbtcomb{T_1'}{T_2'}{T_3'}}
+%         \hypo{T_1 \mbpeqca T_1'}
+%         \hypo{T_2 \mbpeqca T_2'}
+%         \hypo{T_3 \mbpeqca T_3'}
+%         \infer4{\mbtcomb{T_1}{T_2}{T_3}}
+%       \end{prooftree}
+%     \end{center}
+%     % TODO: Move this into the Pat chapter
+%     % \begin{minipage}[t]{0.53\textwidth}
+%     %   \begin{tabular*}{\linewidth}{@{}l@{\extracolsep{\fill}}r@{}}
+%     %     \textbf{Usage-annotated} & \fbox{$\mbtucomb{A}{B}{A'}$}\\
+%     %     \textbf{type combinations} &
+%     %   \end{tabular*}
+%     %   \begin{center}
+%     %     \begin{prooftree}
+%     %       \infer0{\mbtucomb{C}{C}{C}}
+%     %     \end{prooftree}
+%     %     \quad
+%     %     \begin{prooftree}
+%     %       \hypo{\mbtucomb{\eta_1}{\eta_2}{\eta}}
+%     %       \hypo{\mbtcomb{J_1}{J_2}{K}}
+%     %       \infer2{\mbtucomb{J_1^{\eta_1}}{J_2^{\eta_2}}{K^{\eta}}}
+%     %     \end{prooftree}
+%     %   \end{center}
+%     % \end{minipage}
+%     % \hfill
+%     % \begin{minipage}[t]{0.46\textwidth}\vspace{-\baselineskip}
+%     %   \textbf{Usage combinations} \hfill \fbox{$\mbtucomb{\eta_1}{\eta_2}{\eta_3}$}
+%     %   \begin{align*}
+%     %     \mbtucomb{\usecondclass}{\usecondclass}{\usecondclass}\\
+%     %     \mbtucomb{\usecondclass}{\ureturnable}{\ureturnable}
+%     %   \end{align*}
+%     % \end{minipage}
+%
+%   \caption{The definition of type combination}
+%   \label{fig:type-combination-definition}
+% \end{figure}
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#TypeCombination}[Type Combination]
+%   \emph{Type combination} is a ternary relation (written \mbtcomb{T}{U}{T'}), where for types $T$ and $U$, $T'$ is the type combination if it is derivable using the following rules:
+%   % For types $T$ and $U$, $T'$ is the \emph{type combination} (written \mbtcomb{T}{U}{T'}) if it is derivable using the following rules:
+%
+%   \begin{center}
+%     \begin{prooftree}
+%         \infer0{\mbtcomb{C}{C}{C}}
+%       \end{prooftree}
+%       \qquad
+%       \begin{prooftree}
+%         \infer0{\mbtcomb{\mbtout{E}}{\mbtout{F}}{\mbtout{(E \mbcomp F)}}}
+%       \end{prooftree}
+%       \qquad
+%       \begin{prooftree}
+%         \infer0{\mbtcomb{\mbtout{E}}{\mbtin{(E \mbcomp F)}}{\mbtin{F}}}
+%       \end{prooftree}
+%     \end{center}
+%     \begin{center}
+%       \begin{prooftree}
+%         \infer0{\mbtcomb{\mbtin{(E \mbcomp F)}}{\mbtout{E}}{\mbtin{F}}}
+%       \end{prooftree}
+%       \qquad
+%       \begin{prooftree}
+%         \hypo{\mbtcomb{T_1'}{T_2'}{T_3'}}
+%         \hypo{T_1 \mbpeqca T_1'}
+%         \hypo{T_2 \mbpeqca T_2'}
+%         \hypo{T_3 \mbpeqca T_3'}
+%         \infer4{\mbtcomb{T_1}{T_2}{T_3}}
+%       \end{prooftree}
+%     \end{center}
+% \end{linkdef}
+
+
+Type combinations model the concurrent interaction between processes acting on the same mailbox.
+For example, assume processes $P_1$ and $P_2$ that both interact with mailbox $m$.
+Process $P_1$ stores some message $\msg{m}$, while $P_2$ stores some message
+$\msg{n}$.
+Then, mailbox $m$ can be described by the type combination
+$\mbtcomb{\mbtout{\mbmsg{m}}}{\mbtout{\mbmsg{n}}}{\mbtout{(\mbmsg{m} \mbcomp \mbmsg{n}})}$.
+If instead, we have type $\mbtin{(\mbmsg{m} \mbcomp \mbmsg{n})}$, then we get the type combination
+$\mbtcomb{\mbtout{\mbmsg{m}}}{\mbtin{(\mbmsg{m} \mbcomp \mbmsg{n}})}{\mbtin{\mbmsg{n}}}$.
+Figure \ref{fig:type-combination} shows a example with three mailbox types.
+There are different ways of arranging the combination, but in the end, the result always balances out to an empty mailbox.
+
+\begin{figure}[t]
+  \hbox{\scriptsize
+  \hspace{-5pt}
+  \begin{forest}
+    for tree={grow'=90, s sep=0.2mm},
+    for leaves={tier=leaf},
+    [$\mbtin{\mbone}$
+      [$\mbtin{(\mbmsg{n} \mbcomp \mbone)}$
+        [$\mbtin{(\mbmsg{m} \mbcomp \mbmsg{n} \mbcomp \mbone)}$]
+        [$\mbtout{\mbmsg{m}}$]
+      ]
+      [$\mbtout{\mbmsg{n}}$]
+    ]
+  \end{forest}
+  \vline\quad\hspace{-3mm}
+  \begin{forest}
+    for tree={grow'=90, s sep=.2mm},
+    for leaves={tier=leaf},
+    [$\mbtin{\mbone}$
+      [$\mbtin{(\mbmsg{m} \mbcomp \mbone)}$
+        [$\mbtin{(\mbmsg{m} \mbcomp \mbmsg{n} \mbcomp \mbone)}$]
+        [$\mbtout{\mbmsg{n}}$]
+      ]
+      [$\mbtout{\mbmsg{m}}$]
+    ]
+  \end{forest}
+  \vline\quad\hspace{-3mm}
+  \begin{forest}
+    for tree={grow'=90, s sep=.2mm},
+    for leaves={tier=leaf},
+    [$\mbtin{\mbone}$
+      [$\mbtin{(\mbmsg{m} \mbcomp \mbmsg{n} \mbcomp \mbone)}$]
+      [$\mbtout{(\mbmsg{m} \mbcomp \mbmsg{n})}$
+        [$\mbtout{\mbmsg{m}}$]
+        [$\mbtout{\mbmsg{n}}$]
+      ]
+    ]
+  \end{forest}
+  }
+  \caption{
+    Example of possible type combinations for three mailbox types.
+    Each top node represents the type of the same mailbox in three different processes that run in parallel.
+    Edges indicate the type combination relation.
+  }
+  \label{fig:type-combination}
+\end{figure}
+
+Figure \ref{fig:permutations-definition} shows the definition of the \emph{type combination relation}.
+Note how there is no rule for type combination of two types with input capabilities.
+This would be allowing parallel reads of the same mailbox, which is not safe \cite{deliguoroMailboxTypesUnordered2018}, and thus not permitted.
+The last rule in the definition of type combinations allows us to substitute types for their permutations.
+Note how the previous definition of pattern equality $E \mbpeq F$ is specifically \emph{not} used in the definition of type combination.
+%
+The combination operation is a \emph{syntactic} operation, i.e.\ we can only
+combine types that are \emph{syntactically equal} to the forms specified by the
+type combination operation (up to commutativity and associativity).
+To combine other mailbox types, for example
+$\mbtout{\mbmsg{m}}$ and $\mbtin{(\mbmsg{m} \mbchoice \mbmsg{m})}$ we must firstly use
+\emph{subtyping} to rewrite the latter mailbox type to $\mbtin{(\mbmsg{m} \mbcomp \mbone)}$
+before using the combination operator. We will discuss subtyping further in
+Section~\ref{sec:pat-programming-language}.
+
+
+% SJF: think this has been said already
+%%The need for a notion of equivalence up to certain properties is due to type combination being commutative and associative.
+
+% TODO: Move this into the next Section
+% Figure \ref{fig:type-combination-definition} shows the extension of type combination to \emph{usage-annotated type combination}.
+% For usage annotations, we have to obey the rule that a $\usecondclass$ variable has to occur before a $\ureturnable$ variable.
+% Otherwise, we would violate the property that any $\ureturnable$ variable appears as the final one in a process.
+% Additionally, combining two $\ureturnable$ is not allowed, otherwise there could be multiple instances of a returnable mailbox name per thread.
+
+\paragraph{Mechanization.}
+Our mechanization of mailbox types differs from the original formalizations in that we treat partial operations as relations,
+and include the notion of pattern and type permutations.
+This addition allows us to prove desired properties, such as commutativity of type combinations.
+Naturally, proofs about type combinations become more complex since we have to cover additional cases.

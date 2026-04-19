@@ -1,0 +1,179 @@
+\subsection{Quasi-linear Mailbox Types}
+
+Pat uses quasi-linear typing \cite{kobayashiQuasilinearTypes1999,ennalsLinearTypesPacket2004a} to solve the problem of name aliasing and cyclic dependency between mailboxes.
+To this end, every mailbox type is equip\-ped with a \emph{usage annotation}: either \emph{second class} ($\usecondclass$) or \emph{returnable} ($\ureturnable$).
+Values of second class types can be used several times within the scope they are
+defined, however, they cannot leave that scope.  On the other hand, values of
+returnable types can be let-bound and used as the subject of a guard, but must
+appear as the last lexical occurrence of the name.
+Base types are not equipped with usage, as they do not suffer from the aliasing problems.
+
+\begin{figure}[t]
+    {\small
+  \centering
+  \begin{tabular}{p{7.5cm}p{5cm}}
+    \begin{tabular}{lccl}
+      Usage annotations (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#UsageAnnotation}) \; & $\eta$ \; & $::=$ \; & $\usecondclass \mid \ureturnable$\\
+      Usage-annotated types (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#TUsage}) \; & $A, B$ \; & $::=$ \; & $C \mid J^\eta$\\
+    \end{tabular}
+    &
+    \begin{tabular}{p{2.5cm}p{2.5cm}}
+      \multicolumn{2}{l}{Type operations (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#returnType},
+        \rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#returnUsage},
+        \rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#secondType},
+        \rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#secondUsage})}\\
+      \begin{tabular}{lcl}
+        $\secondclassop{C}$ & $=$ & $C$\\
+        $\secondclassop{J}$ & $=$ & $J^\usecondclass$\\
+        $\secondclassop{J^\eta}$ & $=$ & $J^\usecondclass$
+      \end{tabular}
+      &
+      \begin{tabular}{lcl}
+        $\returnableop{C}$ & $=$ & $C$\\
+        $\returnableop{J}$ & $=$ & $J^\ureturnable$\\
+        $\returnableop{J^\eta}$ & $=$ & $J^\ureturnable$
+      \end{tabular}
+    \end{tabular}
+  \end{tabular}
+
+  \vspace{.5cm}
+
+  \begin{minipage}[t]{0.53\textwidth}
+    \begin{tabular*}{\linewidth}{@{}l@{\extracolsep{\fill}}r@{}}
+      \textbf{Usage-annotated} & \fbox{$\mbtucomb{A}{B}{A'}$}\\
+      \textbf{type combinations} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#TypeUsageCombination}) &
+    \end{tabular*}
+    \begin{center}
+      \begin{prooftree}
+        \infer0{\mbtucomb{C}{C}{C}}
+      \end{prooftree}
+      \quad
+      \begin{prooftree}
+        \hypo{\mbtucomb{\eta_1}{\eta_2}{\eta}}
+        \hypo{\mbtcomb{J_1}{J_2}{K}}
+        \infer2{\mbtucomb{J_1^{\eta_1}}{J_2^{\eta_2}}{K^{\eta}}}
+      \end{prooftree}
+    \end{center}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.46\textwidth}\vspace{-\baselineskip}
+    \begin{tabular*}{\linewidth}{@{}l@{\extracolsep{\fill}}r@{}}
+      \textbf{Usage} & \fbox{$\mbtucomb{\eta_1}{\eta_2}{\eta_3}$}\\
+      \textbf{combinations} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#UsageCombination})&
+    \end{tabular*}
+    \begin{mathpar}
+      \mbtucomb{\usecondclass}{\usecondclass}{\usecondclass}
+
+      \mbtucomb{\usecondclass}{\ureturnable}{\ureturnable}
+  \end{mathpar}
+  \end{minipage}
+
+  \vspace{.5cm}
+
+  \begin{minipage}[t]{0.37\textwidth}\vspace{0cm}
+    \begin{tabular*}{\linewidth}{@{}l@{\extracolsep{\fill}}r@{}}
+      \textbf{Usage} & \fbox{$\eta_1 \subtype \eta_2$}\\
+      \textbf{subtyping} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#UsageSubtype}) &
+    \end{tabular*}
+    \begin{mathpar}
+      \eta \subtype \eta
+
+      \ureturnable \subtype \usecondclass
+    \end{mathpar}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.6\textwidth}\vspace{0pt}
+    \textbf{Subtyping} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#Subtype}) \hfill \fbox{$A \subtype B$}
+    \begin{center}
+          \begin{prooftree}
+              \infer0{C \subtype C}
+          \end{prooftree}
+          \quad
+          \begin{prooftree}
+              \hypo{E \mbpinc F}
+              \hypo{\eta_1 \subtype \eta_2}
+              \infer2{\mbtin{E^{\eta_1}} \subtype \mbtin{F^{\eta_2}}}
+          \end{prooftree}
+          \quad
+          \begin{prooftree}
+              \hypo{F \mbpinc E}
+              \hypo{\eta_1 \subtype \eta_2}
+              \infer2{\mbtout{E^{\eta_1}} \subtype \mbtout{F^{\eta_2}}}
+          \end{prooftree}
+      \end{center}
+  \end{minipage}
+}
+
+  \caption{Definitions of usage-annotated types.}
+  \label{fig:usage-annotation-definition}
+\end{figure}
+
+Figure \ref{fig:usage-annotation-definition} shows definitions of usage annotations, usage-annotated types and relations on them.
+We also define operators $\secondclassop{\cdot}$ and $\returnableop{\cdot}$ to turn types into second class and returnable respectively.
+%
+Additionally, we define a mailbox type to be \emph{unrestricted} (written $\unr{A}$) (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Types.html\#Unrestricted})
+if it is a base type, or $A = \mbtout{\mbone^\usecondclass}$.
+
+% \begin{figure}[t]
+%   \begin{minipage}[t]{0.37\textwidth}\vspace{0cm}
+%     % \textbf{Usage subtyping} \hfill \fbox{$\eta_1 \subtype \eta_2$}
+%     \begin{align*}
+%       \eta \subtype \eta\\
+%       \ureturnable \subtype \usecondclass
+%     \end{align*}
+%   \end{minipage}\hfill
+%   \begin{minipage}[t]{0.6\textwidth}\vspace{0pt}
+%     % \textbf{Subtyping} \hfill \fbox{$A \subtype B$}
+%     \begin{center}
+%           \begin{prooftree}
+%               \infer0{C \subtype C}
+%           \end{prooftree}
+%           \quad
+%           \begin{prooftree}
+%               \hypo{E \mbpinc F}
+%               \hypo{\eta_1 \subtype \eta_2}
+%               \infer2{\mbtin{E^{\eta_1}} \subtype \mbtin{F^{\eta_2}}}
+%           \end{prooftree}
+%           \quad
+%           \begin{prooftree}
+%               \hypo{F \mbpinc E}
+%               \hypo{\eta_1 \subtype \eta_2}
+%               \infer2{\mbtout{E^{\eta_1}} \subtype \mbtout{F^{\eta_2}}}
+%           \end{prooftree}
+%       \end{center}
+%   \end{minipage}
+%
+%   \caption{Subtyping with usage annotations.}
+%   \label{fig:usage-subtyping}
+% \end{figure}
+
+% \subsubsection{Usage-annotated Type Combination.}
+\paragraph{Usage-annotated Type Combination.}
+We extend type combination to \emph{usage-annotated type combination} by incorporating usage combination.
+% Figure \ref{fig:usage-annotated-type-combination} shows the extension of type combination to \emph{usage-annotated type combination}.
+For usage annotations, we have to obey the rule that a $\usecondclass$ variable has to occur before a $\ureturnable$ variable.
+Otherwise, we would violate the property that any $\ureturnable$ variable appears as the final one in a process.
+Combining two $\ureturnable$ types is not allowed as there could otherwise be multiple instances of a returnable mailbox name per thread.
+
+\paragraph{Subtyping.}
+Subtyping is needed in mailbox typing to rewrite mailbox types so that they can
+be combined by the type combination operator.
+For mailbox types, subtyping is \emph{covariant} for types with receive
+capability and \emph{contravariant} for types with send capability
+\cite{deliguoroMailboxTypesUnordered2018}.
+Subtyping also allows us to treat returnable types as second-class types.
+
+%%   Subtyping on usage annotations only
+%%   allows reflexivity, or for returnable types to be subtypes of second class
+%%   types.  If we would also allow subtyping in the other direction, i.e.\
+%%   $\usecondclass \subtype \ureturnable$, it would be possible to escape the
+%%   restrictions of second class types using subtyping.
+
+%% SJF: I don't think this really adds much
+%%   \paragraph{Mechanization.}
+%%
+%%   The addition of usage annotations to mailbox types makes the mechanization more
+%%   complex in that proofs require reasoning about usage.  Fortunately, we can use
+%%   already proven properties about non-usage counterpart definitions from previous
+%%   sections.  With them, we only have to argue about changes introduced by having a
+%%   restriction on usage annotations of types.
+

@@ -1,0 +1,24 @@
+
+\subsection{Tree-width definition}
+We adopt the definition of tree-width as proposed in \cite{ClassOfGraphsBoundedTreewidth}.
+
+
+Let $G = (V, E)$ be a graph. A tree-decomposition of $G$ is a pair 
+$\bigl(\{X_i \mid i \in I\}, T = (I, F)\bigr)$, with 
+$\{X_i \mid i \in I\}$ a family of subsets of $V$, and $T$ a tree, with the following properties:
+\begin{itemize}
+    \item $\bigcup_{i \in I} X_i = V$
+    \item For every edge $e = (v, w) \in E$, there is a subset $X_i$, $i \in I$ with $v \in X_i$ and $w \in X_i$.
+    \item For all $i, j, k \in I$, if $j$ lies on the path in $T$ from $i$ to $k$, then 
+    \[
+        X_i \cap X_k \subseteq X_j.
+    \]
+\end{itemize}
+
+The \emph{tree-width} of a tree-decomposition $\bigl(\{X_i \mid i \in I\}, T\bigr)$ is 
+\[
+    \max_{i \in I} |X_i| - 1.
+\]
+
+The tree-width of $G$, denoted by $\operatorname{tree\text{-}width}(G)$, is the minimum tree-width 
+of a tree-decomposition of $G$, taken over all possible tree-decompositions of $G$.

@@ -1,0 +1,65 @@
+\begin{center}
+$
+\begin{bNiceArray}{c}[last-row] 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ \text{\#} \\ T_1 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 1 \\ 0 \\ 1 \\ 0 \\ 0 \\ 1 \\ \text{\#} \\ T_2 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ \text{\#} \\ T_3 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0 \\ \text{\#} \\ T_4 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 1 \\ 1 \\ 1 \\ 1 \\ 0 \\ 0 \\ \text{\#} \\ T_5 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ \text{\#} \\ T_6 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row,last-col] 0 & p_1\\ 0 & p_2\\ 0 & \\ 0 &  \\ 0 &  \\ 0 & \\ \text{\#} & p_1\xrightarrow{ar}p_2 \text{ ?} \\ T_7 & \end{bNiceArray}
+$
+\end{center}
+%%%%%%%%%%%%%%%%% NEW COMMAND
+%\newcommand{\MatrixBlock}[13]{%
+%  \IfStrEq{#1}{}{%
+%    % No operator name
+%    $\begin{bNiceArray}{c}
+%      #2 \\ #3 \\ #4 \\ \vdots \\
+%      \cellcolor{Orchid!20} #5 \\ \cellcolor{Orchid!20} #6 \\ \cellcolor{Orchid!20} #7 \\
+%      \cellcolor{Salmon!20} #8 \\ \cellcolor{Salmon!20} #9 \\ \cellcolor{Salmon!20} #10 \\
+%      \cellcolor{Lavender!30} #11 \\ \cellcolor{Lavender!30} #12 \\ \cellcolor{Lavender!30} #13
+%    \end{bNiceArray}$%
+%  }{%
+%    % With operator name
+%    $\begin{bNiceArray}{c}[first-row]
+%      #1 \\
+%      #2 \\ #3 \\ #4 \\ \vdots \\
+%      \cellcolor{Orchid!20} #5 \\ \cellcolor{Orchid!20} #6 \\ \cellcolor{Orchid!20} #7 \\
+%      \cellcolor{Salmon!20} #8 \\ \cellcolor{Salmon!20} #9 \\ \cellcolor{Salmon!20} #10 \\
+%      \cellcolor{Lavender!30} #11 \\ \cellcolor{Lavender!30} #12 \\ \cellcolor{Lavender!30} #13
+%    \end{bNiceArray}$%
+%  }%
+%}
+%\foreach \op/\pone/\ptwo/\pthree/\poneA/\poneB/\poneC/\ptwoA/\ptwoB/\ptwoC/\pthreeA/\pthreeB/\pthreeC in {
+%  /0/0/0/0/0/0/0/0/0/0/0/0,
+%  \opf/0/0/1//0/0/0/0/0/0/0/0/0,
+%  /0/0/0/0/0/0/0/0/0/0/0/0,
+%  \opa/1/0/0/0/0/0/0/0/0/0/1/1,
+%  \opd/1/1/0  /0/0/1  /0/0/0  /0/1/1,
+%  \opg/1/1/1  /0/0/1  /0/0/1  /0/0/1,
+%  /1/1/0  /0/0/0  /0/0/0  /0/0/0,
+%  /0/1/0  /0/0/0  /0/0/0  /0/0/0,
+%  \oph/0/1/1  /0/0/1  /0/0/1  /0/0/1,
+%  /0/1/0  /0/0/0  /0/0/0  /0/0/0,
+%  /0/0/0  /0/0/0  /0/0/0  /0/0/0,
+%  \opi/0/0/1  /0/0/1  /0/0/1  /0/0/1,
+%  /0/0/0  /0/0/0  /0/0/0  /0/0/0,
+%  \opj/0/0/1  /0/0/1  /0/0/1  /0/0/1,
+%  /0/0/0  /0/0/0  /0/0/0  /0/0/0,
+%  \opb/1/0/0  /0/0/0  /0/0/0  /1/0/0,
+%  \opk/1/0/1  /0/2/0  /0/0/1  /0/0/1,
+%  /1/0/0  /0/0/0  /0/0/0  /0/0/0,
+%  \ope/1/1/0  /0/2/0  /0/0/1  /1/0/1,
+%  \opl/1/1/1  /0/0/1  /0/0/1  /0/0/1,
+%  /0/1/1  /0/0/0  /0/0/0  /0/0/0,
+%  /0/1/0  /0/0/0  /0/0/0  /0/0/0,
+%  \opc/1/1/0  /0/0/1  /0/0/1  /0/1/0,
+%  \opm/1/1/1  /0/1/0  /0/0/1  /0/0/1,
+%  /1/0/1  /0/0/0  /0/0/0  /0/0/0,
+%  /1/0/0  /0/0/0  /0/0/0  /0/0/0,
+%  /0/0/0  /0/0/0  /0/0/0  /0/0/0,
+%  \opn/0/0/1  /0/0/0  /0/0/0  /0/0/0,
+%  /0/0/0  /0/0/1  /0/0/1  /0/0/1
+%}{
+%  \MatrixBlock{\op}{\pone}{\ptwo}{\pthree}{\poneA}{\poneB}{\poneC}{\ptwoA}{\ptwoB}{\ptwoC}{\pthreeA}{\pthreeB}{\pthreeC} &
+%}

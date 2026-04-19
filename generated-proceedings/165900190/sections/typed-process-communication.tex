@@ -1,0 +1,110 @@
+% \subsection{Typed Process Communication}
+\label{sec:typed-process-communication}
+
+In programming languages designed with a focus on communication, there are two main models for communication abstractions.
+\emph{Channel-based} languages such as Go \cite{thegodeveloperteamGoProgrammingLanguage} and Rust \cite{matsakisRustLanguage2014}, use channels where the
+sending of a message in one process is paired with the receive of the message in another process.
+On the other hand, \emph{actor-based} languages such as Erlang \cite{armstrongHistoryErlang2007a} and Elixir \cite{theelixirteamElixirLanguage} operate
+using \emph{mailboxes} that store messages that processes can retrieve.
+
+% Figure \ref{fig:processes} shows the difference between both approaches in a visual way.
+% Each circle represent a process, while the arrows indicate the direction of communication.
+
+One of the most important distinctions between both models is the order in which messages are processed.
+While channel-based communication imposes a strict order on the arrival of messages,
+with actor-based communication, a process is typically able to choose in which order it retrieves messages from a mailbox.
+
+% With both models there are challenges in ensuring correct communication.
+% Undesired behaviour in communication protocols should be detected and avoided, such as deadlocks and protocol violations.
+For both the channel-based and actor-based approach, there exist type systems that can give certain guarantees about the correctness of a protocol implementation.
+% In particular, \emph{session types} are typically used for reasoning about channel-based systems 
+
+% \tikzset{Process Node/.style={circle, draw, thick, text width=0.3cm}}
+% \tikzset{Channel Node/.style={draw, thick, rectangle, minimum height=.3cm, minimum width=1.0cm}}
+% \begin{figure}[t]
+%     \centering
+%     \begin{tabular}{cc}
+%         \begin{tikzpicture}
+%             \tikzset{node distance = 2cm}
+%             \node [Process Node] (top-left-proc) {};
+%             \node [Process Node, right=of top-left-proc] (top-right-proc) {};
+%             \coordinate(top-mid) at ($(top-left-proc)!0.5!(top-right-proc)$);
+%             \node [Process Node, below =of top-mid] (bottom-proc) {};
+%             \coordinate(left-mid) at ($(top-left-proc)!0.5!(bottom-proc)$);
+%             \coordinate(right-mid) at ($(top-right-proc)!0.5!(bottom-proc)$);
+%
+%             \draw (left-mid) node[Channel Node, rotate=-60] (left-channel)
+%             {   
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%             };
+%             \draw (right-mid) node[Channel Node, rotate=60] (right-channel)
+%             {
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%             };
+%             \draw (top-mid) node[Channel Node] (top-channel)
+%             {
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%             };
+%
+%             \path[<->, draw, thick] (top-left-proc) -- (left-channel);
+%             \path[<->, draw, thick] (bottom-proc) -- (left-channel);
+%             \path[<->, draw, thick] (top-right-proc) -- (right-channel);
+%             \path[<->, draw, thick] (bottom-proc) -- (right-channel);
+%             \path[<->, draw, thick] (top-right-proc) -- (top-channel);
+%             \path[<->, draw, thick] (top-left-proc) -- (top-channel);
+%
+%             \node[below=of bottom-proc, yshift=2.0cm] (text) {Channel-based};
+%         \end{tikzpicture}
+%         \hspace{1.5cm}
+%         &
+%         \begin{tikzpicture}
+%             \tikzset{node distance = 2cm}
+%             \node [Process Node] (top-left-proc) {};
+%             \node [Process Node, right=of top-left-proc] (top-right-proc) {};
+%             \coordinate(top-mid) at ($(top-left-proc)!0.5!(top-right-proc)$);
+%             \node [Process Node, below =of top-mid] (bottom-proc) {};
+%             \coordinate(left-mid) at ($(top-left-proc)!0.5!(bottom-proc)$);
+%             \coordinate(right-mid) at ($(top-right-proc)!0.5!(bottom-proc)$);
+%
+%             \node[Channel Node, below=of top-right-proc, xshift=0.5cm, yshift=1.9cm] (top-right-mailbox)
+%             {
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%             };
+%             \node[Channel Node, below=of top-left-proc, xshift=-0.5cm, yshift=1.9cm] (top-left-mailbox)
+%             {
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%             };
+%             \node[Channel Node, above=of bottom-proc, yshift=-1.8cm] (bottom-mailbox)
+%             {
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%                 \includegraphics[height=.2cm]{images/letter.png}
+%             };
+%
+%             \path[->, draw, thick] (top-left-proc) -- (top-right-mailbox);
+%             \path[->, draw, thick] (top-left-proc) -- (bottom-mailbox);
+%             \path[->, draw, thick] (top-right-proc) -- (top-left-mailbox);
+%             \path[->, draw, thick] (top-right-proc) -- (bottom-mailbox);
+%             \path[->, draw, thick] (bottom-proc.east) -- (top-right-mailbox);
+%             \path[->, draw, thick] (bottom-proc.west) -- (top-left-mailbox);
+%
+%             \path[->, draw, thick] (top-right-mailbox) -- (top-right-proc);
+%             \path[->, draw, thick] (top-left-mailbox) -- (top-left-proc);
+%             \path[->, draw, thick] (bottom-mailbox) -- (bottom-proc);
+%
+%             \node[below=of bottom-proc, yshift=2.0cm] (text) {Actor-based};
+%         \end{tikzpicture}
+%     \end{tabular}
+%     \caption{Channel-based and actor-based communication of processes \todo{ES}{Is this figure even needed?}}
+%     \label{fig:processes}
+% \end{figure}

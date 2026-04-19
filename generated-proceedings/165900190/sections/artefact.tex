@@ -1,0 +1,135 @@
+\lstset{basicstyle={\fontfamily{tx}\sffamily\small}}
+
+\section{Artefact Evaluation}
+
+This paper comes with a Rocq mechanization as artefact.
+We provide a Docker image, as well as the Rocq source files.
+The artefact can be downloaded under the following link: \url{https://doi.org/10.5281/zenodo.18769147}.
+
+\subsection{Badge claims}
+We claim two badges (i) Artefact Available and (ii) Artefact Functional.
+The reasons why our tool fulfils the requirements set out by the EAPLS scheme are outlined below.
+
+\vspace{1\baselineskip}
+\noindent
+\textbf{Functional outcomes}
+\begin{itemize}
+  \item $F_1$: All definitions described in the paper are formally defined in Rocq
+  \item $F_2$: Every lemma stated in the paper is encoded as a formal statement in Rocq
+  \item $F_3$: All claimed results in the paper are fully proven in Rocq
+\end{itemize}
+
+\subsection{Quick start}
+The Rocq project can be build using the provided Docker container or with a local Rocq installation (at least version $9.0$).
+To check that Docker is installed, execute \lstinline|docker info|.
+To check that Rocq is installed, execute \lstinline|rocq --version|.
+
+\begin{figure}
+  \begin{itemize}
+    \item \lstinline{doc/} \textit{(HTML documentation generated from the Rocq source files)}
+    \item \lstinline{theories/} \textit{(Rocq sources)}
+  \end{itemize}
+
+  \caption{Source code directory structure}
+  \label{fig:dir-structure}
+\end{figure}
+
+The Rocq source code of the project can be found in \lstinline|mailbox-types-rocq.zip|.
+Figure \ref{fig:dir-structure} describes the directory structure of the project.
+
+\subsection{Functional Evaluation}
+This section guides the verification of our functional outcomes.
+
+\subsubsection{$F_1$: All definitions in the paper are formally defined in Rocq.}
+The following table shows a mapping from definitions in the paper to corresponding Rocq definitions and where to find them.
+\pagebreak
+\small
+\begin{tabularx}{\textwidth}{|L|l|l|l|}
+\hline
+    \textbf{Definition} & \textbf{Paper} & \textbf{Rocq File} & \textbf{Rocq Name} \\ \hline
+    Mailbox configuration & Section 2.1 & Message.v & \lstinline|MailboxConfig| \\ \hline
+    Empty mailbox & Section 2.1 & Message.v & \lstinline|EmptyMailbox| \\ \hline
+    Singleton mailbox & Section 2.1 & Message.v & \lstinline|SingletonMailbox| \\ \hline
+    Mailbox union & Section 2.1 & Message.v & \lstinline|mailbox\_union| \\ \hline
+    Mailbox equality & Section 2.1 & Message.v & \lstinline|mailbox\_eq| \\ \hline
+    Mailbox patterns & Section 2.1 & MailboxPatterns.v & \lstinline|MPattern| \\ \hline
+    Pattern power & Section 2.1 & MailboxPatterns.v & \lstinline|Pow| \\ \hline
+    Mailbox pattern semantics & Section 2.1 & MailboxPatterns.v & \lstinline|valueOf| \\ \hline
+    Pattern inclusion & Section 2.1 & MailboxPatterns.v & \lstinline|MPInclusion| \\ \hline
+    Pattern equivalence & Section 2.1 & MailboxPatterns.v & \lstinline|MPEqual| \\ \hline
+    Pattern residual & Section 2.1 & MailboxPatterns.v & \lstinline|PatternResidual| \\ \hline
+    Pattern Normal Form & Section 2.1 & MailboxPatterns.v & \lstinline|PNFLit| \\ \hline
+    Mailbox types & Section 2.2 & Types.v & \lstinline|MType| \\ \hline
+    Base types & Section 2.2 & Types.v & \lstinline|BType| \\ \hline
+    Types & Section 2.2 & Types.v & \lstinline|TType| \\ \hline
+    Pattern permutation & Section 2.2 & Types.v & \lstinline|PatternEq| \\ \hline
+    Type permutation & Section 2.2 & Types.v & \lstinline|TypeEq| \\ \hline
+    Type combinations & Section 2.2 & Types.v & \lstinline|TypeCombination| \\ \hline
+    Usage annotations & Section 3.1 & Types.v & \lstinline|UsageAnnotation| \\ \hline
+    Usage-annotated types & Section 3.1 & Types.v & \lstinline|TUsage| \\ \hline
+    Type operation (second class) & Section 3.1 & Types.v & \lstinline|secondType|, \lstinline|secondUsage| \\ \hline
+    Type operation (returnable) & Section 3.1 & Types.v & \lstinline|returnType|, \lstinline|returnUsage| \\ \hline
+    Usage-annotated type combinations & Section 3.1 & Types.v & \lstinline|TypeUsageCombination| \\ \hline
+    Usage combinations & Section 3.1 & Types.v & \lstinline|UsageCombination| \\ \hline
+    Usage subtyping & Section 3.1 & Types.v & \lstinline|UsageSubtype| \\ \hline
+    Subtyping & Section 3.1 & Types.v & \lstinline|Subtype| \\ \hline
+    Unrestricted Type & Section 3.1 & Types.v & \lstinline|Unrestricted| \\ \hline
+    Definition name & Section 3.2 & Syntax.v & \lstinline|IDefinitionName| \\ \hline
+    Function defintions & Section 3.2 & Syntax.v & \lstinline|FunctionDefinition| \\ \hline
+    Values & Section 3.2 & Syntax.v & \lstinline|Value| \\ \hline
+    Terms & Section 3.2 & Syntax.v & \lstinline|Term| \\ \hline
+    Guards & Section 3.2 & Syntax.v & \lstinline|Guard| \\ \hline
+    Environments & Section 3.2 & Environment.v & \lstinline|Env| \\ \hline
+    Program & Section 3.2 & Syntax.v & \lstinline|Prog| \\ \hline
+    Environment subtyping & Section 3.3 & Environment.v & \lstinline|EnvironmentSubtype| \\ \hline
+    Environment combination & Section 3.3 & Environment.v & \lstinline|EnvironmentCombination| \\ \hline
+    Disjoint environment combination & Section 3.3 & Environment.v & \lstinline|EnvironmentDisjointCombination| \\ \hline
+    Empty environment & Section 3.3 & Environment.v & \lstinline|EmptyEnv| \\ \hline
+    Typing rule for program & Section 3.4 & TypingRules.v & \lstinline|WellTypedProgram| \\ \hline
+    Typing rule for definition & Section 3.4 & TypingRules.v & \lstinline|WellTypedDefinition| \\ \hline
+    Typing rules for terms & Section 3.4 & TypingRules.v & \lstinline|WellTypedTerm| \\ \hline
+    Typing rules for guard sequences & Section 3.4 & TypingRules.v & \lstinline|WellTypedGuards| \\ \hline
+    Typing rules for guards & Section 3.4 & TypingRules.v & \lstinline|WellTypedGuard| \\ \hline
+\end{tabularx}
+
+\subsubsection{$F_2$: Every lemma stated in the paper is encoded as a formal statement in Rocq.}
+The following table shows a mapping from lemmas in the paper to corresponding Rocq proofs and where to find them:
+
+\begin{tabularx}{\textwidth}{|L|l|l|l|}
+\hline
+    \textbf{Property} & \textbf{Paper} & \textbf{Rocq File} & \textbf{Rocq Name} \\ \hline
+    Pattern inclusion is reflexive & Lemma 1 & MailboxPatterns.v & \lstinline|MPInclusion\_refl| \\ \hline
+    Pattern inclusion is transitive & Lemma 1 & MailboxPatterns.v & \lstinline|MPInclusion\_trans| \\ \hline
+    Pattern inclusion compatible wrt. composition & Lemma 1 & MailboxPatterns.v & \lstinline|MPInclusion\_compatable\_Comp| \\ \hline
+    Pattern inclusion compatible wrt. choice & Lemma 1 & MailboxPatterns.v & \lstinline|MPInclusion\_compatable\_Choice| \\ \hline
+    Pattern equality is reflexive & Lemma 2 & MailboxPatterns.v & \lstinline|MPEqual\_refl| \\ \hline
+    Pattern equality is transitive & Lemma 2 & MailboxPatterns.v & \lstinline|MPEqual\_trans| \\ \hline
+    Pattern equality is symmetric & Lemma 2 & MailboxPatterns.v & \lstinline|MPEqual\_sym| \\ \hline
+    Patterns form a commutative Kleene algebra & Section 2.1 & MailboxPatterns.v & \lstinline|MPattern\_props| \\ \hline
+    Balancing lemma & Lemma 3 & MailboxPatterns.v & \lstinline|Balancing| \\ \hline
+    Substitution lemma & Lemma 4 & Substitution.v & \lstinline|subst\_lemma| \\ \hline
+\end{tabularx}
+
+\subsubsection{$F_3$: All claimed results in the paper are fully proven in Rocq.}
+Building the Rocq project ensures that all definitions and proofs are correct.
+
+\vspace{1\baselineskip}
+\noindent
+\textbf{Building with Docker}\\
+\vspace{-0.7cm}
+\begin{enumerate}
+  \item Import the provided Docker image: \lstinline{docker load -i mailbox-types-rocq.tar}
+  \item Run the Docker image: \lstinline{docker run -it mailbox-types-rocq:latest}
+  \item A prompt of the form \lstinline{rocq@daf52d3edbb8:~/mailbox-types$\textdollar$} should open. Executing \lstinline{make} builds the project
+  \item A successful compilation indicates all theorems and lemmas hold
+\end{enumerate}
+
+\noindent
+\textbf{Building with local Rocq installation}\\
+\vspace{-0.7cm}
+\begin{enumerate}
+  \item Extract \lstinline{mailbox-types-rocq.zip}
+  \item Navigate to the extracted directory
+  \item Executing \lstinline{make} builds the project
+  \item A successful compilation indicates all theorems and lemmas hold
+\end{enumerate}

@@ -1,0 +1,47 @@
+In \Sec{sec-realize} we assumed that every member of the set of
+realised scenarios has a different sequence of events. In this section
+we discuss how to relax that assumption. Our method is best explained
+by an example.
+
+Assume that we have already performed the initial partitioning
+(see \Page{initial-partitioning-step}), and that
+our current task is to realise the set of scenarios $S$, such
+that, for every $\xi, \eta \in S$, $\Sigma_{\xi} = \Sigma_{\eta}$.
+Moreover, $S = S_A \cup S_B \cup S^{\prime}$, where
+\begin{itemize}
+  \item
+    $S_A = \{A_1, A_2, A_3\}$ and $\ESeq{A_1} = \ESeq{A_2} = \ESeq{A_3}$;
+  \item
+    $S_B = \{B_1, B_2\}$ and $\ESeq{B_1} = \ESeq{B_2} \neq \ESeq{A_1}$;
+  \item
+    every member of $S^{\prime}$ has a sequence of events that is unique in $S$.
+\end{itemize}
+
+Each projection of a DTS has a unique sequence of events, so the expression that
+realises $S$ must have at least three alternatives: one for each member of
+$S_A$. However, it is possible that, say, $A_2$ and $B_1$ are projections of the
+same DTS. The question is how to pair the right $A$ with the right $B$.
+
+A way to address this question is to investigate all the combinations of members
+from $S_A$ and $S_B$.
+More concretely, we create six sets of scenarios:
+$S_1 = \{A_1, B_1\} \cup S^{\prime}$,
+$S_2 = \{A_1, B_2\} \cup S^{\prime}$,
+$S_3 = \{A_2, B_1\} \cup S^{\prime}$ etc.
+In each of these six sets every scenario has a unique sequence of events, so we
+can run our realisation algorithm separately for $S_1$, $S_2$ etc., to obtain
+six scenario expressions. From each of those scenario expressions we remove
+alternatives that realise only members of $S^{\prime}$, then find the best of
+the remaining expressions, i.e., one with the fewest alternatives. Let us say
+that it is an expression whose only alternative realises
+$\{A_3, B_2, D, F\}$ (where $D,F\in S'$).
+We retain this expression as a partial solution to the problem of realising
+$S$, and then repeat the process for $S \setminus \{A_3, B_2, D, F\}$
+to find the other alternatives of the solution for $S$.
+
+The problem with this approach is that the number of combinations to be
+investigated grows exponentially with the number of scenarios that have
+identical sequences. But as long as the number of combinations is not
+prohibitively large,
+%a few thousand,
+the approach is quite effective.

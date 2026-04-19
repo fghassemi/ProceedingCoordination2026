@@ -1,0 +1,124 @@
+\usepackage[utf8]{inputenc}
+\usepackage{emerald}
+\usepackage{xargs}
+\usepackage{xspace}
+\usepackage{url}
+
+\usepackage{todonotes}
+\usepackage[nomargin,multiuser,inline,draft]{fixme} 
+\fxusetheme{color}
+% \FXRegisterAuthor{rg}{arg}{\color{blue}   {\underline{rG}}}
+% \FXRegisterAuthor{eM}{aeM}{\color{orange} {\underline{eM}}}
+
+
+\usepackage{rotating}               % For \sidewaysfigure etc.
+
+% \renewcommand{\theequation}{\thesection.\roman{equation}}
+
+\newcounter{tmp}
+
+\renewcommand{\theequation}{\arabic{equation}}
+
+% \usepackage{cancel}
+%\usepackage{caption}                % Needed by subcaption
+\usepackage{cmll}                   % \bigwith symbol
+\usepackage{colonequals}            % More symbols (colon equalities etc.)
+% \usepackage{enumerate}              % More enumeration styles
+\usepackage{environ}                % Provides NewEnviron w/ eager expansion
+% \usepackage{etex,etoolbox}          % Needed by theorem-appendix.tex
+% \usepackage[left=1in,top=1in,bottom=1in,right=1in]{geometry} % Quick margins
+\usepackage{graphicx}               % For \scalebox etc.
+
+% CONFLICT WITH LMCS
+% \usepackage[affil-it]{authblk}      % Author affiliation
+% \usepackage{IEEEtrantools}          % Mostly for IEEEeqnarray env
+% \usepackage{makeidx}                % allows for indexgeneration
+
+\usepackage{multirow}               % Table multirow/multicolumn support
+\usepackage{nicefrac}
+\usepackage{proof}                  % Logic proofs
+\usepackage{bussproofs}
+\EnableBpAbbreviations
+
+\usepackage{subcaption}             % Support for subfigures
+\usepackage{thmtools, thm-restate, thm-autoref}  % Advanced theorem handling
+\usepackage{xifthen}                % for conditional commands
+\usepackage{appendix}               % for correct numeration of statements
+
+\usepackage{fancyvrb}       % For verbatim text customization
+
+\usepackage{stmaryrd}
+%\usepackage{mathabx}
+\usepackage{pdfsync}
+% \usepackage{wasysym}
+% \usepackage{chemarr}
+
+\PassOptionsToPackage{usenames,dvipsnames,svgnames,table}{xcolor}
+\usepackage{xcolor} % must be loaded first
+\newcommand{\red}[1]{{\color{red} #1}}
+\usepackage{tikz}                   % Graphs
+\usetikzlibrary{shadows,arrows,shapes,automata,positioning,decorations.markings}
+
+% \usepackage{fixltx2e} % Text mode subscript and superscript
+
+%\usepackage{amsthm}
+\usepackage{amsmath,amssymb,amsbsy}
+\usepackage{mathtools} % \xRightArrow and stuff - load late to avoid conflicts
+% \usepackage[amsmath,amssymb,amsthm,thref,thmmarks]{ntheorem} % \listoftheorems and other stuff
+%\newtheorem*{remark}{Remark}
+% \newtheorem{definition}{Definition}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}{Lemma}
+% \newtheorem{example}{Example}
+
+\usepackage[ruled,vlined,noend,linesnumbered,boxed]{algorithm2e}
+\SetKwProg{Fn}{Function}{:}{end}
+\SetKwInOut{Input}{Input}
+\SetKwInOut{Output}{Output}
+\SetKwProg{Throw}{throw}{}{end}
+\SetKwProg{Try}{try}{}{end}
+\SetKwProg{Catch}{catch}{}{end}
+\SetKwProg{And}{and}{}{end}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  linkcolor = purple,
+  urlcolor  = purple,
+  citecolor = teal,
+  anchorcolor = teal
+}
+\usepackage[capitalise]{cleveref}
+\crefformat{enumi}{condition~#2#1#3}
+\crefname{fact}{Fact}{Facts}
+\Crefname{fact}{Fact}{Facts}
+\crefformat{fact}{Fact~#2#1#3}
+\crefname{algorithm}{algorithm}{algorithms}
+\Crefname{algorithm}{Algorithm}{Algorithms}
+\Crefname{lstlisting}{Listing}{Listings}
+%\hypersetup{final} % Needed to generate hyperlinks even in draft mode
+
+% \DeclareMathSizes{display size}{text size}{script size}{scriptscript size}
+\DeclareMathSizes{10}{10}{6}{6}
+
+% Figures setup
+% \numberwithin{figure}{section}
+
+% \usepackage[inline]{showlabels}
+% \renewcommand{\showlabelsetlabel}[1]{{\textcolor{ForestGreen}{\showlabelfont{\tiny #1}}}}
+
+\usepackage{paralist}
+% \usepackage{subfigure}
+
+\usepackage{tikz}
+
+\usepackage[scaled]{beramono}
+% \renewcommand*\familydefault{\ttdefault} %% Only if the base font of the document is to be typewriter style
+\usepackage[T1]{fontenc}
+
+\usepackage{mdframed}  %% putting staff in frames, boxes, etc
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

@@ -1,0 +1,191 @@
+In this section we show how to translate HistMSO to MSO over natural numbers.
+This translation allows us to leverage MONA's decision procedures to verify properties of finite histories and abstract executions in distributed systems. We first recall some background on MONA, then we present our translation for histories, and finally we discuss how to extend this translation to abstract executions.
+
+\subsection{Background on MONA}
+
+MONA deals with the following logical formalism:
+$$
+\varphi ::= x < y \mid x \in X \mid \neg \varphi \mid \varphi \land \varphi \mid \exists x.\varphi \mid \exists X.\varphi
+$$
+where $x,y$ are first-order variables ranging over natural numbers, and $X$ is a second-order variable ranging over sets of natural numbers. A model of a formula $\varphi$
+with free (first and second order) variables $\upsilon_1,\ldots,\upsilon_n$ (the order of the enumeration matters) is a word over the alphabet $\{0,1\}^n$. Each position $i$ of the word corresponds to a natural number, and the $j$-th bit of the letter at position $i$ is 1 if and only if the $j$-th order-1 (resp. order 2) variable is interpreted as equaling to (resp. containing) $i$ (see~\cite{MONAguide} for more details).
+
+Our goal in the following is to define an encoding function $\Enc$ that takes as input a finite history $H\in\historyset$ and outputs a word of bitvectors $\Enc(H)\in(\{0,1\}^n)^*$ (for some $n$ depending on the meta parameters $\mathbb{P}, \mathbb{T}, \mathbb{O}, \mathbb{V}$) and a translation $T(\varphi)$ of a formula $\varphi$ of the MSO logic of histories and abstract executions defined in Section~\ref{sec:definition-logic} into a MONA formula $T(\varphi)$ such that 
+\begin{equation}\label{eq:correctness-of-translation}
+H \models \varphi \qquad \iff \qquad \Enc(H) \models_{\tiny \mathsf{MONA}} T(\varphi)
+\end{equation}
+
+\subsection{Encoding histories to words}
+
+Each letter of $Enc(H)$ represents the operations and relations of $H$ at a certain point in time: the word $Enc(H)$ forms a sequence of snapshots of $H$ over time, quite similar to a discrete sampling of a continuous signal. To define the encoding function we follow these steps: coding the timeline, then adding information about types and values.
+
+\subsubsection{Coding the timeline}
+Let us first fix some enumeration $\mathbb{P}=\{p_1,...,p_m\}$ of the (finite) set of processes.
+For a finite history (resp. an $\omega$-history) $H$, and for a timestamp $t\in \mathbb{R}_{\geq 0}$,
+let $\mathsf{snapshot}(H, t)\in\{0,1\}^{|\mathbb{P}|}$ denote the bitvector 
+whose $i$-th coordinate is 1 if and only if process $p_i$ is active in $H$ at timestamp $t$;
+for an increasing sequence $\mathbf{T}$ of timestamps $t_0<t_1<...$ we define
+$\mathsf{snapshots(H,\mathbf{T})}$ as the sequence of snapshots $\mathsf{snapshot}(H, t_i)$.
+The timeline encoding $\Enc_{tl}(H)$ is $\Enc(H,\mathbf{T}_H)$ where $\mathbf{T}$ denote the enumeration of all starting and ending times of operations in $H$.
+
+\begin{example}
+The construction is illustrated on Figure~\ref{fig:encodingExample1AllVectors}.
+The history $H$ on this figure is run on three processes. 
+We therefore have $Enc(H)\in (\{0,1\}^3)^*$. Each time an operation starts or returns, we take a snapshot. 
+\end{example}
+
+\begin{figure}[t]
+\begin{center}
+\resizebox{0.7\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; 
+  \node[anchor=east] at (-0.3, -2) {$p_3$};  
+
+  \draw[dashed,line width=1pt] (0,0) -- (19,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (19,-1);
+  \draw[dashed,line width=1pt] (0,-2) -- (19,-2);
+
+  % Horizontal operations
+  \draw[withcaps] (2,0) -- (5,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (10,0) -- (14,0) node[pos=0.45, above] {$\opb$};
+  \draw[withcaps] (15.5,0) -- (18,0) node[midway, above] {$\opc$}; 
+  
+  \draw[withcaps] (3,-1) -- (7,-1) node[midway, above] {$\opd$};
+  \draw[withcaps] (12,-1) -- (17,-1) node[midway, above] {$\ope$};
+
+  \draw[withcaps] (8,-2) -- (11,-2) node[midway, above] {$\opf$};
+
+  % Vertical time lines at starts and ends
+  \foreach \x/\t/\vone/\vtwo/\vthree in {
+  0/T_0/0/0/0,
+  2/T_1/1/0/0,
+  3/T_2/1/1/0,
+  5/T_3/0/1/0,
+  7/T_4/0/0/0,
+  8/T_5/0/0/1,
+  10/T_6/1/0/1,
+  11/T_7/1/0/0,
+  12/T_8/1/1/0,
+  14/T_9/0/1/0,
+  15.5/T_{10}/1/1/0,
+  17/T_{11}/1/0/0,
+  18/T_{12}/0/0/0
+  } {
+    \draw[dashed,blue] (\x,-2) -- (\x,0) 
+	node[below=10em,black] {$\begin{bmatrix} \vone \\ \vtwo \\ \vthree \end{bmatrix}$}
+    node[below] at (\x,-2.20) {$\t$};
+  }
+
+\end{tikzpicture}
+}
+\end{center}
+  \caption{A finite history $H$ and its timeline encoding $\Enc_{tl}(H)$}
+\label{fig:encodingExample1AllVectors}
+\end{figure}
+
+\begin{remark}
+We assumed in Definition~\ref{def:history} that the histories we consider are such that every timestamp
+occurs in at most one operation extremity, and no operation starts at $t=0$. 
+This ensures that every two consecutive vectors in $\Enc_{tl}(H)$ differ at exactly one coordinate and help identify the process on which an operation starts or stop at a given timestamp (see for instance the formula $\mathsf{isStart}$ we later define).
+\end{remark}
+
+\subsubsection{Adding information about types, values, and objects}
+
+For now the only information encoded are the start and return times. We want to enrich the encoding with the $type$, $ival$/$oval$ and $obj$ attributes. 
+We will do so by adding coordinates to the vectors we just used to define $\Enc_{tl}(H)$. 
+Remember that we assumed the meta parameters $\Types$, $\Values$ and $\Objects$ are finite sets. 
+We can therefore assume that a type, a value, or an object identifier can be coded on a number of bits that can be determined in advance. 
+For instance, we assumed above for simplicity that $\Types$ contains only \texttt{read} and \texttt{write}.
+We can simply code a \texttt{read} as a 0 and a \texttt{write} as a 1. For $Values$, we can stick to their machine representation. To encode $\Objects$ we can fix an enumeration $o_1,\ldots o_n$ and represent the object identifier $o_i$ by the binary encoding of $i$ of $\left\lceil\log_2(n)\right\rceil$ bits.
+
+In $\Enc_{tl}(H)$, two successive vectors differ in only one coordinate. This means, in particular, that when introducing a new operation $\opa$ on a vector $w$, we only need to encode data about $\opa$. 
+
+Each vector of $Enc(H)$ is of the following form. The $m$ first coordinates are used as explained above in the definition of $\Enc_{tl}(H)$. The following coordinates encode the attributes of the operation that either starts or stop at this timestamp: the $m+1$ coordinate encodes the type of the operation (0 for $read$, 1 for $write$), the next $\left\lceil \log_2 |Values| \right\rceil$ coordinates are dedicated to encoding either the input or the output value\footnote{A $read$ operation does not have an input value and a $write$ operation does not have an output value}, and the last $\left\lceil \log_2 |Objects| \right\rceil$ to the encoding of the object identifier. The very first vector is the null vector.
+
+\subsubsection{Translating formulas}
+
+Finally, we sketch the definition of the translation $\varphi\mapsto T(\varphi)$
+of MSO formulas over histories to MONA formulas. Each line $\ell$ 
+of a bitvector of $\Enc(H)$ is associated with a second order variable $X_{\ell}$.
+The translation otherwise maps each first order variable $\varopa$ (ranging over an operation) to a first order variable ranging over a column of $\Enc(H)$, that we also write $\varopa$. Similarly, second order variables are mapped to second order variables.
+More precisely, we define the translation inductively as follows:
+$$
+\begin{array}{l}
+T(\varphi\vee\psi) \eqdef T(\varphi) \vee T(\psi) 
+\qquad
+T(\neg\varphi) \eqdef \neg T(\varphi) 
+\\
+T(\exists \varopa.\ \varphi) \eqdef \exists \varopa.\ \mathsf{isStart}(\varopa)\wedge T(\varphi)
+\qquad
+T(\varopa\in A) \eqdef \varopa \in A
+\\
+T(\exists A.\ \varphi) \eqdef \exists A.\ (\forall \varopa.\ \varopa\in A\Rightarrow \mathsf{isStart}(\varopa))\wedge T(\varphi)
+\end{array}
+$$
+where $\mathsf{isStart}(\varopa)$ is a MONA formula stating that the vector at position $\varopa$ corresponds to the start of an operation (that is, $a\neq 0$ and the only bit that differs between $a-1$ and $a$ is equal to $1$ at $a$).
+The atomic formulas are translated as expected from the encoding defined above. For instance $T(\varopa.obj=p)= \varopa \in X_p$, where $X_p$ is the free variable associated with the line of $p$ in $\Enc_{tl}(H)$. The translation of $\varopa.tattr<\varopb.tattr'$ is $\exists \varopa',\varopb'.\ tattr(\varopa,\varopa')\wedge tattr'(\varopb,\varopb')\wedge \varopa'<\varopb'$, with
+$stime(\varopa,\varopa')\eqdef \varopa=\varopa'$,
+and $rtime(\varopa,\varopa')$ expressing that $\varopa'$ is the first position 
+after $\varopa$ where the bit on the line of the process of $\varopa$ is null. We omit the full definition of the translation for brevity. We also omit the definition of the formula $\mathsf{isEncoding}$ that checks that a word is indeed an encoding of a history, i.e $w\models_{\mathsf{MONA}} \mathsf{isEncoding}$ if and only if there exists $H\in\historyset$ such that $w=\Enc(H)$.
+
+\begin{theorem}
+  For every closed formula $\varphi$ of HistMSO$\setminus\{\ar,\vis\}$, for every finite history $H\in\historyset$ (respectively $\omega$-history $H\in\infhistoryset$), it holds that
+  $$
+    H \models \varphi \qquad \iff \qquad \Enc(H) \models_{\mathsf{MONA}} T(\varphi)
+  $$
+\end{theorem}
+\begin{corollary}
+  The HistMSO theory of finite histories and the HistMSO theory of $\omega$-infinite histories are decidable.
+\end{corollary}
+
+\subsection{Extension to abstract executions}
+In this section we explain how to extend the encoding defined for histories to abstract executions. It is not clear how to encode the relations $\vis$ and $\ar$ directly in the word encoding of an abstract execution, as they are not directly related to the timeline of operations. Therefore, we propose a few assumptions that can be made on these relations, and then exploit them to extend our encoding technique.
+
+\subsubsection{Representing arbitration in real-time histories}
+
+Remember that arbitration is \emph{any} total order on operations. Without any further assumption, the two relations $\rb$ and $\ar$ could be used to define a grid, and the logic would be undecidable even at first order.
+
+However, in practice, arbitration is not completely independent of the timeline. 
+We therefore make the assumption that the abstract executions we consider are 
+real-time\footnote{Weaker forms of this assumption, like "boundedly deviating from real-time", could be worth exploring.} (see formula \textsc{RealTime} in the previous section).
+
+With this restriction, the only pairs of operations $(\opa,\opb)$ for which our encoding should specify whether $\opa$ is arbitrated before $\opb$ or the converse are those pairs of concurrent operations. 
+To encode this information, we add $|\mathbb{P}|-1$ extra bits to the vectors we used
+in the definition of $\Enc(H)$. If $t$ is the starting time of an operation $\opa$ on process $p_i$, then the $j$-th extra bit (for $j\neq i$) indicates whether $\opa \ar \opb$, where $\opb$ is the last operation started on process the $j$th process (skipping $p_i$ if $j>i$) before time $t$.
+
+This coding allows us to define a binary relation $\xrightarrow{arc}$ such that 
+$\xrightarrow{arc}\cap\xleftarrow{arc}=\emptyset$ and $a(\xrightarrow{arc}\cup\xleftarrow{arc})b$ iff $a$ and $b$ are concurrent. We then just need to define
+$\ar$ as $(\rb \cup \xrightarrow{arc})^+$, and assert in the formula $\mathsf{isEncoding}$ that $\ar$ is acyclic.
+
+\subsubsection{Representing visibility under real-time and $k$-transient visibility assumptions}
+
+Visibility is even more versatile and challenging to encode. We again rely on the real-time assumption to restrict the possible visibility relations, which enforces that $\forall \opa,\opb, \opa \rb \opb \Rightarrow \neg(\opb\vis\opa)$.
+We can therefore decompose the visibility relation into two parts: the visibility between concurrent operations, which can be encoded as we did for arbitration, and the visibility between operations $\opa$ and $\opb$ such that $\opa\rb\opb$, two relations we denote respectively by $\visc$ and $\visrb$, with $\vis=\visc\cup\visrb$. We therefore add an extra bit to the vectors of $\Enc(H)$ to encode $\visc$ as we did for arbitration.
+
+In order to encode $\visrb$, we need to make further assumptions on visibility. We cannot make too strong assumptions, as we want to be able to tell apart all consistency models defined in~\cite{ViottiVukolic}. For instance,
+it would be problematic to make the assumption that once an operation $\opa$ is visible to another operation $\opb$, then it is also visible to all operations started after $\opb$ on the same process. Indeed, this assumption, known as PRAM, or FIFO, subsumes some prominent consistency models like \emph{monotonic reads}, \emph{monotonic writes}, or \emph{read my writes}.
+
+Remember that $a\succrl{p}{rb} b_0$ if $b_0$ is the first operation on process $p$ that starts after the return time of $a$. Given a fixed $a$ and $p$, 
+consider $b_0,b_1,\ldots,b_{i},\ldots$ such that $b_0\succrl{p}{rb} b_{1} \succrl{p}{rb} \cdots \succrl{p}{rb} b_{k-1}$. We say that $a$ is $k$-transient to process $p$ if for all $i\geq k$, $a\vis b_i$ iff $a\vis b_{k-1}$.
+Intuitively, this means that the visibility of an operation $\opa$ to operations on a given process $p$ stabilises after a bound $k$ to either always visible or always invisible. 
+
+\begin{definition}[$k$-transient visibility]
+Let $k\geq 0$. An abstract execution $(H,\ar,\vis)$ has $k$-transient visibility if for all operations $\opa\in H$, for all processes $p\in \mathbb{P}$, $a$ is $k$-transient to process $p$.
+\end{definition}
+
+We therefore add an extra meta parameter $k$, and add $k\cdot |\mathbb{P}|$ bits to the vectors of $\Enc(H)$. These bits are used to encode, for each process timestamp
+corresponding to the start of an operation $\opa$, the visibility of $\opa$ to the first $k$ operations started on each process $p$ after the return of $\opa$.
+With this encoding, we can define a formula for $\visrb$ in MONA, and impose in the formula $\mathsf{isEncoding}$ that $\vis=\visc\cup\visrb$ is acyclic.
+
+
+\begin{theorem}
+  For every closed formula $\varphi$ of HistMSO for every finite (resp. $\omega$-infinite) abstract execution $(H,\ar,vis)$, it holds that
+  $$
+    H \models \varphi \qquad \iff \qquad \Enc(H) \models_{\mathsf{MONA}} T(\varphi)
+  $$
+\end{theorem}
+\begin{corollary}
+  The HistMSO theory of finite (resp. $\omega$-infinite) abstract executions with real-time arbitration and $k$-transient visibility is decidable.
+\end{corollary}

@@ -1,0 +1,112 @@
+\section{Rocq Mechanization}
+\label{sec:rocq-mechanization}
+
+In this section, we assess our Rocq formalization of mailbox types and Pat.
+We start with a general overview of the mechanization's structure, and then move into the specifics of different aspects.
+
+Figure \ref{fig:rocq-modules} shows the Rocq project's structure for mechanizing Pat.
+The definition of types is required by the syntax module since it also defines what a Pat program is.
+Substitution is a syntactic operation, however, the module also includes proofs about substitution on well-typed terms, thus depending on the typing rules.
+
+The table in Figure \ref{fig:rocq-modules} shows the lines of code, number of definitions and lemmas for each file.
+Module \coqe{Environments} contains, by far, the most amounts of lemmas.
+This reflects the complexity stemming from environment combinations and environment subtyping.
+
+The mechanizations of messages, mailbox patterns and mailbox types are straightforward.
+Mailbox configurations mostly rely on the definitions of permutations of lists, already provided by Rocq's standard library.
+% Thus, a significant amount of proofs simply make use of already existing lemmas, with only little adjustments needed.
+The formalization of mailbox patterns requires more effort.
+Defining the semantics of mailbox patterns as a relation between configuration and pattern, instead of possibly infinite multisets,
+yield a mechanization that is adequate to work with \todo{ES}{Good?}.
+The proofs about pattern equivalence and inclusion mostly follow the same approach of performing induction over a mailbox pattern.
+While a substantial amount of lemmas need to be proven before being able to proof balancing (Lemma \ref{lemma:balancing}), most of
+the proofs are manageable in size and complexity.
+Since the difference in mailbox types between Pat and the mailbox calculus are mostly the usage annotations provided by quasi-linear types,
+a mechanization of the mailbox calculus could certainly reuse our definitions and properties.
+
+Formalizing environments is, by far, the most complex part of this mechanization.
+% Even finding an acceptable representation took time and testing.
+The library \emph{dblib} reduces some of the complexity around environments by proving operations and properties on them.
+However, reasoning about environment combinations and environment subtyping still is far from simple.
+Independent of the representation of environments that were considered, environment splitting and subtyping require a substantial amount of technical lemmas.
+While most of the proofs of these properties follow the same general approach, they are lengthy and tedious to perform.
+It may be possible that other representations of environments could reduce the complexity of such proofs.
+
+% Before using \emph{dblib}, one approach was the usage of list concatination to reason about inserting values into an environment.
+% For example, instead of writing $\envInsert{x}{A}{\Gamma}$ for inserting a type into $\Gamma$,
+% one would have to specify $\Gamma = \Gamma_1 \, {++} \, (A, \Gamma_2$), where the length of $\Gamma_1$ is equal to $x$.
+% Of course, specifying insertion in this way is tedious and error prone, as well as hard to reason about.
+% The library \emph{dblib} provides a much easier and more understandable way, and reduces some of the complexity around
+% environments by proving operations and properties on them.
+% However, reasoning about environment combinations and environment subtyping still is far from simple.
+% Independent of the representation of environments that were considered, environment splitting and subtyping require a substantial amount of technical lemmas.
+% While most of the proofs of these properties follow the same general approach, they are lengthy and tedious to perform.
+% It may be possible that other representations of environments could reduce the complexity of such proofs.
+
+The mechanization of the syntax and typing rules of Pat is close to their pen-and-paper counterparts,
+with the exception of using de Bruijn indices.
+Defining the syntax and rules poses no problem after settling on the representation of variables and environments.
+While the choice of using de Bruijn indices is reasonable, it comes with the downside of extensive reasoning about indices and lifting.
+This is especially evident in the proofs required for the substitution lemma (Lemma \ref{lemma:substitution}).
+While \emph{dblib} alleviates some of this burden, a substantial amount of manual work is still required.
+Exploring whether other variable representations require less work is definitely worth to consider.
+
+% \begin{table}[t]
+%   \begin{center}
+%     \begin{tabular}{|l | c | c | c|}
+%       \hline
+%       Module & LOC & Definitions & Lemmas\\
+%       \hline\hline
+%       Messages & 177 & 7 & 9\\
+%       Mailbox Patterns & 828 & 8 & 44\\
+%       Types & 685 & 35 & 29\\
+%       Environments & 2658 & 18 & 110\\
+%       Util & 48 & 6 & 2\\
+%       Syntax & 180 & 16 & 0\\
+%       Typing Rules & 302 & 4 & 11\\
+%       Substitution & 941 & 2 & 26\\
+%       Runtime & 959 & 18 & 35\\
+%       \hline
+%               & 6778 & 114 & 266\\
+%       \hline
+%     \end{tabular}
+%   \end{center}
+%   \caption{Table showing the lines of code, amount of definitions and lemmas in each file of the Rocq project.}
+%   \label{table:rocq-modules}
+% \end{table}
+
+Due to \emph{dblib}, the substitution operation is provided for us with little effort.
+% As a user, one simply has to provide a \emph{traverse} function over terms, counting how many binders are being passed.
+That said, the lemmas required for the substitution lemma are quite technical and are mostly about a relation between two variables.
+Since variables are considered values in Pat, reasoning about substituting one variable for another is required.
+While \emph{dblib} provides tactics for automatically proving some of these properties, it often would not be able to do so,
+requiring manual proofs.
+Additionally, during the process of proving the substitution lemma, it was discovered that the proof is not as easy as it first seems.
+Due to linear typing and environment combinations, one has to consider more cases than one would expect.
+Thus, the substitution lemma's proof is by far the most complex and largest proof in this mechanization.
+
+% Further, we successfully initiated the mechanization of Pat's operational semantics.
+% While it seems straightforward, a big hurdle are in fact de Bruijn indices, representing variables.
+% One complex aspect in that regard is the definition of structural congruence.
+% It allows for the rearranging of name restrictions, and in turn, requires operations that change de Bruijn indices.
+% For example, for some term $(\nu \, x)(\nu \, y)P$, with structural congruence, we are able to swap both restrictions, resulting in
+% $(\nu \, y )(\nu \, x)P$.
+% While this does not require any modifications when using classical names as variables,
+% for de Bruijn indices, we have to exchange the indices in $P$.
+% Additionally, whenever a new mailbox name is created dynamically, it is assigned index $0$.
+% Thus, we have to lift all indices in all current configurations by one.
+% This constant manipulation of indices substantially increases the complexity of proving properties and
+% even formulating appropriate definitions, such as structural congruence.
+% While it is not yet clear how much work is required to formalize the operational semantics of Pat,
+% it certainly is not an easy task.
+
+During the mechanization, multiple oversights and inaccuracies in the original definitions and proofs were discovered.
+For instance, the rules for environment subtyping and pattern residuals, as presented in the paper \cite{fowlerSpecialDeliveryProgramming2023}, are missing cases.
+Additionally, while trying to prove some of the properties claimed, the proofs seemed more difficult than initially expected.
+The proof of the substitution lemma (Lemma \ref{lemma:substitution}), for example, did not account for the complexity of environment combinations in the
+case of let-bindings.
+This resulted in examining the proof at a greater detail, requiring additional intermediate lemmas.
+A similar problem was discovered while trying to prove the preservation property.
+In some cases, subtyping was not accounted for, skipping over some of the most complex parts of the proof, as it turned out.
+With the help of a rigorous formalization in Rocq, we were able to identify these oversights.
+All found issues have been acknowledged and consequently fixed by the authors of Pat in an updated version of their original paper \cite{fowlerSpecialDeliveryProgramming2025}.

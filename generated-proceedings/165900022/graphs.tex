@@ -1,0 +1,36 @@
+% A history of a program execution can be perceived as a timeline gathering different data updates. Key information held in a timeline includes when operations start and return, and the order in which they are performed. Since the \textsl{returns-before} relation holds exactly this information, it will serve as the foundation of our graphs. Graphs are data structures that relate some elements (referred to as \textsl{vertices} or \textsl{nodes}) according to some relation represented by \textsl{edges}. In this work, we focus on graphs that are restricted to edges having exactly two end-points. Since edges are intended to represent the \textsl{returns-before} relation, the \textsl{vertices} of these graphs correspond precisely to the operations in a history. 
+
+We adopt the conventional notation for a graph $G=(V,E)$ with $V$ the set of vertices and $E$, where $E$ is a subset of $V\times V$, or equivalently a binary relation on $V$. The rb-graph $G_H$ associated with an history $H$ is $G_H=(H,\rb)$.
+
+The rb-graph of an history is overly dense, with redundant information. 
+This redundancy makes it impractical to define a bounded tree decomposition of such a graph. We therefore aim to define a new binary relation $\rightarrow$ on operations with the two following properties.
+\begin{itemize}
+	\item $\rb$ is the transitive closure of $\rightarrow$.
+	As a consequence, the MSO theory of $G_H$ can be reduced to the one of $G=(H,\rightarrow)$.
+	\item $(H,\rightarrow)$ admits a tree decomposition whose width is bounded by a number $n$ that only depends on the meta parameters (more precisely, it will only depend on $\mathbb{P}$)
+\end{itemize}
+The graph $(H,\rightarrow)$ is called a generator of $(H,\rb)$.
+We will achieve something even stronger than what we just stated, 
+as we will instead show that the generator $G=(H,\rightarrow)$ is of bounded \emph{cutwidth}. 
+
+The cutwidth of an undirected graph $G$ is the minimum \mbox{$k \in \mathbb{N}$} such that for some linear ordering of the vertices of ${G}$ along a horizontal axis, every vertical cut intersects at most $k$ edges. 
+Using the cutwidth is advantageous in our work, as vertices of graphs of history already represent a timeline, which is a linear ordering. 
+To rigouroulsy define the cutwidth of a graph, it is necessary to introduce the notion of \textsl{cut} of a graph. 
+Let $G=(V,E)$ be a graph with $n$ vertices $v_1,\ldots,v_n$, and $\sigma$ a permutation\footnote{in other words, a linear ordering/an enumeration of the vertices of $G$} of $\{1,\ldots,n\}$, and $\ell\in\{1,\ldots n\}$.
+$$
+Cut_\ell(\sigma,G)\eqdef (\{v_{\sigma(1)},...,v_{\sigma(\ell)}\},\{v_{\sigma(\ell+1)},...,v_{\sigma(n)}\})
+$$
+defines a \textsl{cut} of $G$. An edge $(u,v)$ crosses a cut $Cut_\ell(\sigma,G)=(L,R)$, if either $(u,v) \in L\times R$ or $(u,v)\in R\times L$. 
+For $G=(V,E)$ a graph, let $\mathsf{Perm}(V)$ denote the set of all possible permutations of the vertices of $G$. 
+$$
+cutwidth(G) \eqdef \displaystyle \min_{\sigma\in \mathsf{Perm}(V)}\; \max_{1\leq\ell\leq n} \big|\big\{\;
+(u,v)\;\big| \; (u,v) \mbox{ crosses } Cut_\ell(\sigma,G)
+\;\big\}\big|.
+$$
+
+In the remainder, we first construct the generator graph $G$ of a given history, then we bound its cutwidth. As explained above, we will bound its cutwidth through a bound on $\max_{1\leq\ell\leq n} \big|\big\{\;
+(u,v)\;\big| \; (u,v) \mbox{ crosses } Cut_\ell(\sigma,G)
+\;\big\}\big|$ for the linear ordering $\sigma=ord(H)$ defined by the timestamps of the operations:
+$$
+ord(H) \eqdef (a_1,\ldots,a_n) \qquad\mbox{ such that for all } i<j, a_i.stime <a_j.stime.
+$$

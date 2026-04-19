@@ -1,0 +1,35 @@
+\section{Conclusion and Future Work}
+\label{chap:conclusion}
+
+In this paper, we have described the first mechanization of mailbox types and
+their semantics, as well as the syntax and semantics of the Pat programming
+language, in the Rocq Prover.
+%
+We show that mechanizing Pat is nontrivial: in particular, environment
+combinations and subtyping pose a big challenge due to the numerous
+technical lemmas needed.
+%
+Our work successfully provides a significant number of
+machine-checked proofs for various properties about mailbox types and Pat's
+static semantics.  During the mechanization process, we also identified and
+fixed multiple oversights in the original definitions and proofs.
+
+The next step for future work is the mechanization of the operational semantics,
+which would allow us to formulate machine-checked proofs of properties such as
+preservation and progress.
+%
+Initial work has shown that a primary difficulty in formalizing Pat's
+operational semantics is the constant manipulation of de Bruijn indices.  While
+tedious, previous work \cite{zalakainLeftoversMechanisationAgda2021} was able to
+successfully formalize a similar semantics with this representation of
+variables.
+%
+Alternatively, we could make heavier use of Rocq's dependent types.  In some
+mechanizations of the $\pi$-calculus \cite{ambalHOPiCoq2021}, the type system
+keeps track of available channel endpoints for each process, which could
+potentially reduce the proofs regarding de Bruijn indices.
+
+% A further research area, after successfully proving preservation and progress, is the verification of the algorithmic type system of Pat.
+% This thesis focuses on the declarative type system as a base of correctness.
+% However, Pat's implementation makes use of the algorithmic type system.
+% Formally verifying whether both type systems provide the same properties would be an interesting further work.

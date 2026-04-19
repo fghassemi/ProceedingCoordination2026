@@ -1,0 +1,296 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ToDo comments
+
+\newcommand{\todo}[2]{%
+  {\sffamily\color{red}\ensuremath{\vartriangleright}#1: #2 \ensuremath{\vartriangleleft}}
+  }
+
+\newcommand{\sjfnote}[1]{\todo{SJF}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Colors
+
+\colorlet{MessageColor}{OrangeRed}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% New symbols
+
+% 3 stacked tildes; mix between \equiv and \approx
+\newcommand*{\approxident}{%
+  \mathrel{\vcenter{\offinterlineskip
+  \hbox{$\sim$}\vskip-.35ex\hbox{$\sim$}\vskip-.35ex\hbox{$\sim$}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Stacked hypotheses for ebproof
+
+% Taken from https://tex.stackexchange.com/a/691409
+% Usage:
+%   #1 : Number of \hypo in line 1 
+%   #2 : line 1, it probably will do weird things if its not just a series of \hypo 
+%   #3 : Number of \hypo in line 2
+%   #4 : line 2, same note as above
+\newcommand{\stackedhypos}[4]{%
+    \hypo{
+        \begin{prooftree}
+            #2 % line 1
+            \infer[no rule]#1{ 
+                \begin{prooftree}[rule margin=0ex]
+                    #4 % line 2
+                    \infer[no rule]#3{}
+                \end{prooftree}
+            }
+        \end{prooftree}
+    }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Math Macros
+
+\newcommand{\nat}{\ensuremath{\mathbb{N}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pat Macros
+
+% A message
+\newcommand{\msg}[1]{\ensuremath{{\color{MessageColor}\mathsf{#1}}}}
+% A mailbox configuration
+\newcommand{\mbconf}[1]{\ensuremath{{\langle #1 \rangle}}}
+% An empty mailbox configuration
+\newcommand{\mbempty}{\mbconf{}}
+% Union of two mailboxes
+\newcommand{\mbu}{\ensuremath{\uplus}}
+% Mailbox equality
+\newcommand{\mbeq}{\ensuremath{\approxident}}
+% Pattern zero
+\newcommand{\mbzero}{\ensuremath{\mathbb{0}}}
+% Pattern one
+\newcommand{\mbone}{\ensuremath{\mathbb{1}}}
+% Pattern message
+\newcommand{\mbmsg}[1]{\ensuremath{\llangle \msg{#1} \rrangle}}
+% Pattern composition
+\newcommand{\mbcomp}{\ensuremath{\odot}}
+% Pattern choice
+\newcommand{\mbchoice}{\ensuremath{\oplus}}
+% Pattern star
+\newcommand{\mbstar}[1]{\ensuremath{{#1^{\star}}}}
+% Pattern star with payload
+\newcommand{\mbstarpayload}[2]{\ensuremath{{#1}[#2]^{\star}}}
+% Pattern inclusion
+\newcommand{\mbpinc}{\ensuremath{\sqsubseteq}}
+% Pattern equality
+\newcommand{\mbpeq}{\ensuremath{\cong}}
+% Pattern residual
+\newcommand{\mbpres}[3]{\ensuremath{#1 \;\backslash\; \msg{#2} \triangleq #3}}
+% Pattern normal form
+\newcommand{\pnf}{\ensuremath{\models}}
+% Mailbox type input
+\newcommand{\mbtin}[1]{\ensuremath{\text{\upshape\sffamily?}#1}}
+% Mailbox type output
+\newcommand{\mbtout}[1]{\ensuremath{\text{\upshape\sffamily!}#1}}
+% Unit type
+\newcommand{\unittype}{\ensuremath{\textbf{1}}}
+% Unit value
+\newcommand{\unitvalue}{\ensuremath{\mathsf{()}}}
+% Bool type
+\newcommand{\booltype}{\ensuremath{\mathsf{Bool}}}
+% Second class usage
+\newcommand{\usecondclass}{\ensuremath{\circ}}
+% Returnable usage
+\newcommand{\ureturnable}{\ensuremath{\bullet}}
+% Second class type operator
+\newcommand{\secondclassop}[1]{\ensuremath{\lceil #1 \rceil}}
+% Returnable type operator
+\newcommand{\returnableop}[1]{\ensuremath{\lfloor #1 \rfloor}}
+% Erase type operator
+\newcommand{\eraseop}[1]{\ensuremath{| #1 |}}
+% Subtype
+\newcommand{\subtype}{\ensuremath{\leq}}
+% Pattern equality up to commutativity and associativity
+\newcommand{\mbpeqca}{\ensuremath{\sim}}
+% Type combination
+\newcommand{\mbtcomb}[3]{\ensuremath{#1 \boxplus #2 = #3}}
+% Type-usage combination
+\newcommand{\mbtucomb}[3]{\ensuremath{#1 \vartriangleright #2 = #3}}
+% Returnable types
+\newcommand{\returnable}[1]{\ensuremath{\mathsf{returnable}(#1)}}
+% Second class types
+\newcommand{\second}[1]{\ensuremath{\mathsf{second}(#1)}}
+% Unrestricted type
+\newcommand{\unr}[1]{\ensuremath{\mathsf{un}(#1)}}
+% Definition name
+\newcommand{\defname}{\ensuremath{\mathsf{f}}}
+% Bold serif font
+\newcommand{\keyword}[1]{\textbf{\textsf{\textup{#1}}}}
+% Variable
+\newcommand{\Var}[1]{\ensuremath{\mathsf{Var} \ #1}}
+% Let term
+\newcommand{\TLet}[2]{\keyword{let} \ #1 \ \keyword{in} \ #2}
+% Spawn term
+\newcommand{\TSpawn}[1]{\keyword{spawn} \ #1}
+% New term
+\newcommand{\TNew}{\keyword{new}}
+% Send term
+\newcommand{\TSend}[3]{#1\textsf{\textup{!}}\msg{#2}[#3]}
+% Fail guard
+\newcommand{\GFail}{\keyword{fail}}
+% Free guard
+\newcommand{\GFree}[1]{\keyword{free} \mapsto #1}
+% Guard term
+\newcommand{\TGuard}[3]{\keyword{guard} \ #1 : #2 \ \{#3\}}
+% Receive guard
+\newcommand{\GReceive}[2]{\keyword{receive} \ \msg{#1} \mapsto #2}
+
+% Function definition
+\newcommand{\FunctionDef}{\ensuremath{\keyword{def} \ \defname(A) : B \ \{t\}}}
+
+% Insert
+\newcommand{\envInsert}[3]{\ensuremath{[#1 \mapsto #2]#3}}
+% Strict subtype
+\newcommand{\strictsubtype}{\ensuremath{\preccurlyeq}}
+% Environment combination
+\newcommand{\envcomb}[3]{\ensuremath{#1 \vartriangleright #2 = #3}}
+% Disjoint Environment combination
+\newcommand{\disenvcomb}[3]{\ensuremath{#1 + #2 = #3}}
+% Empty environment
+\newcommand{\EmptyEnv}[1]{\ensuremath{\mathsf{Empty}(#1)}}
+
+% Well-typed term with program argument
+\newcommand{\WellTypedTermP}[4]{\ensuremath{#1 \vdash_{#2} #3 : #4}}
+% Well-typed term without program argument
+% \newcommand{\WellTypedTerm}[3]{\WellTypedTermP{#1}{\mathcal{P}}{#2}{#3}}
+\newcommand{\WellTypedTerm}[3]{\WellTypedTermP{#1}{}{#2}{#3}}
+
+% Well-typed guards without program argument
+\newcommand{\WellTypedGuardsP}[4]{\ensuremath{#1 \vdash_{\mathcal{P}} #2 : #3 :: #4}}
+\newcommand{\WellTypedGuards}[4]{\ensuremath{#1 \vdash #2 : #3 :: #4}}
+% Well-typed guard without program argument
+\newcommand{\WellTypedGuardP}[4]{\ensuremath{#1 \vdash_{\mathcal{P}} #2 : #3 :: #4}}
+\newcommand{\WellTypedGuard}[4]{\ensuremath{#1 \vdash #2 : #3 :: #4}}
+
+% Well-typed definition
+\newcommand{\WellTypedDef}[1]{\ensuremath{\vdash_{\mathcal{P}} #1}}
+% Well-typed program
+\newcommand{\WellTypedProg}{\ensuremath{\vdash \mathcal{P}}}
+
+% Typing rule names
+\newcommand{\VAR}{\textsc{Var} }
+\newcommand{\TRUE}{\textsc{True} }
+\newcommand{\FALSE}{\textsc{False} }
+\newcommand{\UNIT}{\textsc{Unit} }
+\newcommand{\APP}{\textsc{App} }
+\newcommand{\LET}{\textsc{Let} }
+\newcommand{\SPAWN}{\textsc{Spawn} }
+\newcommand{\NEW}{\textsc{New} }
+\newcommand{\SEND}{\textsc{Send} }
+\newcommand{\GUARD}{\textsc{Guard} }
+\newcommand{\SUB}{\textsc{Sub} }
+\newcommand{\SINGLE}{\textsc{Single} }
+\newcommand{\SEQ}{\textsc{Seq} }
+\newcommand{\FAIL}{\textsc{Fail} }
+\newcommand{\FREE}{\textsc{Free} }
+\newcommand{\RECEIVE}{\textsc{Receive} }
+
+\newcommand{\traverse}{\ensuremath{\mathsf{traverse}}}
+
+% Stack frame
+\newcommand{\stackframe}[2]{\ensuremath{\langle #1, #2 \rangle}}
+\newcommand{\config}[2]{\ensuremath{\llparenthesis \, #1, #2 \, \rrparenthesis}}
+\newcommand{\sendconfig}[3]{\ensuremath{#1 \leftarrow \msg{#2}[#3]}}
+
+
+% redefine the \mess, otherwise can't use mathmode in labels of messages
+% https://tex.stackexchange.com/a/164725
+\renewcommand{\mess}[4][0]{
+  \stepcounter{seqlevel}
+  \path
+  (#2)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (mess from) {};
+  \addtocounter{seqlevel}{#1}
+  \path
+  (#4)+(0,-\theseqlevel*\unitfactor-0.7*\unitfactor) node (mess to) {};
+  \draw[->,>=angle 60] (mess from) -- (mess to) node[midway, above]
+  {#3};
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rocq Environments
+
+% Rocq glyph
+\newcommand*\rocqlogo{\includegraphics[width=0.8em]{images/icon-rocq-black}}
+
+% Rocq inline link
+\newcommand{\rocqlink}[1]{\href{#1}{\rocqlogo}}
+% Rocq item in itemize environment with link
+\newcommand{\rocqitem}[1]{\item[\rocqlink{#1}{}]}
+
+% % Environments for Rocq constructs
+% \newtheoremstyle{linked}
+%   {}         % Space above, empty = `usual value'
+%   {}         % Space below
+%   {\itshape} % Body font
+%   {}         % Indent amount (empty = no indent, \parindent = para indent)
+%   {\bfseries}% Thm head font
+%   {}         %        Punctuation after thm head
+%   { }        %     Space after thm head: " " = normal interword space;
+%              %     \newline = linebreak
+%   {\href{\thislink}{\thmname{\rocqlogo \ #1}} \thmnumber{#2}\thmnote{ (#3)}}% Thm head spec
+%
+% % Environments for Rocq definitions
+% \newtheoremstyle{linkeddef}
+%   {}         % Space above, empty = `usual value'
+%   {}         % Space below
+%   {}         % Body font
+%   {}         % Indent amount (empty = no indent, \parindent = para indent)
+%   {\bfseries}% Thm head font
+%   {}         % Punctuation after thm head
+%   { }        % Space after thm head: " " = normal interword space;
+%              % \newline = linebreak
+%   {\href{\thislink}{\thmname{\rocqlogo \ #1}} \thmnumber{#2}\thmnote{ (#3)}}% Thm head spec
+
+% \theoremstyle{linked}
+% \newtheorem{innlinkthm}[section]{Theorem} % theorems with link
+% \newenvironment{linkthm}[1]
+%  {\def\thislink{#1}\innlinkthm}
+%  {\endinnlinkthm}
+
+% \theoremstyle{linkeddef}
+% \newtheorem{innlinkdef}{Definition}[chapter] % definitions with link
+% \newenvironment{linkdef}[1]
+%  {\def\thislink{#1}\innlinkdef}
+%  {\endinnlinkdef}
+
+% \theoremstyle{linkeddef}
+% \newtheorem{innlinkdef}{Definition}[chapter] % definitions with link
+% \newenvironment{linkdef}[1]
+%  {\def\thislink{#1}\innlinkdef}
+%  {\endinnlinkdef}
+%
+% \theoremstyle{linked}
+% \newtheorem{innlinklemma}[innlinkdef]{Lemma} % lemmas with link
+% \newenvironment{linklemma}[1]
+%  {\def\thislink{#1}\innlinklemma}
+%  {\endinnlinklemma}
+
+% Temporary wrappers for linkdef and linklemma
+\newenvironment{linkdef}[1]
+ {\begin{definition}}
+ {\end{definition}}
+
+\newenvironment{linklemma}[1]
+ {\begin{lemma}}
+ {\end{lemma}}
+
+\newcommand{\smallmath}[1]{%
+  \parbox{\linewidth}{%
+    \footnotesize
+    \[
+      #1
+    \]
+  }%
+}
+
+\newcommand{\var}{\textit}
+
+\newcommand{\vala}{v}
+\newcommand{\tma}{t}
+\newcommand{\gd}{g}
+\newcommand{\seq}{\overrightarrow}

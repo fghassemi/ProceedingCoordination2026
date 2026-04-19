@@ -1,0 +1,14 @@
+\section{Related Work}
+\label{sect-related-work}
+
+Federated learning has emerged as a powerful paradigm for collaborative model training without centralizing data, addressing privacy, regulatory, and data-silo constraints \cite{li2021survey,yang2019federated}.
+However, most approaches rely on sub-symbolic models such as deep neural networks, whose decision processes are inherently opaque. While numerous explainability techniques have been proposed, they are predominantly post-hoc, providing approximate explanations that are not guaranteed to faithfully reflect the underlying model behavior \cite{lopez2024interplay}.
+Our work contrasts by adopting from the outset the interpretable setting of inductive logic programming. This has allowed us to establish theoretical properties which have no counterpart in these pieces of work.
+
+Beyond neural networks, several works have explored interpretable or symbolic models in federated settings, including decision trees \cite{wu2021fedforest,li2023fedtree,truex2019hybrid} and fuzzy logic models \cite{ducange2024federated,jiang2025fuzzy,polap2021fuzzy,srivastava2025iot,wilbik2021towards}.
+%ce qui ne va pas
+These approaches demonstrate that interpretability can be integrated into federated learning, but they typically focus on aggregating model structures or parameters. In contrast to our work, they are not designed to support relational hypothesis induction under explicit background knowledge, as required in Inductive Logic Programming, and do not emphasize the logical semantics and soundness guarantees central to logic programming systems.
+
+As regards coordination, to the best of our knowledge, the article~\cite{Viroli-coord24} is the only other coordination-based approach that has coped with federated learning. However, the approach is quite different from ours. First, the authors have used aggregate-based computing whereas we have employed a classical Linda-like approach. Moreover, as their goal is to tackle heterogeneity in data distribution, they have proposed Field-Based Federated Learning to allow the construction of several personalized model zones, each with its own model tailored to its local data, instead of a single global model shared across all data entities. We adopt an opposite perspective in our work by addressing data entities of a similar nature and showing that a model that would have been classically learned in a centralized way can actually be learned in a distributed manner.
+
+Finally, our work is a continuation of a first approach in federated learning in which we explored the aggregation of locally learned hypotheses through majority voting~\cite{akaichi2025federated}. However, in contrast to this work, our approach operates at the level of complete hypotheses and does not federate the internal learning process itself.

@@ -1,0 +1,48 @@
+\section{Related Work}
+\label{chap:related-work}
+
+Since little research exists on mailbox types, we discuss related work with a focus on mechanizations of the $\pi$-calculus and session types \cite{hondaTypesDyadicInteraction1993}.
+These are tailored to languages that make use of \emph{communication channels} rather than mailboxes.
+
+Ambal et al. \cite{ambalHOPiCoq2021} present a Rocq formalization of a higher-order $\pi$-calculus, where messages are able to carry processes.
+Their work focuses on the representation of binders in name restrictions of processes.
+The authors provide four versions of their mechanization, each with a different representation of variables.
+% locally nameless, de Bruijn indices, nominal representation (where variables are by convention distinct from each other) and higher-order abstract syntax.
+They conclude that their de Bruijn formalization is the most concise, but requires complex manipulation of de Bruijn indices and intricate proofs about renaming lemmas.
+This fact can also be observed in our work.
+% While de Bruijn indices remove the need for $\alpha$-equivalence, their maintenance can become complex.
+
+Goto et al. \cite{gotoExtensibleApproachSession2016} provide a mechanization of polymorphic session types for the $\pi$-calculus in Rocq.
+Their mechanization uses the locally-nameless \cite{chargueraudLocallyNamelessRepresentation2012} approach for variables.
+% In their mechanization, they use the locally-nameless representation for variables in the calculus.
+Similar to our work, the authors first provide their definitions for processes and types independently.
+% In turn, one can argue about untyped, as well as typed processes.
+They are able to prove that their type system guarantees preservation and safety properties.
+
+Thiemann~\cite{thiemannIntrinsicallyTypedMechanizedSemantics2019}
+presents a mechanization of session types in Agda.
+In contrast to other mechanizations, his approach makes use of
+\emph{intrinsically} typed terms, meaning that
+only well-typed terms can be constructed.
+As is common with intrinsically typed mechanizations, variables are represented by de Bruijn indices \cite{wadlerProgrammingLanguageFoundations2022a}.
+% The operational semantics are modeled by two layers.
+% At the top layer, a scheduler selects processes from a thread pool.
+% Then, at the bottom layer, single expressions are evaluated.
+% Evaluation happens in the style of an abstract machine.
+The preservation and progress properties are proven by construction.
+Intrinsic typing can lead to reduced proof sizes and fewer lemmas \cite{wadlerProgrammingLanguageFoundations2022a}.
+Whether such a representation would also work for Pat is worth exploring.
+
+Tirore et al.~\cite{tiroreMultipartyAsynchronousSession2025} provide a mechanization of multiparty asynchronous session types in Rocq.
+They rely on the original definitions by Honda et al.~\cite{hondaMultipartyAsynchronousSession2016}.
+During their mechanization they discovered flaws with the original definitions, such that type preservation does not hold in that system.
+They propose a new type system for which preservation and other properties hold, formally proving this claim.
+To manage the complexity of variables, they use the \emph{Autosubst2} library \cite{starkMechanisingSyntaxBinders2019}, which generates Rocq code based on the de Bruijn representation.
+In contrast to our formalization, the authors choose to represent environments as a list of pairs, with name and type.
+They claim that this representation, in particular, simplified context splitting for parallel composition.
+
+Zalakain and Dardha \cite{zalakainLeftoversMechanisationAgda2021} present a mechanization of a type system for the $\pi$-calculus in Agda.
+Their approach facilitates \emph{leftover typing}, where the typing judgment includes a second leftover environment.
+The leftover environment contains types not used in the typing of the term, leaving them available for parallel processes.
+This technique eliminates the need for environment splits but would likely be
+difficult to use due to the need for type combination.

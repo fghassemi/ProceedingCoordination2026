@@ -1,0 +1,346 @@
+% !TEX root = ./main.tex
+
+In a quest for a notion of adaptation, the authors of~\cite{bcglv12}
+advocate a conceptual framework grounded on a neat separation of
+concerns.
+%
+Starting from the observation that the behaviour of a component is
+determined by a program defining \emph{control} and manipulating
+\emph{data}, adaptation requires to consider, and possibly, modify
+specific computational or physical resources.
+%
+The conceptual framework in~\cite{bcglv12} envisages \emph{adaptation}
+as the possibility of a component to manipulate and take decisions
+according to a well-identified set of \emph{control data}.
+%
+For instance, an adaptive behaviour may need to account for memory
+usage, network traffic, or environmental physical conditions like
+e.g., temperature.
+
+We render the conceptual framework in our platform as detailed in
+\cref{sec:arch,sec:control-loop}.
+
+\subsection{An architecture for runtime adaptation}\label{sec:arch}
+%
+Embracing the conceptual framework introduced in~\cite{bcglv12} allows
+one to define adaptation as the property of a component of controlling
+and possibly modifying at run-time its behaviour based on a specific
+set of control data.
+
+This acceptation implicitly requires a \emph{monitor} that can collect
+and make available the control data necessary for enforcing adaptive
+behaviour.
+%
+Noteworthy, the nature of control data impacts on the complexity of
+the monitoring activities.
+%
+When control data are \emph{exogenous}, namely they originate outside
+the application (e.g., from sensors, operating system, etc.), their
+usage in the adaption process can be simply attained by requesting the
+information to the monitor (e.g., with a request-response
+interaction).
+%
+Otherwise, for \emph{endogenous} control data, namely data produced by
+some components of the application, monitor and application are more
+coupled and their interactions can require the definition of specific
+application-level protocols.
+
+Leveraging the API of \SEArch, we propose a programming pattern to
+support the conceptual framework proposed
+in~\cite{bcglv12}.
+%
+We focus on exogenous control data, leaving adaptation endogenous
+control data for future work.
+%
+
+\begin{figure}[t!]\centering
+  \includegraphics[width = \textwidth]{adaptable-service}
+  \caption{Architectural view of our programming pattern for adaptation}
+  \label{fig:adaptable_service}
+\end{figure}
+%
+\cref{fig:adaptable_service} provides a high-level architectural view
+of an adaptable agent implemented over our platform; the two main
+elements of the architecture are the \emph{adaptable service} itself
+and the local \emph{middleware} (dark blue box) that sets
+up the communication infrastructure necessary for the dynamic composition
+of services.
+%
+As shown, the adaptable service runs behind the middleware,
+which mediates the interactions of the services/applications in
+execution on a node with every other component in the network,
+including other middlewares and the service broker.
+%
+The mediation basically connects (via the channels
+$\textsf{CC}_\textsf{1}, \cdots, \textsf{CC}_\textsf{n}$) the required
+ports of the adaptable service with the provided ports of brokered
+external components.
+%
+
+
+The structure of an adaptable service is rather complex and consists
+of:
+\begin{itemize}
+\item a collection of contracts (specified as extended CFSMs)
+  corresponding to each of the execution scenarios
+  ($\{\mathsf{Communication\ contract\ i}\}_\mathsf{1 \leq i \leq n}$
+  in the topmost part of the orange box, so that each
+  $\mathsf{Communication\ contract\ i}$ corresponds to the
+  middleware's channel $\mathsf{CC}_\textsf{i}$; we also emphasise
+  this correspondence with colours),
+\item a collection of implementations corresponding to each of the
+  execution scenarios
+  $\{\mathsf{Execution\ scenario\ i}\}_\mathsf{1 \leq i \leq n}$,
+  each equipped with an \emph{adaptation contract}
+  $\mathcal{E}_\mathsf{i}$ formalising the
+  environmental conditions under which the execution scenario should
+  be run (bottom-most part of the inner orange box), and
+\item a decision procedure that runs a control loop, which uses the control data received from the monitor to determine an appropriate execution scenario to run (leftmost part of the orange box).
+\end{itemize}
+
+We remark that each channel $\textsf{CC}_\textsf{i}$ is used by the
+middleware to trigger the adaptation scenarios according to the
+$\mathsf{Communication\ contract\ i}$.
+%
+The details of the control loop and of the adaptation contracts of the
+execution scenarios are given in \cref{sec:control-loop}.
+
+
+\subsection{An implementation of the control loop}\label{sec:control-loop}
+%
+As discussed above, taking inspiration from~\cite{bcglv12}, we
+understand adaptability as the capacity of an agent to respond to
+changes in the environment.
+%
+Thus, a significant aspect of our approach relies on the exogenous
+control data received from the monitor, and how the decision making
+process uses it to determine an appropriate execution scenario at
+runtime.
+
+Our programming pattern relies on a fixed set $\mathcal{A}$ of
+(\emph{quantitative}) \emph{attributes} (ranged over by $a$) which
+store the exogenous control data.
+
+\begin{example}\label{exe:attributes}
+  For the sake of our running example, we make the following assumptions:
+  \begin{itemize}
+  \item \srv{Local DB} and \srv{WebUI} run on the same node while the image
+	 provider \srv{Image provider} runs on a different node (cf.
+	 \cref{fig:external-service-arch} and \cref{fig:fallback-contract-arch} in \cref{sec:teapat});
+  \item adaptations are triggered depending on some constraints
+	 involving the attributes $L$ (network latency), $R$
+	 (responsiveness of \srv{Image provider}), and $C$ (CPU load at the node of \srv{WebUI}).
+  \end{itemize}
+  The adaptation contracts of our running examples will be constraints
+  on these attributes.
+  \finex
+\end{example}
+
+The programming pattern proposed here essentially hinges on \SEArch
+features to instantiate communication channels used in the control
+loop to manage adaptation.
+%
+More precisely,
+%
+\begin{itemize}
+\item the invocation of a service triggers the
+  registration of the $\mathsf{n}$ alternative communication channels in the 
+ middleware of the  local node of the service,
+\item the control loop managing the runtime adaptations consists of
+  iterating the following steps:
+  \begin{enumerate}[a.]
+  \item acquire from the most recent control data from the monitor (cf. \cite{bcglv12})
+	 as an assignment of values to the attributes in $\mathcal A$;
+  \item\label{it:select} select a suitable execution scenario
+	 according to the control data provided by the monitor;
+  \item trigger the execution of the code implementing the selected scenario;
+  \item stop the running execution scenario if the updated control data 
+          determine that the current execution scenario is no longer admissible
+	 (i.e., the contract of the running scenario is invalidated by
+	 newly acquired control data) and repeat from step~\ref{it:select}.
+  \end{enumerate}
+\end{itemize}
+
+The control loop sketched above is designed to select one of the
+possible execution scenarios according to the control data provided by
+the monitor.
+%
+More precisely, the identification of a suitable scenario depends on the
+control data returned by the monitor, which we render as
+mappings $m : \mathcal{A} \to \Re$ that assign a real value to each
+attribute in $\mathcal A$.
+%
+%\begin{example}\label{exe:cd}
+%\end{example}
+%
+This design decision is supported by the framework introduced
+in~\cite{lopezpombo:tcs-1043,lopezpombo:ictac23} which guaranties the
+existence of a decision procedure for determining satisfiability of a
+class of constraints expressed in a first-order logic with
+equality whose formulae predicate on real values.\footnote{%
+  The framework is based on \emph{real closed fields}~\cite{tarski51},
+  a decidable first-order theory of the real
+  numbers~\cite[Theorem~37]{tarski51}) to specify contracts on
+  quantitative aspects of software artefacts.
+  %
+  For the sake of this paper, it is enough to assume that contracts
+  consist of decidable constraints; the interested reader is referred
+  to~\cite{lopezpombo:tcs-1043,lopezpombo:ictac23} and references
+  therein for details.
+  %
+}
+%
+Hence, this framework enables the use of \emph{Satisfiability Modulo
+  Theories solvers}~\cite{biere21} (SMT solvers for short) such as
+Z3~\cite{demoura:tacas08}, Yices~\cite{dutertre:cav14}, or
+CVC5~\cite{barbosa:tacas22}.
+% 
+% Hereafter, we let $m : a \mapsto v_a$ with $a \in \mathcal{A}$ range
+% over control data mappings and
+In fact, we formalise adaptation contracts as constraints on real
+values.
+%
+\begin{example}\label{exe:contract}
+We set the following conditions\footnote{%
+  The adaptation contracts in our running example are pretty basic,
+  for simplicity.
+  %
+  We remark that our platform can handle non-trivial constraints
+  expressed as formulae of the decidable first-order logic over real
+  closed fields.
+} on $L$, $R$, and $C$:
+\begin{align*}
+  \mathcal{E}_1 & = L < 5ms \quad \land \quad R < 1s
+  \\
+  \mathcal{E}_2 & = \neg \mathcal{E}_1 \quad \land \quad 0 \leq C \leq .9
+  \\
+  \mathcal{E}_3 & = \neg \mathcal{E}_1 \quad \land \quad C > .9
+\end{align*}
+%
+The intuition behind these conditions is that the interaction between
+\srv W and \srv P is satisfactory when $\mathcal{E}_1$ holds otherwise
+an adaptation should take place.
+%
+We conceive two adaptations when the remote interaction degrades; \srv
+W retrieves the images through \srv S when the local CPU is not
+overloaded ($\mathcal{E}_2$), otherwise a default image is displayed
+($\mathcal{E}_3$).
+\finex
+\end{example}
+
+
+% Besides expressing adaptation contracts (attained using the framework in~\cite{lopezpombo:tcs-1043,lopezpombo:ictac23}),
+The dynamic selection of execution scenarios appeals to the use of SMT
+solvers to decide the satisfiability of the adaptation contracts
+associated to the execution scenarios.
+%
+To tackle this issue, we equip our platform
+with the procedure expressed in Pythonic pseudo-code in
+\cref{lst:control-loop} which relies on threads and on the following
+assumptions on the execution scenarios (cf.
+lines~\ref{lst:threads}-\ref{lst:scenario-def-end} of \cref{lst:control-loop}):
+\begin{description}
+\item[scenarios] the functions implementing each execution scenario
+  are collected in a module called \lstinline[style=pyinl]{ExcScenarios} which also
+  exports the list \lstinline[style=pyinl]{ES} of such functions; for simplicity,
+  we assume that these functions do not take parameters;
+\item[coordination] the module \lstinline[style=pyinl]{ExcScenarios} also
+  exports a boolean variable \lstinline[style=pyinl]{done}, shared with the control loop, 
+  and used to determine when the scenario has completed its execution;
+\item[termination] each execution scenario
+  is guaranteed to
+   atomically set\footnote{We use the syntax \lstinline[style=pyinl]{<<...>>}
+	 to mark critical sections.} \lstinline[style=pyinl]{done} to \lstinline[style=pyinl]{True} before
+  returning and to terminate.
+\end{description}
+
+\begin{figure}[t]
+  \centering
+\begin{lstlisting}[style=PythonStyle,caption={Pythonic pseudo-code implementing the control loop.},label={lst:control-loop}]
+from threading import Thread $\label{lst:threads}$
+from ExcScenarios import ES, done $\label{lst:scenario-def-end}$
+
+done = False
+
+while << not done >>:            	        # atomic access $\label{lst:scenario-selection-start}$
+  stop, scenario = False, None 
+  i = 0
+$\label{scenario-selection-start}$  while scenario == None:
+    # get monitored data
+$\label{monitor-update-selection}$    m = monitor_update() 
+$\label{adaptation-condition-check-selection}$    if not SMT(not $\mathcal{E}_i[a \mapsto \mathsf{m}(a)]_{a \in \mathcal{A}}$) == $\ $ SAT:
+      # spawn the chosen scenario ES[i]
+      scenario = Thread(target = ES[i]) $\label{lst:thread-creation}$
+$\label{selection-execution}$      scenario.start() $\label{lsg:thread-start}$
+    else:
+$\label{scenario-selection-end}$      i = (i $+$ 1) mod len(ES)
+
+  while not (done or stop): $\label{lst:running}$
+    old_m = m
+    # get monitored data
+$\label{monitor-update}$    m = monitor_update()                
+    if not old_m == m:
+      stop = SMT(not $\mathcal{E}_i[a \mapsto \mathsf{m}(a)]_{a \in \mathcal{A}}$) == $\  $ SAT
+    if stop:
+      scenario.terminate() $\label{lst:finishing}$
+\end{lstlisting}
+\end{figure}
+
+The control loop starts by setting\footnote{%
+  Notice that there is no need to make an atomic assignment since the
+  control loop has not spawned any other thread yet.
+%
+} the \lstinline[style=pyinl]{done}
+flag to \lstinline[style=pyinl]{False}
+and entering the loop on line~\ref{lst:scenario-selection-start} which,
+until the \lstinline[style=pyinl]{done} flag is not set:
+\begin{enumerate}[a.]
+\item chooses a scenario to run if none is running
+  (lines~\ref{lst:scenario-selection-start}-\ref{scenario-selection-end})
+  and
+\item keeps checking if a running scenario should be stopped or it
+  gracefully finished (lines~\ref{lst:running}-\ref{lst:finishing}).
+\end{enumerate}
+% 
+To select the execution scenario, the control loop iterates over
+the list of function \lstinline[style=pyinl]{ES} and stops
+as soon as it finds a function whose adaptation contract is true.
+%
+This is checked by querying an SMT solver whether the negation of
+$\mathcal{E}_i[a \mapsto \mathsf{m}(a)]_{a \in \mathcal{A}}$ is
+satisfiable or not;\footnote{%
+  As usual, $\mathcal{E}[a \mapsto v_a]_{a \in \mathcal{A}}$ denotes the
+  application to the formula $\mathcal{E}$ of the substitution
+  $[a \mapsto v_a]_{a \in \mathcal{A}}$ which maps each
+  attribute $a \in \mathcal{A}$ to a value $v_a$.
+  %
+}
+\begin{itemize}
+\item gets the control data from the monitor (line~\ref{monitor-update-selection};
+  assume that \lstinline[style=pyinl]{monitor_update} takes
+  care of communicating with the monitor and returning the mapping
+  to the control loop),
+\item if the adaptation contract $\mathcal{E}_i$
+  is violated (namely its negation is satisfiable)
+  under the returned control data, then the scenario cannot be chosen,
+\item otherwise, the scenario is chosen and a thread running the associated implementation
+  is started (lines~\ref{lst:thread-creation}-\ref{lsg:thread-start})
+  and the execution continues on line~\ref{lst:running}.
+\item the loop on lines~\ref{lst:running}-\ref{lst:finishing} keeps
+  checking that the adaptation contract of the running scenario is
+  still valid; if the contract gets violated, the scenario is
+  terminated (line~\ref{lst:finishing}).
+\end{itemize}
+
+For simplicity, the thread running the execution scenario is
+terminated; we indeed opted for a lighter presentation instead of
+devising a more general mechanism to coordinate the thread and the
+control loop for a graceful termination (where e.g., the thread
+restores some application-dependent invariants before terminating) at
+the cost of complicating the presentation.
+
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "main"
+%%% End:

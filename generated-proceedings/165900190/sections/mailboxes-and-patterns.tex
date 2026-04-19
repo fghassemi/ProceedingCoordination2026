@@ -1,0 +1,361 @@
+\subsection{Mailboxes and Mailbox Patterns}
+\label{sec:messages}
+
+Like Pat but unlike in the original definition of mailbox types
+\cite{deliguoroMailboxTypesUnordered2018}, we do not include message payloads as
+part of a mailbox type, but rely only on \emph{message tags}
+\msg{m} like \msg{Put} and \msg{Get} and associate types with messages when defining the typing rules for
+Pat (\S\ref{sec:typing-rules}).
+
+% that should be possible with some effort.
+
+% To simplify reasoning about messages, we restrict the set of possible messages to a predefined but arbitrary set.
+% Additionally, equality of messages must be decidable.
+
+% \begin{linkdef}{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Message.html\#IMessage}[Message]
+% \todo{ES}{Remove this definition, just mention in text}
+% A message $\msg{m}, \msg{n}$ is a value of an arbitrary type equipped with decidable equality.
+% \end{linkdef}
+
+\begin{figure}[t]
+  \centering
+  \begin{minipage}{0.7\textwidth}
+    \begin{tabular}{lccl}
+      Mailbox configurations (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Message.html\#MessageConfig_def}) \; & $m$ \; & $::=$ \; & $\mbempty \mid \mbconf{\msg{m}} \mid m_1 \mbu m_2$\\
+      Mailbox patterns (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPattern}) \; & $E, F$ \; & $::=$ \; & $\mbzero \mid \mbone \mid \mbmsg{m} \mid E \mbcomp F$\\
+       \; & \; & $\mid$ & $E \mbchoice F \mid \mbstar{E}$
+    \end{tabular}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.27\textwidth}
+    Pattern power (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#Pow})\\
+    \begin{tabular}{lcl}
+      $E^0$ & $:=$ & $\mbone$\\
+      $E^{n+1}$ & $:=$ & $E \mbcomp E^n$
+    \end{tabular}
+  \end{minipage}
+
+  \caption{The syntax of mailbox configurations and patterns.}
+  \label{fig:syntax-mailbox-patterns}
+\end{figure}
+
+% In Rocq this definition can be achieved using a type class.
+% \begin{coq}
+% Class IMessage Message : Type :=
+% {
+%   eq_dec : forall m n : Message, {m = n} + {m <> n}
+% }.
+% \end{coq}
+% This approach has several advantages over statically defining a concrete message type.
+% Firstly, we can argue about any kind of messages and are not restricted by the initial definition of messages.
+% Furthermore, we can define our own message type or use existing data types.
+% An additional advantage of this approach is that needed properties about messages can be extended without much effort.
+% For example, if we extend messages to carry more than one payload, we could include a function mapping each message to the amount of data it carries:
+% \begin{coq}
+% Class IMessage Message : Type :=
+% {
+%   eq_dec : forall m n : Message, {m = n} + {m <> n};
+%   content_size : Message -> $\mathbb{N}$
+% }.
+% \end{coq}
+%
+% As an example of how one can define messages, consider strings.
+% We can use Rocq's predefined implementation of strings and use them as messages by proving the corresponding type class instance:
+% \begin{coq}
+% Instance StringMessage : IMessage string :=
+% {
+%   eq_dec := string_dec
+% }.
+% \end{coq}
+%
+% As an example of custom defined messages, consider the following type definition that represents two messages:
+% \begin{coq}
+% Inductive SendReceive : Type :=
+%     Send : SendReceive
+%   | Receive : SendReceive.
+% \end{coq}
+% By proving that equality is decidable for this given type, we can define the message type class instance.
+% \begin{coq}
+% Instance SendReceiveMessage : IMessage SendReceive :=
+% {
+%   eq_dec := SendReceive_eq_dec
+% }.
+% \end{coq}
+
+\paragraph{Mailbox Configurations.}
+A mailbox represents an unordered collection of messages, where a message can be included multiple times.
+Figure \ref{fig:syntax-mailbox-patterns} shows the definition of a \emph{mailbox configuration} $m$.
+It is either the empty mailbox $\mbempty$, a singleton mailbox $\mbconf{\msg{m}}$ containing only message $\msg{m}$, or the union of two mailboxes $m_1 \mbu m_2$.
+In Rocq, we model mailbox configurations as lists, where $\mbu$ is implemented as append.
+To reason about the equality of mailboxes, i.e.\ mailboxes with the same content, we need to take into account that order does not matter.
+% For example, mailboxes $\mbconf{\msg{m}} \mbu \mbconf{\msg{m}} \mbu \mbconf{\msg{n}}$ and $\mbconf{\msg{m}} \mbu \mbconf{\msg{n}} \mbu \mbconf{\msg{m}}$
+% should be considered equivalent.
+Mailbox configurations $m_1$ and $m_2$ are equal, written $m_1 \approxident m_2$, if they are permutations of each other (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Message.html\#mailbox_eq}).
+% We define the relation $m_1 \approxident m_2$ to be holding, if $m_1$ and $m_2$ are permutations of each other.
+We then have $\mbconf{\msg{m}} \mbu \mbconf{\msg{m}} \mbu \mbconf{\msg{n}} \approxident \mbconf{\msg{m}} \mbu \mbconf{\msg{n}} \mbu \mbconf{\msg{m}}$,
+but $\mbconf{\msg{n}} \mbu \mbconf{\msg{n}} \not\approxident \mbconf{\msg{n}}$.
+
+
+\paragraph{Mailbox Patterns.}
+The crucial building block of mailbox types are \emph{mailbox patterns}.
+They can be thought of as a commutative regular expression that describes the content of a mailbox.
+Figure \ref{fig:syntax-mailbox-patterns} shows the definition of mailbox patterns.
+The pattern $\mbzero$ denotes an \emph{unreliable} mailbox, i.e.\ one that
+received an unexpected message and which cannot be used for further
+communication.  Pat's type system ensures that it is not possible to create such
+a mailbox using well-typed terms.
+%
+Pattern $\mbone$ represents an \emph{empty} mailbox, containing zero messages.
+%
+The pattern $\mbmsg{m}$ denotes a mailbox containing a \emph{single message} $\msg{m}$.
+Mailbox \emph{composition} is described by pattern $E \mbcomp F$, combining both patterns $E$ and $F$.
+As an example, pattern $\mbmsg{m} \mbcomp \mbmsg{n}$ would describe a mailbox containing both $\msg{m}$ and $\msg{n}$.
+%
+On the other hand, $E \mbchoice F$ denotes \emph{choice} between patterns.
+In particular, it describes that the mailbox is either described by pattern $E$ or by pattern $F$.
+Lastly, pattern $\mbstar{E}$ describes repeated composition of pattern $E$.
+For example, $\mbstar{\mbmsg{m}}$ denotes a mailbox containing zero or more $\msg{m}$ messages.
+
+\paragraph{Pattern Semantics.}
+Since patterns describe the contents of an unordered mailbox, multiple patterns can describe the same mailbox.
+For example, pattern $\mbmsg{m} \mbcomp \mbmsg{n}$ describes the same mailbox as $\mbmsg{n} \mbcomp \mbmsg{m}$.
+Thus, checking equality of mailbox patterns requires a semantic definition.
+The semantics of mailbox types are usually given by a denotational semantics
+that map patterns to sets of multisets of atoms~\cite{deliguoroMailboxTypesUnordered2018}.
+Since we are working with Rocq, which is based on constructive logic, we require
+a method of constructing these sets;
+a particular challenge is representing the $\mbstar{E}$ pattern whose denotation
+is an infinite union of multisets and not easily representable in Rocq.
+Instead, we use a relational approach to connect mailbox configurations to
+patterns. 
+
+\begin{figure}[t]
+  % \textbf{Pattern semantics} \hfill \fbox{$m \in E$}
+  \begin{center}
+        \begin{prooftree}
+            \infer0{\mbempty \in \mbone}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \infer0{\mbconf{\msg{m}} \in \mbmsg{m}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{m \in E}
+            \infer1{m \in E \mbchoice F}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{m \in F}
+            \infer1{m \in E \mbchoice F}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \hypo{\exists n.\ m \in E^n}
+            \infer1{m \in \mbstar{E}}
+        \end{prooftree}
+        \quad
+        \begin{prooftree}
+            \stackedhypos{1}{
+              \hypo{m \mbeq m_1 \mbu m_2}
+            }{2}{
+              \hypo{m_1 \in E}
+              \hypo{m_2 \in F}
+            }
+            \infer1{m \in E \mbcomp F}
+        \end{prooftree}
+    \end{center}
+
+    \caption{The semantics of mailbox patterns (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#valueOf}).}
+    \label{fig:pattern-semantics}
+\end{figure}
+
+Instead of building possibly infinite sets of possible configurations, we relate a mailbox configuration to a pattern, written $m \in E$.
+A configuration is included in the set induced by a pattern if the configuration can be constructed using the pattern.
+For example, we have $\mbconf{\msg{m}} \mbu \mbconf{\msg{n}} \in \mbmsg{m} \mbcomp \mbmsg{n}$ and $\mbconf{\msg{n}} \mbu \mbconf{\msg{m}} \in \mbmsg{m} \mbcomp \mbmsg{n}$,
+but also $\mbconf{\msg{m}} \mbu \mbconf{\msg{n}} \in \mbmsg{m} \mbcomp \mbmsg{n} \mbcomp \mbone$.
+
+The inference rules for this relation are given in Figure~\ref{fig:pattern-semantics}.
+The first two rules describe that the empty mailbox configuration $\mbempty$ is the pattern $\mbone$ and a configuration containing a single message $\msg{m}$ is part of pattern $\mbmsg{m}$.
+For the choice operator $E \mbchoice F$, there are two rules: one for when $m$ is part of $E$ and one for when $m$ is part of $F$.
+The rule for composition is the most complex one.
+If $m$ is part of a composition of patterns $E$ and $F$, then $m$ is required to be split into two sub-configurations, where one is part of $E$ and one is part of $F$.
+Lastly, the rule for $\mbstar{E}$ uses the 
+\emph{power} operation (defined in Figure~\ref{fig:syntax-mailbox-patterns})
+to state that any mailbox configuration that can be built using a pattern $E^n$
+(for some $n$) is included in $\mbstar{E}$.
+
+One important observation to make is that we do not include a rule for pattern $\mbzero$.
+According to the definition of de'Liguoro and Padovani \cite{deliguoroMailboxTypesUnordered2018}, $\mbzero$ should map to the empty set, containing no configurations.
+Thus, since we are relating configurations and patterns, there must be no relation between any configuration and $\mbzero$.
+
+We define \emph{pattern inclusion} $E \mbpinc F$ as the proposition $\forall m .\ m \in E \Rightarrow m \in F$ (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion}).
+% \emph{Pattern inclusion} $E \mbpinc F$ is defined not in terms of subsets, but rather as a proposition $\forall m \in E \Rightarrow m \in F$.
+Taking inclusion in both directions yields pattern \emph{equivalence} $E \mbpeq F$ (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPEqual}).
+
+To verify this formalization has the required properties described by de'Liguoro and Padovani \cite{deliguoroMailboxTypesUnordered2018}, we prove
+the following properties:
+
+\begin{lemma}
+  The relation $\mbpinc$ is a precongruence, i.e. the following properties hold:
+  \begin{itemize}
+    \item Reflexive (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_refl}): $E \mbpinc E$
+    \item Transitive (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_trans}): if $E \mbpinc F$ and $F \mbpinc G$, then $E \mbpinc G$
+    \item Compatible wrt. $\mbcomp$ (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_compatable_Comp}): if $E_1 \mbpinc F_1$ and $E_2 \mbpinc F_2$, then $(E_1 \mbcomp E_2) \mbpinc (F_1 \mbcomp F_2)$
+    \item Compatible wrt. $\mbchoice$ (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_compatable_Choice}): if $E_1 \mbpinc F_1$ and $E_2 \mbpinc F_2$, then $(E_1 \mbchoice E_2) \mbpinc (F_1 \mbchoice F_2)$
+  \end{itemize}
+\end{lemma}
+
+\begin{lemma}
+  The relation $\mbpeq$ is an equivalence relation, i.e. it is
+  \begin{itemize}
+    \item Reflexive (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPEqual_refl}): $E \mbpeq E$
+    \item Transitive (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPEqual_trans}): if $E \mbpeq F$ and $F \mbpeq G$, then $E \mbpeq G$
+    \item Symmetric (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPEqual_sym}): if $E \mbpeq F$, then $F \mbpeq E$
+  \end{itemize}
+\end{lemma}
+
+Additionally, we show that we indeed work with a commutative Kleene algebra $(M, \mbchoice, \mbcomp, \mbstar{}, \mbzero, \mbone)$,
+where $M$ is the set of messages (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPattern_props}).%, as described by de'Liguoro and Padovani.
+
+% \begin{lemma}
+%   \todo{ES}{Remove this, just mention in text}
+%   The relation $\mbpinc$ is a \emph{precongruence}, i.e.\ it is
+%   \begin{itemize}
+%     \rocqitem{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_refl} Reflexive: $E \mbpinc E$
+%     \rocqitem{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_trans} Transitive: if $E \mbpinc F$ and $F \mbpinc G$, then $E \mbpinc G$
+%     \rocqitem{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_compatable_Comp}
+%       Compatible with composition: if $E_1 \mbpinc F_1$ and $E_2 \mbpinc F_2$, then $(E_1 \mbcomp E_2) \mbpinc (F_1 \mbcomp F_2)$
+%     \rocqitem{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPInclusion_compatable_Choice}
+%       Compatible with composition: if $E_1 \mbpinc F_1$ and $E_2 \mbpinc F_2$, then $(E_1 \mbchoice E_2) \mbpinc (F_1 \mbchoice F_2)$
+%   \end{itemize}
+% \end{lemma}
+%
+% \begin{lemma}
+%   \todo{ES}{Remove this, just mention in text}
+%   The relation $\mbpeq$ is an \emph{equivalence relation}, i.e.\ it is
+%   \begin{itemize}
+%     \rocqitem{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPEqual_refl} Reflexive: $E \mbpeq E$
+%     \rocqitem{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPEqual_sym} Symmetric: if $E \mbpeq F$, then $F \mbpeq E$
+%     \rocqitem{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPEqual_trans} Transitive: if $E \mbpeq F$ and $F \mbpeq G$, then $E \mbpeq G$
+%   \end{itemize}
+% \end{lemma}
+
+% \begin{figure}
+%   \begin{minipage}{.49\linewidth}
+%   \begin{align*}
+%     E \mbchoice \mbzero &\mbpeq E\\
+%     E \mbchoice E &\mbpeq E\\
+%     E \mbchoice F &\mbpeq F \mbchoice E\\
+%     E \mbchoice (F \mbchoice F') &\mbpeq (E \mbchoice F) \mbchoice F'\\
+%   \end{align*}
+%   \end{minipage}
+%   \begin{minipage}{.49\linewidth}
+%   \begin{align*}
+%     E \mbcomp \mbone &\mbpeq E\\
+%     E \mbcomp \mbzero &\mbpeq \mbzero\\
+%     E \mbcomp F &\mbpeq F \mbcomp E\\
+%     E \mbcomp (F \mbcomp F') &\mbpeq (E \mbcomp F) \mbcomp F'\\
+%   \end{align*}
+%   \end{minipage}
+%   \vspace{-.5cm}
+%   \begin{align*}
+%     E \mbcomp (F \mbchoice F') &\mbpeq (E \mbcomp F) \mbchoice (E \mbcomp F')\\
+%     \mbstar{E} &\mbpeq \mbstar{E} \mbchoice E \mbcomp \mbstar{E}
+%   \end{align*}
+%   \caption{\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#MPattern_props}{Properties of mailbox patterns}}
+%   \label{fig:pattern-properties}
+% \end{figure}
+
+% We are now ready to prove that we indeed work with a commutative Kleene algebra, as described by de'Liguoro and Padovani.
+% Figure \ref{fig:pattern-properties} shows the necessary properties required.
+% We see that both $\mbchoice$ and $\mbcomp$ are commutative and associative.
+% Additionally, both a have unit elements and $\mbcomp$ distributes over $\mbchoice$.
+% We also can observe the recursive nature of $\mbstar{}$, which can be unfolded an arbitrary amount of times.
+
+\begin{figure}[t]
+    {\small
+  \textbf{Pattern residuals} (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#PatternResidual}) \hfill \fbox{$\mbpres{E}{m}{F}$}
+  \begin{center}
+        \begin{prooftree}
+          \infer0{\mbpres{\mbzero}{m}{\mbzero}}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+          \infer0{\mbpres{\mbone}{m}{\mbzero}}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+          \infer0{\mbpres{\mbmsg{m}}{m}{\mbone}}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+          \hypo{\msg{m} \neq \msg{n}}
+          \infer1{\mbpres{\mbmsg{m}}{n}{\mbzero}}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{\mbpres{E}{m}{E'}}
+            \infer1{\mbpres{\mbstar{E}}{m}{E' \mbcomp \mbstar{E}}}
+        \end{prooftree}
+    \end{center}
+    \begin{center}
+        \begin{prooftree}
+            \hypo{\mbpres{E}{m}{E'}}
+            \hypo{\mbpres{F}{m}{F'}}
+            \infer2{\mbpres{E \mbchoice F}{m}{E' \mbchoice F'}}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{\mbpres{E}{m}{E'}}
+            \hypo{\mbpres{F}{m}{F'}}
+            \infer2{\mbpres{E \mbcomp F}{m}{(E' \mbcomp F) \mbchoice (E \mbcomp F')}}
+        \end{prooftree}
+    \end{center}
+}
+  \caption{The definition of pattern residuals.}
+    \label{fig:pattern-residuals}
+\end{figure}
+
+\paragraph{Pattern Residuals.}
+Mailboxes are dynamic objects, not static.
+Their content changes dynamically while receiving and consuming messages.
+For example, when consuming message \msg{m} from a mailbox described by pattern $\mbmsg{m}$ the resulting mailbox should be empty,
+described by pattern $\mbone$.
+To model this behavior, de'Liguoro and Padovani introduce the concept of \emph{pattern residuals} \cite{deliguoroMailboxTypesUnordered2018} (Figure \ref{fig:pattern-residuals}).
+In Pat \cite{fowlerSpecialDeliveryProgramming2023a}, pattern residuals correspond exactly to the Brzozowski
+derivative of a commutative regular expression \cite{brzozowskiDerivativesRegularExpressions1964}.
+A pattern residual describes the resulting pattern when a message is consumed, i.e.\ removed from the mailbox.
+% The original description of pattern residuals defines them as a partial operator on patterns \cite{deliguoroMailboxTypesUnordered2018}.
+% \sjfnote{I think Pat's derivative operator is total, right, as it corresponds to
+% the Brzozowski derivative?}
+% Since Rocq does not allow partial functions in the traditional sense, we define a residual as a relation between a pattern, a message and the result pattern.
+
+An important property of residuals is \emph{balancing}.
+For a configuration described by pattern $\mbmsg{m} \mbcomp E$, which is included in a pattern $F$, $E$ should be included in the residual $\mbpres{F}{m}{F'}$.
+This property is needed for reasoning about the type of a mailbox after a
+message has been received.
+
+\begin{lemma}[Balancing (\rocqlink{{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.MailboxPatterns.html\#Balancing}})]
+  If $\mbmsg{m} \mbcomp F \mbpinc E$ where $F \not\mbpinc \mbzero$ and $\mbpres{E}{m}{E'}$, then $F \mbpinc E'$.
+  \label{lemma:balancing}
+\end{lemma}
+
+\paragraph{Mechanization.}
+Mailbox configurations mostly rely on the definitions of list permutations
+already provided by Rocq's standard library, but the formalization of mailbox
+patterns requires more effort.
+Describing the semantics of mailbox patterns as a relation between a configuration
+and a pattern, instead of possibly infinite multisets, yields a mechanization that
+is adequate to work with.  The proofs about pattern equivalence and inclusion
+are typically inductions over a pattern, but proving balancing
+(Lemma~\ref{lemma:balancing}) requires several technical lemmas that rely on
+proven properties about permutations of mailbox configurations.
+
+When mechanizing the pattern residual relation, we discovered that in the
+definition of Pat~\cite{fowlerSpecialDeliveryProgramming2023} the rule for
+$\mbstar{}$ was missing.  This issue was consequently fixed in the journal
+version \cite{fowlerSpecialDeliveryProgramming2025}.
+
+% Since the difference in mailbox types between Pat and the mailbox calculus are mostly the usage annotations provided by quasi-linear types,
+% a mechanization of the mailbox calculus could certainly reuse our definitions and properties.

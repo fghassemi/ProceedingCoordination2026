@@ -1,0 +1,167 @@
+\PassOptionsToPackage{svgnames,dvipsnames}{xcolor}
+\documentclass{llncs}
+
+\input{styles}
+\input{macros_util}
+\input{ggmacros}
+
+\graphicspath{{./search-paper/images/}{./images/}}
+\usepackage{orcidlink}
+
+\usepackage{listings}
+\lstdefinestyle{PythonStyle}{
+        language=Python,
+        basicstyle=\sffamily,
+        keywordstyle=\color{teal},
+        commentstyle=\color{black!50!red!50},
+        stringstyle=\color{DarkGreen},
+        numberstyle=\tiny\color{gray},
+        showstringspaces=false,
+        breaklines=true,
+        frame=single,
+        numbers=left,
+        numbersep=5pt,
+        captionpos=b,
+        backgroundcolor=\color{yellow!5},
+		  tabsize=3,
+		  mathescape,
+		  literate=*{=}{{\textcolor{NavyBlue}{=}}}{1}{<<}{{\textcolor{NavyBlue}{$\langle$}}}{1}{>>}{{\textcolor{NavyBlue}{$\rangle$}}}{1}
+		}
+\lstdefinestyle{pyinl}{
+        language=Python,
+        basicstyle=\normalfont\sffamily,
+		  literate=*{=}{{\textcolor{NavyBlue}{=}}}{1}{<<}{{\textcolor{NavyBlue}{$\langle$}}}{1}{>>}{{\textcolor{NavyBlue}{$\rangle$}}}{1}
+		}
+\newcommand\SEArchLogo{\textcolor{\toolidcol}{\hw{SEArch}}\xspace}
+\newcommand\SEArch{\SEArchLogo}
+\newcommand\SEArchComp{\toolid{{\ECFAugie SEArch -- Service Execution Architecture}}\xspace}
+
+\newcommand{\srv}[1]{\textsf{#1}}
+
+\definecolor{serviceBrokerColor}{RGB}{0,168,157}
+\definecolor{processColor}{RGB}{1,123,118}
+\definecolor{mainProcessColor}{RGB}{248,186,0}
+\definecolor{middlewareColor}{RGB}{0,77,128}
+\definecolor{lightBlueCC}{RGB}{86,193,255}
+\definecolor{blueCC}{RGB}{0,162,255}
+\definecolor{darkBlueCC}{RGB}{0,118,186}
+
+% \newcommand{\orcidlink}[1]{\href{https://orcid.org/#1}{\textcolor[HTML]{A6CE39}{\orcidID{#1}}}}
+
+
+\title{% Runtime adaptation of service composition as a programming pattern in \SEArch
+  % \\
+  % Runtime adaptation as a programming pattern in an infrastructure for service composition
+  % \\
+  Runtime adaptation as a programming pattern in service composition
+}
+
+\author{Carlos G. Lopez Pombo
+	\thanks{On leave from Instituto de Ciencias de la computaci\'on CONICET--UBA and Departamento de Computación, Facultad de Ciencias Exactas y Naturales, Universidad de Buenos Aires.}\inst{1}\raisebox{.6em}{\orcidlink{0000-0002-0248-5019}} \and Pablo Montepagano\inst{2} \and Emilio Tuosto\inst{3}\raisebox{.6em}{\orcidlink{0000-0002-7032-3281}}
+}
+\institute{%
+  Centro Interdisciplinario de Telecomunicaciones, Electrónica,
+  Computación y Ciencia Aplicada, Universidad Nacional de
+  Río Negro - Sede Andina and CONICET. %\\\email{cglopezpombo@unrn.edu.ar}
+  \and 
+  Departamento de Computaci\'on, Facultad de Ciencias Exactas y Naturales, Universidad de Buenos Aires. % \\\email{pmontepagano@dc.uba.ar}
+  \and
+  Gran Sasso Science Institute %\\\email{emilio.tuosto@gssi.it}
+} 
+
+\authorrunning{C. G. Lopez Pombo, P. Montepagano, and E. Tuosto}
+\titlerunning{Runtime adaptation as a programming pattern in service composition}
+%
+\index{Lopez Pombo, Carlos G.}
+\index{Montepagano, Pablo}
+\index{Tuosto, Emilio}
+
+% charlie \orcidlink{0000-0002-0248-5019}
+
+% emilio \orcidlink{0000-0002-7032-3281}
+
+
+\begin{document}
+
+% \begin{figure}[t!]
+%   \begin{subfigure}{\textwidth}\centering
+%     \includegraphics[width = 0.7\textwidth]{adaptable-teastore-a}
+%     \caption{\label{fig:external-service-contract}Architectural view according to the adaptation contract $\mathcal{E}_1$}
+%   \end{subfigure}
+%   \\[2em]
+%   \begin{subfigure}{\textwidth}\centering
+% 	 \includegraphics[width = 0.7\textwidth]{adaptable-teastore-b}
+%     \caption{\label{fig:fallback-contract}Architectural view according to the adaptation contract $\mathcal{E}_2$}
+%   \end{subfigure}
+%   \\[2em]
+%   \begin{subfigure}{\textwidth}\centering
+%     \includegraphics[width = 0.7\textwidth]{adaptable-teastore-c}
+%     \caption{\label{fig:default-contract}Architectural view according to the adaptation contract $\mathcal{E}_3$}
+%   \end{subfigure}
+%   \caption{Architectural views of the adaptable TeaStore according to the different environmental conditions}
+%   \label{fig:adaptable_teastore}
+% \end{figure}
+
+
+\maketitle
+
+\begin{abstract}
+  % We recently introduced an execution infrastructure for service-based
+  % software dubbed \SEArchLogo, after {\ECFAugie S}ervice {\ECFAugie
+  % 	 E}xecution {\ECFAugie Arch}itecture. \SEArchLogo is a
+  % language-independent execution infrastructure capable of performing
+  % transparent dynamic reconfiguration of software artefacts.
+
+  % We demonstrate how our framework can be used to support adaptability
+  % leveraging the underlying execution model of \SEArchLogo which
+  % hinges on a (\emph{service}) \emph{broker} that procures services at
+  % run-time based on formal contracts specified by components that
+  % \quo{consume} services.
+
+  % Therefore, cloud applications can adapt to dynamic changes by
+  % modifying the contracts used to search for the services by-need.
+
+  % \hsl[new]
+  
+  We propose a programming pattern for runtime architectural
+  adaptation of service-oriented applications.
+  %
+  Our approach enables transparent reconfiguration of distributed
+  services at runtime leveraging on the key features for dynamic
+  discovery binding of services supported developed in an existing
+  platform.
+  %
+  More precisely, in this paper we equip the platform with monitoring
+  capabilities supporting the transparent reconfiguration of the
+  architecture of service-oriented applications triggered by changes
+  in the execution context.
+  %
+  We demonstrate the effectiveness of the approach on the
+  adaptable TeaStore benchmark.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+\input{intro}
+
+\section{An Overview of \SEArchLogo}\label{sec:search}
+\input{search_eM}
+
+\section{Adaptability as a programming pattern}\label{sec:progpat}
+\input{adaptation}
+
+\section{The Adaptable TeaStore in \SEArch}\label{sec:teapat}
+\input{example}
+
+\section{Conclusions}\label{sec:conc}
+\input{conc}
+
+
+\bibliographystyle{splncs}
+\bibliography{bibdatabase,morebiblio}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

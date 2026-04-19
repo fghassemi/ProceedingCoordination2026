@@ -1,0 +1,311 @@
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{abstract}
+%\usepackage{cite}
+\usepackage{cancel}
+
+\usepackage[dvipsnames]{xcolor}
+%\usepackage[table]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{theorems}
+
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+\usepackage{dirtytalk}
+\usepackage{float}
+\usepackage{comment}
+\usepackage{nicematrix}
+\usepackage{diagbox}
+\usepackage{listings}
+
+\NiceMatrixOptions{xdots/horizontal-labels}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{bussproofs}
+
+	
+%%% for figures
+\usepackage{tikz}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{graphs,graphdrawing,arrows.meta,decorations.pathreplacing}
+\usegdlibrary{circular}
+%\usegdlibrary{grid}  
+\usetikzlibrary{positioning}
+\usepackage{xcolor}
+\usepackage[justification=centering]{caption}
+\usepackage{xstring}
+\usepackage{pgffor}
+\usepackage{etoolbox}
+%\setlength{\parskip}{2pt} 
+
+%%% for bibliography
+\usepackage{hyperref,url}
+\renewcommand{\sectionautorefname}{Section}
+\usepackage[numbers]{natbib}
+\usepackage{xparse}
+
+\NewDocumentCommand{\citehybridpage}{O{} m}{%
+  [p.~#1]\cite{#2}%
+}
+
+\NewDocumentCommand{\citehybrid}{m}{%
+  \cite{#1}
+}
+
+
+%\usepackage{cite}
+
+\newcommand{\nrightsquigarrow}{
+  \mathrel{\tikz[baseline=(a.base)]{
+    \node[inner sep=0pt,outer sep=0pt] (a) {$\rightsquigarrow$};
+    \draw  ([xshift=-0.3ex,yshift=-0.5ex]a.center) -- ([xshift=0.3ex,yshift=0.8ex]a.center);
+  }}
+}
+
+\tcolorboxenvironment{theorem}{
+  colback=black!7,       % light gray background
+%%  colframe=black,        % frame color
+%  boxrule=0pt,         % frame thickness
+%  arc=0mm,               % rounded corners
+%  left=6pt, right=6pt, top=6pt, bottom=6pt, % padding
+%  enhanced,
+  enhanced jigsaw,
+  sharp corners,
+%  colback=white,
+  colframe=black!70,
+  boxrule=0pt,
+  borderline west={1pt}{0pt}{black!70},  % <-- vertical line on the left
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+  before skip=10pt,
+  after skip=10pt,
+}
+\tcolorboxenvironment{notation}{
+  colback=gray!10,       % light gray background
+%  colframe=black,        % frame color
+  boxrule=0pt,         % frame thickness
+  arc=0mm,               % rounded corners
+  left=6pt, right=6pt, top=6pt, bottom=6pt, % padding
+  enhanced,
+}
+\tcolorboxenvironment{lemma}{
+  colback=black!7,       % light gray background
+%%  colframe=black,        % frame color
+%  boxrule=0pt,         % frame thickness
+%  arc=0mm,               % rounded corners
+%  left=6pt, right=6pt, top=6pt, bottom=6pt, % padding
+%  enhanced,
+  enhanced jigsaw,
+  sharp corners,
+%  colback=white,
+  colframe=black!70,
+  boxrule=0pt,
+  borderline west={1pt}{0pt}{black!70},  % <-- vertical line on the left
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+  before skip=10pt,
+  after skip=10pt,
+}
+\tcolorboxenvironment{corollary}{
+  colback=black!7,       % light gray background
+%%  colframe=black,        % frame color
+%  boxrule=0pt,         % frame thickness
+%  arc=0mm,               % rounded corners
+%  left=6pt, right=6pt, top=6pt, bottom=6pt, % padding
+%  enhanced,
+  enhanced jigsaw,
+  sharp corners,
+%  colback=white,
+  colframe=black!70,
+  boxrule=0pt,
+  borderline west={1pt}{0pt}{black!70},  % <-- vertical line on the left
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+  before skip=10pt,
+  after skip=10pt,
+}
+\tcolorboxenvironment{nameddefinition}{
+  enhanced jigsaw,
+  sharp corners,
+  colback=white,
+  colframe=black!70,
+  boxrule=0pt,
+  borderline west={1pt}{0pt}{black!70},  % <-- vertical line on the left
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+  before skip=10pt,
+  after skip=10pt,
+  fontupper=\slshape
+}
+ \tcolorboxenvironment{definition}{
+  enhanced jigsaw,
+  sharp corners,
+  colback=white,
+  colframe=black!70,
+  boxrule=0pt,
+  borderline west={1pt}{0pt}{black!70},  % <-- vertical line on the left
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+  before skip=10pt,
+  after skip=10pt,
+}
+\tcolorboxenvironment{obs}{
+  colback=Cyan!10,       % light gray background
+%  colframe=black,        % frame color
+  boxrule=0pt,         % frame thickness
+  arc=0mm,               % rounded corners
+  left=6pt, right=6pt, top=6pt, bottom=6pt, % padding
+  enhanced,
+}
+\tcolorboxenvironment{proposition}{
+  colback=black!7,       % light gray background
+%%  colframe=black,        % frame color
+%  boxrule=0pt,         % frame thickness
+%  arc=0mm,               % rounded corners
+%  left=6pt, right=6pt, top=6pt, bottom=6pt, % padding
+%  enhanced,
+  enhanced jigsaw,
+  sharp corners,
+%  colback=white,
+  colframe=black!70,
+  boxrule=0pt,
+  borderline west={1pt}{0pt}{black!70},  % <-- vertical line on the left
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+  before skip=10pt,
+  after skip=10pt,
+}
+\tcolorboxenvironment{remark}{
+%  colback=WildStrawberry!10,       % light gray background
+%%  colframe=black,        % frame color
+%  boxrule=0pt,         % frame thickness
+%  arc=0mm,               % rounded corners
+%  left=6pt, right=6pt, top=6pt, bottom=6pt, % padding
+%  enhanced,
+  enhanced jigsaw,
+  sharp corners,
+  colback=white,
+  colframe=black!70,
+  boxrule=0pt,
+  borderline west={1pt}{0pt}{black!70},  % <-- vertical line on the left
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+  before skip=10pt,
+  after skip=10pt,
+}
+
+%\newtheoremstyle{slanted}
+%  {\topsep}   % Space above
+%  {\topsep}   % Space below
+%  {\slshape}  % Body font (slanted)
+%  {}          % Indent amount
+%  {\bfseries} % Theorem head font
+%  {.}         % Punctuation after theorem head
+%  {.5em}      % Space after theorem head
+%  {}          % Theorem head spec
+%
+%
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{nameddefinition}[definition]{Definition}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{obs}[theorem]{Observation}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newtheorem{examplex}{Example}
+\newenvironment{example}
+  {\pushQED{\qed}\renewcommand{\qedsymbol}{$\lozenge$}\examplex}
+  {\popQED\endexamplex}
+	
+\setlength{\columnsep}{20pt}
+
+\geometry{margin=1.5cm}
+%\usepackage[a4paper, left=2cm, right=2cm, bottom=2.54cm]{geometry}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\thepage}
+\lhead{Automated consistency verification for replicated data systems}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{1em}{}
+
+
+
+\usepackage[none]{hyphenat}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\historyset}{\mathcal{H}(\mathbb{P}, \mathbb{T}, \mathbb{O}, \mathbb{V})}
+\newcommand{\contexthistory}{Let $\mathbb{P}$, $\mathbb{T} = \{read,write\}$, $\mathbb{O}$, and $\mathbb{V}$ be finite sets representing, respectively, processes, operation types, objects, and values. }
+\newcommand{\rb}{\xrightarrow{rb}}
+\newcommand{\ssrel}{\xrightarrow{ss}}
+\newcommand{\opa}{a}
+\newcommand{\opb}{b}
+\newcommand{\opc}{c}
+\newcommand{\opd}{d}
+\newcommand{\ope}{e}
+\newcommand{\opf}{f}
+\newcommand{\opg}{g}
+\newcommand{\oph}{h}
+\newcommand{\opi}{i}
+\newcommand{\opj}{j}
+\newcommand{\opk}{k}
+\newcommand{\opl}{l}
+\newcommand{\opm}{m}
+\newcommand{\opn}{n}
+\newcommand{\opo}{o}
+\newcommand{\opp}{p}
+\newcommand{\opq}{q}
+\newcommand{\opr}{r}
+\newcommand{\ops}{s}
+\newcommand{\opt}{t}
+\newcommand{\opu}{u}
+\newcommand{\opv}{v}
+\newcommand{\opw}{w}
+\newcommand{\opx}{x}
+\newcommand{\opy}{y}
+\newcommand{\opz}{z}
+\newcommand{\dsucp}[1]{\stackrel{#1}{\rightharpoonup}}
+\newcommand{\dsuc}{\rightharpoonup}
+%$\twoheadrightarrow$
+\newcommand{\patharrow}{\!\mathrel{\rlap{\hskip 0.55em $\rightarrow$}\rightarrow}\;}
+\newcommand{\algoneset}{\mathcal{G}_{\mathcal{A}\emph{lg1}}}
+\newcommand{\algone}{\textsl{Alg1}}
+\newcommand{\foralls}{\forall\;}
+\newcommand{\ar}{\xrightarrow{ar}}
+\newcommand{\vis}{\xrightarrow{vis}}
+
+\makeatletter
+\renewcommand{\@makefnmark}{\textsuperscript{[\thefootnote]}}
+\makeatother

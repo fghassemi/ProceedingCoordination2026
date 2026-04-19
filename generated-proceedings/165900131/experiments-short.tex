@@ -1,0 +1,238 @@
+\section{Experiments}
+\label{sect-experiments}
+
+%In this section, we evaluate \texttt{Bach4Popper} from a double perspective\footnote{To allow the interested reader to reconduct the tests, the code of Bach4Popper is available at the address mentioned in~\cite{Bach4Popper-code}. }: 
+
+In this section, we evaluate \texttt{Bach4Popper} from two complementary perspectives\footnote{To allow the interested reader to reproduce the experiments, the code of Bach4Popper is available at the address mentioned in~\cite{Bach4Popper-code}.}:
+
+\begin{itemize}
+    \item  \textit{P1 (Correctness).}  Does \texttt{Bach4Popper} compute hypotheses that are equivalent to those learned by (centralized) Popper despite strict data locality constraints and the absence of shared examples?
+    \item  \textit{P2 (Performance and Coordination Cost).}  How does coordination-based federated execution impact the symbolic search process in terms of execution time compared to (centralized) Popper?
+\end{itemize}
+
+\noindent
+%To simulate the distributed setting of federated learning, we evaluate \texttt{Bach4Popper} through a series of experiments %where learning is performed over partitioned data across multiple clients.
+%where learning is performed on partitioned data across multiple clients.\footnote{To allow the interested reader to reproduce the experiments, the code of Bach4Popper is available at the address mentioned in~\cite{Bach4Popper-code}.}
+
+%In this setting, data are partitioned across clients to enforce strict data locality: each client only accesses its own examples, while coordination is handled through a central server. This setup allows us to analyze how the symbolic ILP process behaves under federated constraints.
+
+
+
+\begin{table*}[!t]
+\centering
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Dataset} & \textbf{Target Pred.} & \textbf{\#Pos} & \textbf{\#Neg} & \textbf{MaxClauses} & \textbf{MaxVars} & \textbf{MaxBody} \\
+\midrule
+\texttt{Trains}   & \texttt{f/1}              & 5   & 5   & 3 & 5 & 6 \\
+\texttt{Zendo1}   & \texttt{zendo/1}          & 20  & 20  & 4 & 5 & 7 \\
+\texttt{iggp-rps} & \texttt{next\_score/1}    & 108 & 356 & 4 & 5 & 7 \\
+\bottomrule \\
+
+\end{tabular}
+\caption{Datasets and corresponding Popper configuration used in the experiments.}
+\label{tab:datasets-config}
+\end{table*}
+
+
+\noindent
+The evaluation is conducted on standard ILP benchmark datasets obtained from the official Popper implementation~\cite{popperv110}. These benchmarks are widely used to assess symbolic hypothesis search under controlled bias settings. Table~\ref{tab:datasets-config} summarizes the datasets along with their corresponding configurations. Note that, as we do not have access to data really distributed, we shall partition these datasets in order to fulfill the hypotheses of Definition~\ref{defn-ilp-partition}. Each client thus only accesses its own examples, while coordination is handled through a central server. 
+% This setup allows us to analyze how the symbolic ILP process behaves under federated constraints.
+
+
+We consider three representative benchmarks covering different levels of relational complexity:
+
+\begin{itemize}
+
+\item \textit{Trains.}  
+The \texttt{Trains} dataset~\cite{larson1977inductive} is a classical ILP benchmark where the goal is to distinguish between eastbound and westbound trains. Although relatively small, it requires structured relational reasoning over background knowledge and is commonly used to validate the correctness of ILP systems.
+
+\item \textit{Zendo.}  
+The \texttt{Zendo} dataset~\cite{bramley2018grounding} consists of structured configurations from which a hidden concept must be inferred. Inspired by a rule-discovery game, it features a richer hypothesis space than \textit{Trains} and is therefore suitable for evaluating symbolic generalization.
+
+\item \textit{IGGP-RPS.}  
+The \texttt{IGGP-RPS} dataset originates from Inductive General Game Playing~\cite{cropper2020inductive} and involves learning rules that describe state transitions in a game environment. This benchmark is more challenging due to both the size of the example set and the complexity of the relational background knowledge.
+
+\end{itemize}
+
+\noindent
+We consider a cross-silo federated learning setting composed of three clients and a central server. To simulate this setting, each dataset is partitioned into three client-specific subsets, each containing a balanced distribution of positive and negative examples.
+Each client evaluates candidate hypotheses using only its local data, while coordination is performed by the server. No examples, background knowledge, or intermediate evaluation results are shared between clients or with the server. The server has access only to the bias.
+
+
+\subsection{Correctness}
+Unlike statistical learning, Popper seeks a hypothesis that is logically complete and consistent with the specification.
+Thus, accuracy and recall here indicate logical satisfaction rather than predictive generalization: a value of $1.00$ means that all positive examples are entailed and all negative examples are rejected.
+
+We first evaluate whether Bach4Popper preserves the models computed by centralized Popper. To that end, we consider a hybrid evaluation protocol combining federated learning with centralized testing. 
+Algorithm~\ref{alg:srvpopper} is enriched with access to the full dataset: lines~16-18 of Algorithm~\ref{alg:popper} are inserted before line~18 of Algorithm~\ref{alg:srvpopper}, after which outcomes and scores obtained in the federated and centralized settings are compared. 
+% This results in Algorithm~\ref{alg:gsrvpopper} in Appendix~\ref{app-experiments}.
+
+\begin{table}[!t]
+\centering
+\small
+
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{l|cc|cc|cc}
+\toprule
+\textbf{Setting}
+& \multicolumn{2}{c|}{\textbf{Trains}}
+& \multicolumn{2}{c|}{\textbf{Zendo}}
+& \multicolumn{2}{c}{\textbf{IGGP-RPS}} \\
+& Accuracy & Recall
+& Accuracy & Recall
+& Accuracy & Recall \\
+\midrule
+
+Centralized
+& 1.00  & 1.00 
+& 1.00  & 1.00 
+& 1.00  & 1.00   \\
+
+Bach4Popper
+& 1.00  & 1.00 
+& 1.00  & 1.00 
+& 1.00  & 1.00   \\
+\bottomrule
+\end{tabular}
+\vspace{2mm}
+\caption{Convergence of Bach4Popper towards centralized Popper in terms of descriptive performance.}
+\label{tab:convergence}
+\end{table}
+
+As shown in Table~\ref{tab:convergence}, the coordinated learning process consistently converges to hypotheses that are complete and consistent on the full dataset, confirming that federation preserves the correctness guarantees,
+% of centralized Popper
+thereby addressing \textit{P1 (Correctness)}. This provides an empirical validation of Propositions~1-4 established in Section~\ref{sect-BachForPopper}, showing that federated evaluation preserves the logical correctness of the learned hypotheses.
+
+
+
+%showing that symbolic outcomes and scores computed in a federated manner induce the same hypothesis refinement behavior as centralized Popper.
+
+%We report the hypotheses learned across three independent runs for each dataset in Table~\ref{tab:hypotheses}.
+%For each run, the hypothesis induced by Bach4Popper is logically equivalent to the one learned by centralized Popper, although their syntactic structure may differ due to the non-deterministic nature of the symbolic search.
+
+
+
+\subsection{Performance and Symbolic Cost}
+
+We now evaluate the execution cost induced by distributing the testing phase of Popper. Unlike statistical federated learning, Bach4Popper does not distribute model optimization but preserves the symbolic generate-test-constrain loop of Popper while delegating hypothesis evaluation to multiple clients. To analyze this cost, we measure the following:
+%To analyse this cost, we use Algorithm~\ref{alg:tgsrvpopper} in Appendix~\ref{appendix-lp} to measure:
+
+\begin{itemize}
+    \item \textbf{$tCentralPopper$}: time spent inside the symbolic ILP engine (generation of hypotheses, constraint construction, grounding, and solver update);
+    \item \textbf{$tFedPopper$}: time spent performing federated coordination,
+    i.e., transmitting hypotheses, waiting for client evaluations, and aggregating outcomes;
+    \item \textbf{$global\_time$}: total execution time from the first generated
+    hypothesis until termination.
+\end{itemize}
+
+\noindent
+\begin{sloppypar}
+Two timing modes are used. On the one hand, by using Python \texttt{process\_time()}, we 
+measure only CPU time and ignore waiting periods. This shows the pure computation cost of the algorithm. On the other hand, by using Python \texttt{perf\_counter()}, we 
+measure real elapsed time, including communication and synchronization between clients.
+In other words, the first mode shows how much computation federation adds, while the second shows the actual runtime in a distributed setting.
+\end{sloppypar}
+%\vspace{0.25cm}
+
+\begin{table}[!t]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{l|ccc|ccc}
+\toprule
+\textbf{Dataset} 
+& \multicolumn{3}{c|}{\textbf{With Suspension}} 
+& \multicolumn{3}{c}{\textbf{Without Suspension}} \\
+
+& \textbf{CENT (s)} 
+& \textbf{FED (s)} 
+& \textbf{Glob (s)} 
+& \textbf{CENT (s)} 
+& \textbf{FED (s)} 
+& \textbf{Glob (s)} \\
+
+\midrule
+
+\texttt{Trains}   
+& 0.1437 & 26.9676 & 27.2257 & 0.0415 & 0.0073 & 0.0790 \\
+
+\texttt{Zendo}    
+& 0.1682 & 5.3198 & 5.7002 & 0.2087 & 0.0260 & 0.5039 \\
+
+\texttt{IGGP-RPS} 
+& 268.77 & 100.91  & 600.04 & 275.83 & 2.7582 & 483.15 \\
+
+\bottomrule
+\end{tabular}
+\vspace{2mm}
+\caption{Execution time decomposition of Bach4Popper.
+“With Suspension” uses \texttt{perf\_counter()} (including communication delays),
+while “Without Suspension” uses \texttt{process\_time()} (CPU time only). CENT denotes the Popper symbolic core and FED the federated coordination cost.}
+\label{tab:time}
+\end{table}
+This distinction is clearly reflected in Table~\ref{tab:time}. For all datasets, the federated cost (FED) drops significantly when suspension is removed. For instance, on the \textit{Trains} dataset, FED decreases from 26.96s to 0.0073s, and on \textit{Zendo}, from 5.31s to 0.026s. Even for the more complex \textit{IGGP-RPS} dataset, FED drops from 100.91s to only 2.75s.
+
+This behavior is also influenced by the complexity of the learning task. For simpler datasets such as \textit{Trains} and \textit{Zendo}, the search converges in fewer iterations, and the execution time is therefore largely dominated by coordination latency. In contrast, for more complex datasets such as \textit{IGGP-RPS}, a higher number of iterations is required, which leads to both increased computational cost and an accumulation of coordination delays.
+
+This consistent behavior across datasets shows that the overhead introduced by federation is primarily due to coordination latency, i.e., communication, synchronization, and waiting between components, rather than actual computation. In particular, the very low FED cost in the CPU-only setting indicates that the distributed evaluation itself is computationally lightweight.
+
+Overall, Bach4Popper preserves the computational behavior of Popper, and the additional cost of federation mainly originates from distributed execution rather than increased algorithmic complexity.
+These results address point \textit{P2} above.
+% (Performance and Coordination Cost), showing that the overhead introduced by federation is largely due to coordination latency (i.e., communication and synchronization), while a smaller portion is attributable to additional computation in more complex settings.
+
+Although execution time is influenced by the size and complexity of the datasets, the results show that this factor alone does not account for the observed overhead. The discrepancy between CPU time and wall-clock time demonstrates that coordination introduces additional latency that is independent of the underlying ILP computation. This confirms that the cost of federation arises not only from larger problem instances, but also from the coordination mechanisms required to distribute the evaluation process.
+%While execution time naturally increases with the size and complexity of the datasets, the results show that this alone does not explain the observed behavior. In particular, the comparison between measurements with and without suspension highlights that a significant portion of the overhead is due to coordination effects rather than purely to the intrinsic complexity of the ILP task. This indicates that the impact of federation cannot be reduced to dataset size alone, but must be understood in terms of the interaction between symbolic reasoning and distributed coordination.
+%\begin{table}[!t]
+%\centering
+%\small
+%\setlength{\tabcolsep}{5pt}
+%\begin{tabular}{l|ccc|ccc}
+%\toprule
+%\textbf{Dataset} 
+%& \multicolumn{3}{c|}{\textbf{With Suspension}} 
+%& \multicolumn{3}{c}{\textbf{Without Suspension}} \\
+
+%& \textbf{CENT (s)} 
+%& \textbf{FED (s)} 
+%& \textbf{Glob (s)} 
+%& \textbf{CENT (s)} 
+%& \textbf{FED (s)} 
+%& \textbf{Glob (s)} \\
+
+%\midrule
+
+%\texttt{Trains}   
+%& 0.03 & 4.00 & 4.06 & 10.42 & 0.60 & 21.24 \\
+
+%\texttt{Zendo}    
+%& 0.15 & 4.21 & 4.54 & 0.16 & 0.02 & 0.42 \\
+
+%\texttt{IGGP-RPS} 
+%& 278 & 600  & 98.16 & 2.66 & 334.17 & 600 \\
+
+%\bottomrule
+%\end{tabular}
+%\vspace{2mm}
+%\caption{Execution time decomposition of Bach4Popper.
+%“With Suspension” uses \texttt{perf\_counter()} (including communication delays),
+%while “Without Suspension” uses \texttt{process\_time()} (CPU time only). CENT denotes the Popper symbolic core and FED the federated coordination cost.}
+
+%\label{tab:time}
+%\end{table}
+
+
+
+
+
+%This difference is explained by the measurement methodology. “With suspension” relies on \texttt{perf\_counter()}, which includes communication delays, synchronization, and waiting periods between the server and clients. In contrast, “Without suspension” uses \texttt{process\_time()}, which measures CPU time only and excludes idle or waiting phases.
+
+
+
+%The results in Table~\ref{tab:time} show two different effects. When suspension time is ignored, the additional cost of federation remains small compared to the symbolic reasoning time. This indicates that Bach4Popper preserves the computational behavior of Popper and that coordination introduces little algorithmic overhead.
+
+%When suspension time is included, the federated component becomes the dominant part of the execution time. This is expected, since evaluation now requires communication, synchronization, and waiting for client responses.
+
+%Overall, Bach4Popper does not change the intrinsic complexity of the ILP search but adds latency that comes from distributed execution rather than from the learning process itself.
+
+

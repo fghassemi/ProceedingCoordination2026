@@ -1,0 +1,143 @@
+\def\captionsep{-5pt}
+
+\begin{figure}[t!]
+  \begin{subfigure}{\textwidth}\sf\centering
+	 \begin{minipage}[c]{.3\textwidth}
+		\begin{tabbing}
+		  \= \quad \=\kill\\
+		  \>.outputs W\\
+		  \>.state graph\\
+		  \>\> 0 P ! getImg 1\\
+		  \>\> 1 P ? img 2\\
+		  \>\> 2 P ! stop 3\\
+		  \>\> 2 P ! accept 3\\
+		  \>\> 2 P ! reject 1\\
+		  \>.marking 0\\
+		  \>.end
+		\end{tabbing}
+		\begin{tikzpicture}[cfsm, node distance = 1.7cm and 1.3cm]
+		  \useasboundingbox (-3.5,-4.7);
+		  \node[state] (1) at (0,0){1};
+		  \foreach \i/\j/\l in {1/2/{\ain[w][p][][img]},2/3/{\aout[w][p][][accept]}} {
+			 \node (\j) [state, below = of \i] {\j};
+			 \path (\i) edge node[below] {$\l$} (\j);
+		  }
+		  \node (0) [state, initial, right = of 1, initial where = right] {0};
+		  \path (0) edge node[above]{$\aout[w][p][][getImg]$} (1);
+		  \path (2) edge[bend right] node[below] {$\aout[w][p][][reject]$} (1);
+		  \path (2) edge[bend left] node[below] {$\aout[w][p][][stop]$} (3);
+		\end{tikzpicture}
+	 \end{minipage}
+	 \hspace{3cm}
+	 \begin{minipage}{.3\textwidth}
+		\begin{tabbing}
+		  \= \quad \=\kill\\
+		  \>.outputs P \\
+		  \>.state graph\\
+		  \>\>0 W ? getImg 1\\
+		  \>\>1 W ! img 2\\
+		  \>\> 2 W ? stop 3\\
+		  \>\> 2 W ? accept 3\\
+		  \>\> 2 W ? reject 1 \\
+		  \>.marking 0\\
+		  \>.end
+		\end{tabbing}		  
+		\begin{tikzpicture}[cfsm, node distance = 1.7cm and 1.3cm]
+		  \useasboundingbox (-3.5,-4.7);
+		  \node[state] (1) at (0,0){1};
+		  \foreach \i/\j/\l in {1/2/{\aout[w][p][][img]},2/3/{\ain[w][p][][accept]}} {
+			 \node (\j) [ state, below = of \i] {\j};
+			 \path (\i) edge node[below] {$\l$} (\j);
+		  }
+		  \node (0) [state, initial, right = of 1, initial where = right] {0};
+		  \path (0) edge node[above]{$\ain[w][p][][getImg]$} (1);
+		  \path (2) edge[bend right] node[below] {$\ain[w][p][][reject]$} (1);
+		  \path (2) edge[bend left] node[below] {$\ain[w][p][][stop]$} (3);
+		\end{tikzpicture}		  
+	 \end{minipage}
+	   \setlength{\abovecaptionskip}{\captionsep}
+    \caption{\label{fig:external-service-contract}Contract for external service}
+  \end{subfigure}
+  \\[2em]
+  \begin{subfigure}{\textwidth}\sf\centering
+	 \begin{minipage}[c]{.3\textwidth}
+		\begin{tabbing}
+		  \= \quad \=\kill
+		  \>.outputs W\\
+		  \>.state graph\\
+		  \>\> 0 S ! query 1\\
+		  \>\> 1 S ? img 2\\
+		  \>.marking 0\\
+		  \>.end
+		\end{tabbing}
+		\begin{tikzpicture}[cfsm, node distance = 1.3cm]
+		  \useasboundingbox (-5,-3);
+		  \node (0) [state, initial, initial where = right] {0};
+		  \node (1) [state, left = of 0] {1};
+		  \node (2) [state, below = of 1] {2};
+		  \path (0) edge node[above] {$\aout[w][s][][query]$} (1);
+		  \path (1) edge node[above] {$\ain[w][s][][img]$} (2);
+		\end{tikzpicture}
+	 \end{minipage}
+	 \hspace{3cm}
+	 \begin{minipage}{.3\textwidth}
+		\begin{tabbing}
+		  \= \quad \=\kill
+		  \>.outputs S\\
+		  \>.state graph\\
+		  \>\> 0 W ? query 1\\
+		  \>\> 1 W ! img 2\\
+		  \>.marking 0\\
+		  \>.end
+		\end{tabbing}
+		\begin{tikzpicture}[cfsm, node distance = 1.3cm]
+		  \useasboundingbox (-5,-3);
+		  \node (0) [state, initial, initial where = right] {0};
+		  \node (1) [state, left = of 0] {1};
+		  \node (2) [state, below = of 1] {2};
+		  \path (0) edge node[above] {$\ain[w][s][][query]$} (1);
+		  \path (1) edge node[above] {$\aout[w][s][][img]$} (2);
+		\end{tikzpicture}
+	 \end{minipage}
+	   \setlength{\abovecaptionskip}{\captionsep}
+    \caption{\label{fig:fallback-contract}Contract for the fallback scenario with the storage service}
+  \end{subfigure}
+  \\[2em]
+  \begin{subfigure}{\textwidth}\sf\centering
+	 \begin{minipage}[c]{.3\textwidth}
+		\begin{tabbing}
+		  \= \quad \=\kill
+		  \>.outputs W\\
+		  \>.state graph\\
+		  \>.marking 0\\
+		  \>.end
+		\end{tabbing}
+		\begin{tikzpicture}[cfsm, node distance = 1.3cm]
+		  \useasboundingbox (-3.5,-2);
+		  \node (0) [state, initial] {0};
+		\end{tikzpicture}
+	 \end{minipage}
+	 % \hspace{3cm}
+	 % \begin{minipage}{.3\textwidth}
+	 % 	\begin{tabbing}
+	 % 	  \= \quad \=\kill
+	 % 	  \>.outputs D\\
+	 % 	  \>.state graph\\
+	 % 	  \>.marking 0\\
+	 % 	  \>.end
+	 % 	\end{tabbing}
+	 % 	\begin{tikzpicture}[cfsm, node distance = 1.3cm]
+	 % 	  \useasboundingbox (-3.5,-2);
+	 % 	  \node (0) [state, initial] {0};
+	 % 	\end{tikzpicture}
+	 % \end{minipage}
+	   \setlength{\abovecaptionskip}{\captionsep}
+    \caption{\label{fig:default-contract}Contract for the use of default locally stored images}
+  \end{subfigure}
+  \caption{\label{fig:contracts}Contracts for the scenario-based adaptable TeaStore}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "main"
+%%% End:

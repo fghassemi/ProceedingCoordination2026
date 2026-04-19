@@ -1,0 +1,126 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{listingstyle}[2025/04/23 Scala 3 listings style with branding and type highlighting]
+
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+\RequirePackage{zi4}
+
+% VS Code Light+ Color Palette
+\definecolor{vscLightBackground}{HTML}{F5F5F5}
+\definecolor{vscLightKeyword}{HTML}{AF00DB}
+\definecolor{vscLightType}{HTML}{267f99}
+\definecolor{vscLightString}{HTML}{A31515}
+\definecolor{vscLightComment}{HTML}{008000}
+\definecolor{vscLightFunction}{HTML}{795E26}
+\definecolor{vscLightNumber}{HTML}{098658}
+\definecolor{vscLightLineNum}{HTML}{C8C8C8}
+\definecolor{vscLightText}{HTML}{000000}
+
+% Define Scala 3 language
+\lstdefinelanguage{Scala3}{
+  morekeywords={
+    abstract,case,catch,class,def,do,else,enum,export,extends,false,final,
+    finally,for,forSome,given,if,implicit,import,infix,inline,lazy,match,
+    new,null,object,opaque,open,override,package,private,protected,return,
+    sealed,super,then,this,throw,trait,true,try,type,using,val,var,while,
+    with,yield,derives
+  },
+  morekeywords=[2]{=>,<-,<:,>:,\#,@,=>>},
+  morekeywords=[3]{
+    Option,Some,None,Either,Left,Right,Try,Success,Failure,Future,CanEqual,Iterable,
+    Ordering,Tuple,Map,List,Set,Vector,Seq,Unit,Int,String,Boolean,Double,
+    NonEmptyList,Task,Signal,Remote,Monad
+  },
+  morekeywords=[4]{
+    on,take,takeAll,comm,isotropicComm,anisotropicMessage,anisotropicComm,
+    coAnisotropicComm,reachablePeers,MultiParty,Label,Anisotropic,Quantifier,
+    Single,Multiple,TiedWithSingle,TiedWithMultiple,Network,Environment
+  },
+  morekeywords=[5]{
+    Client,Server,Database,Peer,Alice,Bob,Master,Worker,Primary,Backup
+  },
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+}
+
+% VS Code Light+ Style
+\lstdefinestyle{scala3}{
+  language=Scala3,
+  backgroundcolor=\color{vscLightBackground},
+  basicstyle=\ttfamily\scriptsize\color{vscLightText},
+  keywordstyle=\color{vscLightKeyword}\bfseries,
+  keywordstyle=[2]\color{vscLightText},
+  keywordstyle=[3]\color{vscLightType},
+  keywordstyle=[4]\color{vscLightFunction}\bfseries,
+  keywordstyle=[5]\color{vscLightNumber}\bfseries,
+  commentstyle=\color{vscLightComment}\itshape,
+  stringstyle=\color{vscLightString},
+  numberstyle=\tiny\color{vscLightLineNum},
+  numbers=left,
+  numbersep=6pt,
+  tabsize=2,
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  captionpos=b,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{vscLightLineNum},
+  xleftmargin=1em,
+  xrightmargin=1em,
+  aboveskip=1em,
+  belowskip=1em,
+}
+
+
+% Define Rust language (adapted for Rust syntax and idioms)
+\lstdefinelanguage{Rust}{
+  morekeywords={
+    as,break,const,continue,crate,else,enum,extern,false,fn,for,if,impl,in,let,loop,match,mod,move,mut, pub,ref,return,self,Self,static,struct,super,trait,true,type,unsafe,use,where,while,async,await,dyn,abstract,become,box,do,final,macro,override,priv,try,typeof,unsized,virtual,yield
+  },
+  morekeywords=[2]{::,->,=>,!,?,&},
+  morekeywords=[3]{
+    Option,Some,None,Result,Ok,Err,String,str,Vec,Box,Clone,Copy,Debug,Default,Drop,Eq,Hash,Ord,PartialEq,PartialOrd,Send,Sync,ToString,VecDeque,HashMap,HashSet,BTreeMap,BTreeSet,Arc,Rc,Cell,RefCell,Mutex,RwLock,thread,io,fs,env,process,Command,File,Read,Write,Error,Result,From,Into,Iterator,Future,Pin,Poll,Unpin
+  },
+  morekeywords=[4]{
+    unwrap,expect,new,from,as_ref,as_mut,iter,map,filter,collect,ok,err
+  },
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]", 
+  morestring=[b]',
+}
+
+% VS Code Light+ Style
+\lstdefinestyle{rust}{
+  language=Rust,
+  backgroundcolor=\color{vscLightBackground},
+  basicstyle=\ttfamily\footnotesize\color{vscLightText},
+  keywordstyle=\color{vscLightKeyword}\bfseries,
+  keywordstyle=[2]\color{vscLightText},
+  keywordstyle=[3]\color{vscLightType},
+  keywordstyle=[4]\color{vscLightFunction},
+  commentstyle=\color{vscLightComment}\itshape,
+  stringstyle=\color{vscLightString},
+  numberstyle=\tiny\color{vscLightLineNum},
+  numbers=left,
+  numbersep=6pt,
+  tabsize=2,
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  captionpos=b,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{vscLightLineNum},
+  xleftmargin=1em,
+  xrightmargin=1em,
+  aboveskip=1em,
+  belowskip=1em,
+}
+
+

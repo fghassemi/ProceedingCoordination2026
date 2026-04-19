@@ -1,0 +1,48 @@
+\subsection{Substitution}
+\label{sec:substitution}
+
+%This section describes the process of mechanizing \emph{substitution} for Pat, as well as proving that substitution indeed behaves as expected.
+
+The call-by-value operational semantics of Pat ensures that substitution only
+needs to replace a variable with a value.  However, since Pat enforces a
+syntactic separation of values and computations
+(following \emph{fine-grain
+call-by-value}~\cite{levyModellingEnvironmentsCallbyvalue2003}), variables are
+classed as values, which makes the proof of substitution nontrivial.
+
+The Rocq library \emph{dblib} \cite{pottierDblib2021}, which we use for de
+Bruijn indices, provides a definition of substitution.  To use it, a user
+defines substitution as a \emph{traverse} function
+(\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Substitution.html\#traverse_Term})
+over terms. It applies a function $f$ at every variable and provides $f$
+with the number of binders that have been visited.  
+To use the substitution operation, several lemmas about the traverse function need to be proven.
+% After the
+% traverse function is defined, several lemmas about certain properties need to be
+% proven to use substitution.
+%
+% The main lemma we prove is substitution.
+
+\begin{lemma}[Substitution (\rocqlink{https://edgardschi.github.io/mailbox-types-rocq/MailboxTypes.Substitution.html\#subst_lemma})]
+  If \WellTypedTerm{\envInsert{x}{A}{\Gamma_1}}{t}{B} and \WellTypedTerm{\Gamma_2}{v}{A'}, with $A \subtype A'$ and $\disenvcomb{\Gamma_1}{\Gamma_2}{\Gamma}$,
+  then \WellTypedTerm{\Gamma}{\{v / x\}t}{B}.
+  \label{lemma:substitution}
+\end{lemma}
+
+\paragraph{Mechanization.}
+Originally, the proof of this lemma was assumed to be standard
+\cite{deliguoroMailboxTypesUnordered2018,fowlerSpecialDeliveryProgramming2023}.
+The mechanization revealed the opposite to be the case, and the proof is by far
+the most complex and largest in the mechanization.
+%
+One of the most complex parts of the proof is the $\LET$ case, which requires
+%
+extensive reasoning about variable lifting and environment combination.
+Additionally, due to quasi-linear typing, environment combinations and
+environment subtyping, one has to consider more cases than initially expected.
+%
+Although \emph{dblib} alleviates some of the proof burden, manual work is still
+required.  Since variables are considered values in Pat, reasoning about
+substituting one variable for another is required.  While \emph{dblib} provides
+tactics for automatically proving some of these properties, it often would not
+be able to do so.  We are unsure as to why this is the case.

@@ -1,0 +1,102 @@
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%\urlstyle{rm}
+
+\newif\iflong\longfalse
+
+\input{macros.tex}
+
+\begin{document}
+
+\title{HistMSO: a Logic for Reasoning about Consistency Models with MONA}
+
+\author{Isabelle Coget\inst{1} \and
+Etienne Lozes\inst{2}\orcidID{0000-0001-8505-585X}}
+
+\authorrunning{I. Coget and E. Lozes}
+
+\institute{Institut Polytechnique de Paris, Palaiseau, France \and
+Université Côte d'Azur, CNRS, I3S, France}
+
+\maketitle
+
+\begin{abstract}
+Reasoning about consistency models for replicated data systems is a challenging task that requires a deep understanding of both the consistency models themselves and a large part of human inputs in mechanized verification approaches.
+
+In this work, we introduce an approach to reasoning about consistency models for replicated data systems. 
+We introduce HistMSO, a monadic second-order logic (MSO) for histories and abstract executions, the formal models of executions of replicated data systems introduced by Burckhardt. 
+We show that HistMSO can express 39 out of 42 consistency models from Viotti and Vukolic hierarchy. 
+Moreover, we develop a method for reducing HistMSO satisfiability and model-checking to the same problems for MSO over words. 
+While doing this, we leverage the MONA tool for automated reasoning on consistency models.
+
+\keywords{Replicated data systems \and Consistency models \and Automated verification}
+\end{abstract}
+
+\section{Introduction\label{sec:intro}}
+\input{intro.tex}
+
+\subsubsection{Related works}
+\input{related_works.tex}
+
+\section{Background\label{sec:background}}
+\input{histories.tex}
+
+\section{A Logical Formalism for Consistency Models\label{sec:histmso}}
+In this section we introduce HistMSO, a logic that allows to express properties of 
+histories and abstract executions in distributed systems. 
+We first define the syntax of the logic, then we show how to express consistency models in this logic.
+\subsection{Definition of HistMSO\label{sec:definition-logic}}
+\input{logic-definition.tex}
+\subsection{Expressing Consistency Models in HistMSO}
+\input{expressing-consistency-models.tex}
+
+\section{Translation to MONA\label{sec:translation-to-mona}}
+\input{translation-to-mona.tex}
+
+
+\section{Cutwidth complexity of histories\label{sec:cutwidth}}
+\input{combinatorial-results.tex}
+
+\section{Conclusion and Future Work}
+\input{conclusion.tex}
+
+\begin{credits}
+\subsubsection{\ackname} 
+% Ce travail a bénéficié d'une aide du gouvernement français, gérée par l'Agence Nationale de la Recherche au titre du Pl­an d’investissement France 2030, dans le cadre du projet "UCA DS4H" portant la référence n° ANR-17-EURE-0004
+This work was supported by a grant from the French government under
+the "Investissements d’Avenir" program managed by the National
+Research Agency (ANR), reference ANR-17-EURE-0004, and by
+the project UCA DS4H.
+
+\subsubsection{\discintname}
+%It is now necessary to declare any competing interests or to specifically state that the authors have no competing interests. Please place the statement with a bold run-in heading in small font size beneath the (optional) acknowledgments\footnote{If EquinOCS, our proceedings submission system, is used, then the disclaimer can be provided directly in the system.}, for example: The authors have no competing interests to declare that are relevant to the content of this article. Or: Author A has received research grants from Company W. Author B has received a speaker honorarium from Company X and owns stock in Company Y. Author C is a member of committee Z.
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+\iflong
+    \appendix
+    \section{Additional Consistency Models}\label{app:more-consistency-models}
+    \input{more-consistency-models.tex}
+    \section{Omitted Proofs}\label{app:proofs}
+    \input{omitted-proofs.tex}
+\fi
+
+
+\end{document}

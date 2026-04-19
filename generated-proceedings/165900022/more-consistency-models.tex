@@ -1,0 +1,26 @@
+\subsubsection{Monotonic reads} states that \say{if a process has read a certain value $v$ from an object, any successive read operation
+ will not return any value written before $v$}\cite{ViottiVukolic}. Formally, it is defined as follows.
+
+$$
+\begin{array}{rcl}
+    a\xrightarrow{sorr} b & \eqdef & 
+ a.type=read\land b.type=read \wedge a\sessionorder b \\
+ \textsc{MonotonicReads} & \eqdef & 
+ \forall a. \forall b.\forall c.  
+(a\xrightarrow{vis}b\land b\xrightarrow{sorr} c)\Rightarrow a\xrightarrow{vis}c
+\end{array}
+$$
+
+\subsubsection{Read your writes} ensures that if a \textsl{write} and then a \textsl{read} are performed by the same process, the \textsl{write} will be visible to the \textsl{read}.
+\begin{gather*}
+\textsc{ReadYourWrites} := \forall	a.\forall b.\Big( a.type=write\land b.type=read\Rightarrow ( a\xrightarrow{so}b \Rightarrow a\xrightarrow{vis}b  ) \Big)
+\end{gather*}
+
+ % \textsl{Eventual consistency} guarantess that all correct operations are eventually applied to all correct replicas, and that all operations return. Moreover, all correct replicas that had the same write operations performed will eventually reach an \say{equivalent state}. An operation or a replica is \textsl{correct} if it does not fail. To define eventual consistency, the \textsc{NoCircularCausality} consistency model must be defined. In \cite{ViottiVukolic}, it is defined as \mbox{$acyclic(hb)$}, where $hb := (\xrightarrow{so} \cup \vis)^+$ represents the \textsl{happens-before} relation, and $\xrightarrow{so}$ denotes the \textsl{session order} relation. Specifically, we have $\opa \xrightarrow{so} \opb$ if and only if $\opa \ssrel \opb \land \opa \rb \opb$. The relation $hb$ is MSO-expressible, as it is a transitive closure. Consequently, $acyclic(hb)$ is also MSO-expressible, since it is a restriction of $hb$. \textsl{Eventual consistency} is defined in \cite{ViottiVukolic} as the logical conjunction \mbox{$\textsc{EventualVisibility}\land\textsc{NoCircularCausality}\land\textsc{RVal}$}. However, since $\textsc{EventualVisibility}$ is not relevant in our framework, it is defined as follows.
+
+% \begin{center}
+% $\textsc{EventualConsistency} := \textsc{NoCircularCausality}\land\textsc{RVal}$
+% \end{center}
+
+% EXEMPLE: ou pas eventual consistency (autre nom??) + expliquer no circular causality
+

@@ -1,0 +1,280 @@
+In this section we introduce the notion of timed scenario expressions
+(expressions for short). Expressions allow us to construct models of
+behaviours of complicated systems whose constituent parts are
+distributed
+systems. They provide a hierarchical way of specifying systems, where
+distributed scenarios are used as the building blocks.
+First, we introduce a few operations for manipulating scenarios.
+%\vspace{-0.5em}
+\begin{definition}
+  \label{def-comp-par-seq}
+Let $\xi=(\E_1,\C_1)$ and $\eta=(\E_2,\C_2)$ be two normalised scenarios
+over $\Sigma_\xi$ and $\Sigma_\eta$, respectively.
+ \setlist{nolistsep}
+\begin{itemize}[noitemsep]
+%\begin{itemize}
+  \item
+The \emph{concatenation} of
+$\xi$ and $\eta$, denoted by $\xi\circ\eta$, is
+defined if $\Sigma_\xi\cap\Sigma_\eta=\emptyset$.
+If defined, $\xi\circ\eta$ is the scenario
+$(\E,\C_1\cup\C_2)$ over $\Sigma_\xi\cup\Sigma_\eta$, where $\E$ is
+the concatenation of $\E_1$ and $\E_2$.
+The semantics of $\xi\circ\eta$, denoted by $\Sem{\xi\circ\eta}$, is
+$\Sem{\xi}\circ\Sem{\eta}$, that is, every behaviour of $\xi \circ \eta$
+is a concatenation of some behaviour of $\xi$ and some behaviour of
+$\eta$.
+\item
+   The \emph{choice} between two alternatives, $\xi$ and $\eta$, is denoted by
+   $\xi\BAR\eta$.
+   Its semantics is defined by $\Sem{\xi\BAR\eta} = \Sem{\xi}\cup\Sem{\eta}$.
+\end{itemize}
+\end{definition}
+\noindent
+If $\xi$ and $\eta$ are two scenarios, then
+$\xi\BAR\eta$ is consistent if $\xi$ or $\eta$ is consistent.
+If $\xi\circ\eta$ is defined, then it is consistent
+%, i.e., $\Sem{\xi\circ\eta}\neq \emptyset$
+if $\xi$ and $\eta$ are both consistent.
+
+%, and $\xi||\eta$ is consistent if the DTS $\DScenario=\{\xi,\eta\}$
+%is consistent.
+
+%It is worth mentioning that the semantics of the operator $||$ is
+%in accordance with the rendezvous synchronisation semantics of a DTS
+%(see \Sec{sec-dts}): the semantics of a DTS is obtained by the
+%parallel composition of its components.
+%----------------
+%\begin{obs}
+%   \label{obs-comp-par-seq}
+%Let $\xi$ and $\eta$ be two consistent scenarios. Then,
+
+%$\Sem{\xi\circ\eta} = \Sem{\xi}\circ\Sem{\eta}$ and
+%%$\Sem{\xi||\eta} =
+%%\Sem{\DScenario}$, where $\DScenario=\{\xi,\eta\}$ is a DTS, and
+%$\Sem{\xi\BAR\eta} =
+%\Sem{\xi}\cup\Sem{\eta}$.
+%\end{obs}
+%----------------
+%\vspace{-0.5em}
+\begin{definition}
+   \label{def-comp-par-alt-dts}
+Let $\DScenario_1=\D(\xi_1,\dots,\xi_n)$ and
+$\DScenario_2=\D(\eta_1,\dots,\eta_m)$ be two distributed
+scenarios over $\Sigma_{\DScenario_1}$ and $\Sigma_{\DScenario_2}$,
+respectively.
+ \setlist{nolistsep}
+\begin{itemize}[noitemsep]
+%\begin{itemize}
+  \item
+The \emph{concatenation} of
+$\DScenario_1$ and $\DScenario_2$, denoted by
+$\DScenario_1\circ\DScenario_2$, is defined if
+$\Sigma_{\DScenario_1}\cap\Sigma_{\DScenario_2}=\emptyset$.
+If defined, $\DScenario_1\circ\DScenario_2$ is
+the DTS
+$\DScenario=\D(\gamma_{11},\dots,\gamma_{1m},\dots,\gamma_{n1},\dots,\gamma_{nm})$
+over
+$\Sigma_{\DScenario_1}\cup\Sigma_{\DScenario_2}$, where
+$\gamma_{ij}=\xi_i\circ\eta_j$ (for $1\leq i\leq n$
+and $1\leq j\leq m$),
+and
+%The semantics of $\DScenario_1\circ\DScenario_2$, denoted by
+$\Sem{\DScenario_1\circ\DScenario_2}=\Sem{\DScenario}$.
+%, is $\Sem{\DScenario_1}\circ\Sem{\DScenario_2}$.
+\item
+  The \emph{parallel composition} of $\DScenario_1$, and
+  $\DScenario_2$, denoted by $\DScenario_1||\DScenario_2$, is the DTS
+  $\DScenario=\D(\xi_1,\dots,\xi_n,\eta_1,\dots,\eta_m)$
+  over $\Sigma_{\DScenario_1}\cup\Sigma_{\DScenario_2}$ and
+  $\Sem{\DScenario_1||\DScenario_2} =\Sem{\DScenario}$.
+\item
+   The \emph{choice} between two alternatives,
+$\DScenario_1$ and $\DScenario_2$, is denoted by
+$\DScenario_1\BAR\DScenario_2$.
+Its semantics is defined by $\Sem{\DScenario_1\BAR\DScenario_2} =
+ \Sem{\DScenario_1}\cup\Sem{\DScenario_2}$.
+  \end{itemize}
+\end{definition}
+%---------------
+\noindent
+If $\DScenario_1$ and $\DScenario_2$ are two distributed scenarios,
+then $\DScenario_1\BAR\DScenario_2$ is consistent if $\DScenario_1$ or
+$\DScenario_2$ is consistent.
+If $\DScenario_1\circ\DScenario_2$ is defined, then it is consistent
+if $\DScenario_1$ and $\DScenario_2$ are both consistent.
+It is worth pointing out that, except for the case of concatenation,
+$\DScenario_1$ and $\DScenario_2$ might share some event names. In
+that case, the event names in
+$\Sigma_{\DScenario_1}\cap\Sigma_{\DScenario_2}$ will be synchronising
+events in $\DScenario_1||\DScenario_2$. If $\DScenario_1$ and
+$\DScenario_2$ are both consistent, $\DScenario_1||\DScenario_2$
+might not be well-formed, and, if well-formed, might not be consistent.
+
+For example, $\DScenario_1 = \D(\xi_1,\xi_2)$, where
+ $\xi_1 = (abc, \{\TT{a}{b} \geq 2\})$ and $\xi_2 =
+ (eb, \{\TT{e}{b} \leq 3\})$ is a consistent DTS, so is
+$\DScenario_2 = \D(\xi_3)$, where
+ $\xi_3 = (efb, \{\TT{e}{b} \geq 4\})$. But
+$\DScenario_1||\DScenario_2$ is inconsistent. Observe that $b$ is a
+synchronising event in $\DScenario_1$, while both $b$ and $e$ are the
+synchronising events in $\DScenario_1||\DScenario_1$. Because the
+constraints $\TT{e}{b} \leq 3$ in $\DScenario_1$ and $\TT{e}{b}
+\geq 4$ in $\DScenario_2$ cannot be satisfied simultaneously,
+$\DScenario_1||\DScenario_1$ is inconsistent.
+%----------------
+%\begin{obs}
+%   \label{obs-comp-par}
+%Let $\DScenario_1$ and $\DScenario_2$ be two consistent distributed
+%scenarios. Then,
+%$\Sem{\DScenario_1\circ\DScenario_2} =
+%\Sem{\DScenario_1}\circ\Sem{\DScenario_2}$,
+%$\Sem{\DScenario_1||\DScenario_2} =
+%\Sem{\DScenario}$, where
+%$\DScenario=\D(\xi_1,\dots,\xi_n,\eta_1,\dots,\eta_m)$ is a DTS,
+%$\DScenario_1=\D(\xi_1,\dots,\xi_n)$ and
+%$\DScenario_2=\D(\eta_1,\dots,\eta_m)$,
+%and
+%$\Sem{\DScenario_1\BAR\DScenario_2} =
+%\Sem{\DScenario_1}\cup\Sem{\DScenario_2}$.
+%\end{obs}
+%--------------
+%\vspace{-0.5em}
+\begin{definition}
+  \label{def-simple-exp}
+ % $S$ is a \emph{timed scenario expression} (\emph{expression}
+ % for short), if $S$ is
+  A \emph{timed scenario expression} (\emph{expression}
+  for short) is one of the following:
+  \setlist{nolistsep}
+\begin{itemize}[noitemsep]
+  \item
+    a DTS,
+    %xsequential scenario,
+  \item
+    $(E_1\circ E_2)$, where $E_1$ and $E_2$ are
+    expressions,
+  \item
+    $(E_1||E_2)$, where $E_1$ and $E_2$ are
+    expressions, or
+    \item
+      $(E_1\BAR E_2)$, where $E_1$ and $E_2$ are  expressions.
+ %     \item
+ %   $E_1^*$, where $E_1$ is a scenario expression.
+  \end{itemize}
+  \end{definition}
+%------------------
+\noindent
+Recall that a scenario $\xi$ can be seen as the DTS
+$\D(\xi)$, so it is an expression.
+%In our expressions we are going to treat a sequential
+%scenario as a DTS with one component.
+
+It should be obvious that the three operators, $\circ$, $\BAR$ and $||$,
+are associative. The first one is not commutative, while the other two
+are.
+
+The following observation follows directly from the definitions.
+%-----------------
+%\vspace{-0.5em}
+\begin{obs}
+  \label{obs-dist-laws}
+  Distributive laws for  expressions:
+   \setlist{nolistsep}
+\begin{itemize}[noitemsep]
+%  \begin{itemize}
+  \item
+    $E_1\circ(E_2||E_3)=(E_1\circ E_2)||(E_1\circ E_3)$,
+  %  \item
+      $(E_1||E_2)\circ E_3=(E_1\circ E_3)||(E_2\circ E_3)$
+       \item
+         $E_1\circ(E_2\BAR E_3)=(E_1\circ E_2)\BAR(E_1\circ E_3)$,
+    %     \item
+           $(E_1\BAR E_2)\circ E_3=(E_1\circ E_3)\BAR(E_2\circ E_3)$
+            \item
+              $E_1||(E_2\BAR E_3)=(E_1||E_2)\BAR(E_1||E_3)$,
+           %    \item
+      $(E_1\BAR E_2)||E_3=(E_1||E_3)\BAR(E_2||E_3)$
+    \end{itemize}
+  \end{obs}
+%-------------------------
+%\vspace{-0.5em}
+\begin{definition}
+  \label{def-simple-normal-form}
+  An expression, $E$, is in \emph{normal form} if $E$ is
+  either a DTS $\DScenario$, or of the form
+  $\DScenario_1\BAR\dots\BAR\DScenario_k$, where each $\DScenario_i$
+  ($1\leq i\leq k, 1<k$) is a DTS.
+\end{definition}
+\noindent
+Using the distributive laws an
+expression can be converted into normal form. It should be obvious
+that the normal form of an expression is unique.
+%---------------
+%\vspace{-0.5em}
+\begin{obs}
+  \label{obs-exp-sem}
+Let $E$ be an expression. The semantics of $E$, denoted by
+$\Sem{E}$, is
+ \setlist{nolistsep}
+\begin{itemize}[noitemsep]
+%\begin{itemize}
+  \item
+  $\Sem{\DScenario}$, if $E$ is an
+  expression with normal form $\DScenario$,
+\item
+  $\Sem{\DScenario_1}\cup\dots\cup\Sem{\DScenario_k}$, if $E$ is an
+   expression with normal form $\DScenario_1\BAR\dots\BAR\DScenario_k$
+  ($1<k$).
+%\item
+%  $\Sem{E_1}\cup\Sem{E_2}$, if $S$ is of the form $(E_1\BAR E_2)$, where
+%  $E_1$ and $E_2$ are expressions.
+\end{itemize}
+\end{obs}
+%---------------
+%\noindent
+%--------------
+%\vspace{-0.5em}
+\begin{definition}
+  \label{def-valid}
+An expression, $E$, is \emph{consistent}, if
+$\Sem{E}\neq\emptyset$.
+  \end{definition}
+\noindent
+If $E$ is a consistent expression,
+we say $\Sem{E}$ is the set of behaviours that are \emph{described} or
+\emph{expressed} by $E$.
+%-------------------
+%\vspace{-0.5em}
+\begin{example}
+\label{ex-race}
+Consider a system in which two runners compete with each other
+in a race managed by a controller \cite{Beek-2023}. The race begins with the
+controller issuing a signal {\tt start}, which is received by both the
+runners simultaneously.
+Upon completing the run, runner $\mathtt{i}$ sends a $\mathtt{finish_i}$ signal
+to the controller.
+So there are two alternative outcomes, depending on
+which runner finishes first.
+This can be modeled by the expression $\mathtt{(C_1\BAR C_2)||R_1||R_2}$,
+in which $\mathtt{C_1}$ and $\mathtt{C_2}$ correspond to the two
+%alternative
+outcomes, each specified by a DTS:
+$\mathtt{C_1}=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{finish_2},\emptyset)$,
+$\mathtt{C_2}=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{finish_1},\emptyset)$,
+while $\mathtt{R_1}$ and $\mathtt{R_2}$ capture
+the behaviours of the runners:
+$\mathtt{R_1}=(\mathtt{start}~ \mathtt{finish_1},\emptyset)$,
+$\mathtt{R_2}=(\mathtt{start}~ \mathtt{finish_2},\emptyset)$.
+%as shown in \Fig{fig-race}.
+Observe that %because events are instantaneous,
+{\tt start} is
+a synchronising event between all the components,
+$\mathtt{finish_1}$ is a synchronising event between the controller
+(specified by $\mathtt{(C_1\BAR C_2)}$) and $\mathtt{R_1}$,
+while $\mathtt{finish_2}$ is a synchronising event between the controller
+and $\mathtt{R_2}$.
+  \end{example}
+\noindent
+In the rest of the paper our examples will not feature the operator $\circ$, as
+it plays no role in the problem of realisation.

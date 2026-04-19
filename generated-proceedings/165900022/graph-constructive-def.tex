@@ -1,0 +1,38 @@
+We now define the relation $\rightarrow$ using an algorithm that iteratively adds new edges to an edge set $E$.  We write $\opa\patharrow\opb$ to mean that there exists a path from $\opa$ to $\opb$ in the graph $G=(V,E)$.  Remember that we aim at $\rb$ being the transitive closure of $\rightarrow$.
+
+The set of all direct successors of $\opa$, written as $\succs(\opa)$, is defined as $\succs(\opa) = \{\opb \mid \opb \in H  \land \opa\dsucp{}\opb \} \subset H$ (see Definition~\ref{def:successor}). 
+Observe that for all $\opa \in H$, we have $|\succs(\opa)| \leq |\mathbb{P}|$ because any operation has at most one direct successor on each process. 
+The algorithm operates as follows. It takes as input $\textsl{ord}(H)$, where $H\in\historyset$, and traverses  $\textsl{ord}(H)$ in reverse, starting from the last element and proceeding to the first. For each operation, its direct successors are extracted, sorted according to \textsl{ord}, and then processed one by one. If a path to a given successor already exists in the graph, no action is taken; otherwise, a direct edge to that successor is added. This procedure ensures that the number of edges is minimized. The algorithm is formalized as follows.
+
+\begin{algorithm}[H]
+\renewcommand{\thealgorithm}{} % removes numbering
+\caption{Building a graph of finite history}\label{alg:alg1}
+\begin{multicols}{2}
+\begin{algorithmic}[1]
+\Require $H\in\historyset$ with $\textsl{ord}(H)=(\opa_1,...,\opa_n)$, \mbox{$n \in \mathbb{N}$}
+\Ensure $G=(H,\rightarrow)$
+\State $i \gets n-1$
+\State $E\gets\emptyset$
+\State $G\gets (H,E)$
+\While{$i > 0$}
+\State $S \gets (b_1,...,b_m)=\textsl{ord}(\succs(\opa_i))$
+\For{$j\in\{1,...,m\}$}
+\If{$\neg(\opa_i\patharrow\opb_m)$}
+	\State $E \gets E \cup \{ (\opa_i,\opb_m) \}$
+	\State $G \gets (H,E)$
+\EndIf
+\EndFor
+\State $i \gets i-1$
+\EndWhile
+\end{algorithmic}
+\end{multicols}
+\end{algorithm}
+
+\begin{remark} 
+    When building a directed graph as above, each directed edge can be interpreted as a \say{jump forward in time} —-- that is, traversing an edge corresponds to moving along the timeline of certain operations in the history.
+\end{remark}
+
+We denote by $\algone(H)$ the graph of the finite history $H$ computed by this algorithm. Let $\algoneset_m,m\in\mathbb{N}$ denote the set of all such graphs for histories in  $\historyset$ with $|\mathbb{P}|= m $. It is the finite execution graph set; for $m\in\mathbb{N}$,
+\[
+\algoneset_m \eqdef \big\{\;  \algone(H) \;\mid \;H \in \historyset \text{ and }|\mathbb{P}|= m  \;\big\}
+\]

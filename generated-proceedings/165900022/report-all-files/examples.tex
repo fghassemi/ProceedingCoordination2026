@@ -1,0 +1,362 @@
+
+\begin{example}\label{ex:one}
+
+First we display the timestamps at which operations start and/or finish.
+
+\begin{figure}[H]
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; % Label for second set 
+
+  \draw[dashed,line width=1pt] (0,0) -- (14,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (14,-1);
+  
+  \draw[withcaps] (6,0) -- (10,0) node[midway, above] {$\opb$};
+  \draw[withcaps] (2,0) -- (4,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (8.5,-1) -- (12,-1) node[pos=0.45, above] {$\opc$};
+  
+%  \draw[dashed,blue, thick] (10.5,-2.5) -- (10.5,0.5);
+
+  % Vertical time lines at starts and ends
+  \foreach \x/\t in {
+  0/T_0,
+  2/T_1,
+  4/T_2,
+  6/T_3,
+  8.5/T_4,
+  10/T_5,
+  12/T_6
+  } {
+    \draw[dashed,blue] (\x,-1.5) -- (\x,0) node[below] at (\x,-1.5) {$\t$};
+  }
+  
+\end{tikzpicture}
+}
+\end{center}
+\end{figure}
+
+We have that $\opa$ writes 14 to object $y$, $\opb$ reads $"bee"$ from object $x$ and $\opc$ writes $"fly"$ to object $x$. We recall the attributes of those operations:
+
+\vspace{1em}
+\begin{center}
+\begin{NiceTabular}{cccc}[hvlines]
+\CodeBefore
+	\rectanglecolor{blue!10}{1-1}{1-4}
+	\rectanglecolor{blue!10}{1-1}{8-1}
+\Body
+& $\opa$ & $\opb$ & $\opc$ \\
+$proc$ & $p_1$ & $p_1$ & $p_2$ \\
+$stime$ & $T_1$ & $T_3$ & $T_4$ \\
+$rtime$ & $T_2$ & $T_5$ & $T_6$ \\
+$type$ & $write$ & $read$ & $write$ \\
+$obj$ & $y$ & $x$ & $x$ \\
+$ival$ & 14 & $\Phi$ & $"fly"$ \\
+$oval$ & $\Phi$ & $"bee"$ & $\Phi$
+\end{NiceTabular}
+\end{center}
+
+\vspace{1em}
+
+From this table we extract the necessary data to compute $Timeline(H)$ that is the following collection:
+
+\begin{center}
+$
+\Big((p_1,T_1),(p_1,T_2),(p_1,T_3),(p_2,T_4),(p_1,T_5),(p_2,T_6)
+\Big)
+$
+\end{center}
+
+The execution of the algorithm is the following:
+
+\begin{algorithmic}
+\State $C \gets ((p_1,T_1),(p_1,T_2),(p_1,T_3),(p_2,T_4),(p_1,T_5),(p_2,T_6))$
+\State $Enc \gets \begin{bmatrix} 0 \\ 0 \end{bmatrix}$
+\State $LastVec\gets \begin{bmatrix} 0 \\ 0 \end{bmatrix}$
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time)\gets (p_1,T_1)$
+	\State \hspace{2em} $C\gets ((p_1,T_2),(p_1,T_3),(p_2,T_4),(p_1,T_5),(p_2,T_6))$
+	\State \hspace{2em} $\begin{bmatrix}\alpha_1 \\ \alpha_2 \end{bmatrix} \gets LastVec=\begin{bmatrix} 0 \\ 0 \end{bmatrix}$
+	\State \hspace{2em} $LastVec\gets \begin{bmatrix} \neg 0 \\ 0 \end{bmatrix}=\begin{bmatrix}1 \\ 0 \end{bmatrix}$ 
+	\State \hspace{2em} $Enc\gets Enc\cdot LastVec=\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!\begin{bmatrix}1 \\ 0 \end{bmatrix}$
+\State \hrulefill
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time)\gets (p_1,T_2)$
+	\State \hspace{2em} $C\gets ((p_1,T_3),(p_2,T_4),(p_1,T_5),(p_2,T_6))$
+	\State \hspace{2em} $\begin{bmatrix}\alpha_1 \\ \alpha_2 \end{bmatrix} \gets LastVec= \begin{bmatrix} 1 \\ 0 \end{bmatrix}$
+	\State \hspace{2em} $LastVec\gets \begin{bmatrix} \neg 1 \\ 0 \end{bmatrix}=\begin{bmatrix} 0 \\ 0 \end{bmatrix}$ 
+	\State \hspace{2em} $Enc\gets Enc\cdot LastVec=\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!\begin{bmatrix}1 \\ 0 \end{bmatrix}\!\!\begin{bmatrix} 0 \\ 0 \end{bmatrix}$
+\State \hrulefill
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time)\gets (p_1,T_3)$
+	\State \hspace{2em} $C\gets ((p_2,T_4),(p_1,T_5),(p_2,T_6))$
+	\State \hspace{2em} $\begin{bmatrix}\alpha_1 \\ \alpha_2 \end{bmatrix} \gets LastVec= \begin{bmatrix} 0 \\ 0 \end{bmatrix}$
+	\State \hspace{2em} $LastVec\gets \begin{bmatrix} \neg 0 \\  0 \end{bmatrix}=\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ 
+	\State \hspace{2em} $Enc\gets Enc\cdot LastVec=\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix}1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 0 \end{bmatrix}\!\!$
+\State \hrulefill
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time)\gets (p_2,T_4)$
+	\State \hspace{2em} $C\gets ((p_1,T_5),(p_2,T_6))$
+	\State \hspace{2em} $\begin{bmatrix}\alpha_1 \\ \alpha_2 \end{bmatrix} \gets LastVec= \begin{bmatrix} 1 \\ 0 \end{bmatrix}$
+	\State \hspace{2em} $LastVec\gets \begin{bmatrix} 1 \\ \neg 0 \end{bmatrix}=\begin{bmatrix} 1 \\ 1 \end{bmatrix}$ 
+	\State \hspace{2em} $Enc\gets Enc\cdot LastVec=\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix}1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 1 \end{bmatrix}$
+\State \hrulefill
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time)\gets (p_1,T_5)$
+	\State \hspace{2em} $C\gets ((p_2,T_6))$
+	\State \hspace{2em} $\begin{bmatrix}\alpha_1 \\ \alpha_2 \end{bmatrix} \gets LastVec= \begin{bmatrix} 1 \\ 1 \end{bmatrix}$
+	\State \hspace{2em} $LastVec\gets \begin{bmatrix} \neg 1 \\ 1 \end{bmatrix}=\begin{bmatrix} 0 \\ 1 \end{bmatrix}$ 
+	\State \hspace{2em} $Enc\gets Enc\cdot LastVec=\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix}1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 1 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 1 \end{bmatrix}\!\!$
+\State \hrulefill
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time)\gets (p_2,T_6)$
+	\State \hspace{2em} $C\gets ()$
+	\State \hspace{2em} $\begin{bmatrix}\alpha_1 \\ \alpha_2 \end{bmatrix} \gets LastVec= \begin{bmatrix} 0 \\ 1 \end{bmatrix}$
+	\State \hspace{2em} $LastVec\gets \begin{bmatrix} 0 \\ \neg 1 \end{bmatrix}=\begin{bmatrix} 0 \\ 0 \end{bmatrix}$ 
+	\State \hspace{2em} $Enc\gets Enc\cdot LastVec=\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix}1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 1 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 1 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}$
+\State \hrulefill
+\State  $C = ()$ so we exit the while loop
+\end{algorithmic}
+
+Thus, the encoding of $H$ is the word
+
+\[
+\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix}1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 1 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 1 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}
+\]
+
+\end{example}
+
+
+\begin{example}\label{ex:two}
+We recall the attributes of the operations:
+
+\begin{center}
+\begin{NiceTabular}{cccc}[hvlines]
+\CodeBefore
+	\rectanglecolor{blue!10}{1-1}{1-4}
+	\rectanglecolor{blue!10}{1-1}{8-1}
+\Body
+& $\opa$ & $\opb$ & $\opc$ \\
+$proc$ & $p_1$ & $p_1$ & $p_2$ \\
+$stime$ & $T_1$ & $T_3$ & $T_4$ \\
+$rtime$ & $T_2$ & $T_5$ & $T_6$ \\
+$type$ & $write$ & $read$ & $write$ \\
+$obj$ & $y$ & $x$ & $x$ \\
+$ival$ & 14 & $\Phi$ & $"fly"$ \\
+$oval$ & $\Phi$ & $"bee"$ & $\Phi$
+\end{NiceTabular}
+\end{center}
+
+Let
+
+\begin{gather*}
+f(14)=00\quad f("bee")=01\quad f("fly")=10 \\
+g(x)=0\quad g(y)=1
+\end{gather*}
+
+We use colors to delimit the encodings of attributes: $types$ in \colorbox{yellow!50}{yellow}, $values$ in \colorbox{green!20}{green} and $obj$ in \colorbox{blue!15}{blue}.
+ 
+The execution of Algorithm~\ref{alg:basicTimelineTypesValues} on history $H$ is the following (we use $wr$ for $write$ and $rd$ for $read$).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithmic}
+\State $C \gets ((p_1,T_1,wr,14,y),(p_1,T_2,wr,14,y),(p_1,T_3,rd,"bee",x),$
+\State $ (p_2,T_4,wr,"fly",x),(p_1,T_5,rd,"bee",x),(p_2,T_6,wr,"fly",x))$
+\State $Enc \gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+,\quad $LastVec\gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0\end{bNiceMatrix}$
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time,type,value,obj)\gets (p_1,T_1,wr,14,y)$
+	\State \hspace{2em}$C \gets ((p_1,T_2,wr,14,y),...)$
+	
+	\State \hspace{2em} $\begin{bNiceMatrix} \alpha_1 \\ \alpha_2 \\ \cellcolor{yellow!50}\alpha_3 \\ \cellcolor{green!20}\alpha_4 \\ \cellcolor{green!20}\alpha_5 \\ \cellcolor{blue!15}\alpha_6\end{bNiceMatrix}
+	\gets LastVec=
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	\State \hspace{2em} $\alpha_1=0$ so\; $\gamma_1\gamma_2\gets f(14)=00$ and $\lambda_1\gets g(y)=1$
+	\State \hspace{2em} $t=1$ because $type\neq read$
+	\State \hspace{2em} and \[
+LastVec \gets 
+\begin{bNiceArray}{c}[last-col]
+  1 & \\
+  0 & \\
+  \cellcolor{yellow!50}1 & t \\
+  \cellcolor{green!20}0 & \gamma_1 \\
+  \cellcolor{green!20}0 & \gamma_2 \\
+  \cellcolor{blue!15}1 & \lambda_1
+\end{bNiceArray}
+\]
+	\State \hspace{2em} $Enc \gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}1 \end{bNiceMatrix}$
+\State \hrulefill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time,type,value,obj)\gets (p_1,T_2,wr,14,y)$
+	\State \hspace{2em}$C \gets ((p_1,T_3,rd,"bee",x),...)$
+	\State \hspace{2em} $\begin{bNiceMatrix} \alpha_1 \\ \alpha_2 \\ \cellcolor{yellow!50}\alpha_3 \\ \cellcolor{green!20}\alpha_4 \\ \cellcolor{green!20}\alpha_5 \\ \cellcolor{blue!15}\alpha_6\end{bNiceMatrix}
+	\gets LastVec=
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}1 \end{bNiceMatrix}$
+	\State \hspace{2em} $\alpha_1\neq 0$ so
+	\State \hspace{2em} \[
+	LastVec \gets
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+\]
+	\State \hspace{2em} $Enc \gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}1 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+
+
+\State \hrulefill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time,type,value,obj)\gets (p_1,T_3,rd,"bee",x)$
+	\State \hspace{2em}$C \gets ((p_2,T_4,wr,"fly",x),...)$
+	
+	\State \hspace{2em} $\begin{bNiceMatrix} \alpha_1 \\ \alpha_2 \\ \cellcolor{yellow!50}\alpha_3 \\ \cellcolor{green!20}\alpha_4 \\ \cellcolor{green!20}\alpha_5 \\ \cellcolor{blue!15}\alpha_6\end{bNiceMatrix}
+	\gets LastVec=
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	\State \hspace{2em} $\alpha_1=0$ so $\gamma_1\gamma_2\gets f("bee")=01$ and $\lambda_1\gets g(x)=0$
+	\State \hspace{2em} $t=0$ because $type=read$	
+	\State \hspace{2em} and \[
+	LastVec \gets
+	\begin{bNiceArray}{c}[last-col]
+  1 & \\
+  0 & \\
+  \cellcolor{yellow!50}0 & t \\
+  \cellcolor{green!20}0 & \gamma_1 \\
+  \cellcolor{green!20}1 & \gamma_2 \\
+  \cellcolor{blue!15}0 & \lambda_1
+\end{bNiceArray}
+\]
+	\State \hspace{2em} $Enc \gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}1 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}1 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	
+\State \hrulefill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time,type,value,obj)\gets (p_2,T_4,wr,"fly",x)$
+	\State \hspace{2em}$C \gets ((p_1,T_5,rd,"bee",x),...)$
+	
+	\State \hspace{2em} $\begin{bNiceMatrix} \alpha_1 \\ \alpha_2 \\ \cellcolor{yellow!50}\alpha_3 \\ \cellcolor{green!20}\alpha_4 \\ \cellcolor{green!20}\alpha_5 \\ \cellcolor{blue!15}\alpha_6\end{bNiceMatrix}
+	\gets LastVec=
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}1 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	\State \hspace{2em} $\alpha_2=0$ so $\gamma_1\gamma_2\gets f("fly")=10$ and $\lambda_1\gets g(x)=0$
+	\State \hspace{2em} $t=1$ because $type\neq read$	
+	\State \hspace{2em} and \[
+	LastVec \gets
+  \begin{bNiceArray}{c}[last-col]
+  1 & \\
+  1 & \\
+  \cellcolor{yellow!50}1 & t \\
+  \cellcolor{green!20}1 & \gamma_1 \\
+  \cellcolor{green!20}0 & \gamma_2 \\
+  \cellcolor{blue!15}0 & \lambda_1
+\end{bNiceArray}
+\]
+	\State \hspace{2em} $Enc \gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}1 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}1 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 1 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}1 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	
+\State \hrulefill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time,type,value,obj)\gets (p_1,T_5,rd,"bee",x)$
+	\State \hspace{2em}$C \gets ((p_2,T_6,wr,"fly",x))$
+	\State \hspace{2em} $\begin{bNiceMatrix} \alpha_1 \\ \alpha_2 \\ \cellcolor{yellow!50}\alpha_3 \\ \cellcolor{green!20}\alpha_4 \\ \cellcolor{green!20}\alpha_5 \\ \cellcolor{blue!15}\alpha_6\end{bNiceMatrix}
+	\gets LastVec=
+	\begin{bNiceMatrix} 1 \\ 1 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}1 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	\State \hspace{2em} $\alpha_1=1$ so
+	\State \hspace{2em} and \[
+	LastVec \gets
+  	\begin{bNiceMatrix} 0 \\ 1 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+\]
+	\State \hspace{2em} $Enc \gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}1 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}1 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 1 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}1 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 1 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	
+	\State \hrulefill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\State  $C \neq ()$ so we enter the while loop
+	\State \hspace{2em} $(p_i,time,type,value,obj)\gets (p_2,T_6,wr,"fly",x)$
+	\State \hspace{2em}$C \gets ()$
+	\State \hspace{2em} $\begin{bNiceMatrix} \alpha_1 \\ \alpha_2 \\ \cellcolor{yellow!50}\alpha_3 \\ \cellcolor{green!20}\alpha_4 \\ \cellcolor{green!20}\alpha_5 \\ \cellcolor{blue!15}\alpha_6\end{bNiceMatrix}
+	\gets LastVec=
+	\begin{bNiceMatrix} 0 \\ 1 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+	\State \hspace{2em} $\alpha_2=1$ so
+	\State \hspace{2em} and \[
+	LastVec \gets
+  	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+\]
+	\State \hspace{2em} $Enc \gets \begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}1 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}1 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 1 \\ 1 \\ \cellcolor{yellow!50}1 \\ \cellcolor{green!20}1 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 1 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}
+	\begin{bNiceMatrix} 0 \\ 0 \\ \cellcolor{yellow!50}0 \\ \cellcolor{green!20}0 \\ \cellcolor{green!20}0 \\ \cellcolor{blue!15}0 \end{bNiceMatrix}$
+
+\State \hrulefill
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\State  $C = ()$ so we exit the while loop
+\end{algorithmic}
+
+Thus, the encoding of $H$ with types, values and objects is
+
+\begin{gather*}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 1 \\ 0 \\ 0 \\ 1 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 1 \\ 1 \\ 1 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\end{gather*}
+
+We highlight that data about types/values/object is only encoded on the first vector of an operation. Here for \textcolor{orange}{$\opa$}, \textcolor{cyan}{$\opb$} and \textcolor{magenta}{$\opc$}.
+
+\begin{center}
+$
+\begin{bNiceArray}{c} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceArray}
+{\begin{bNiceArray}{c}[first-row] \downarrow \\ 1 \\ 0 \\ \color{orange}{1} \\ \color{orange}{0} \\ \color{orange}{0} \\ \color{orange}{1} \end{bNiceArray}}
+\begin{bNiceArray}{c} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceArray}
+{\begin{bNiceArray}{c}[first-row] \downarrow \\ 1 \\ 0 \\ \color{cyan}{0} \\ \color{cyan}{0} \\ \color{cyan}{1} \\ \color{cyan}{0} \end{bNiceArray}}
+{\begin{bNiceArray}{c}[first-row] \downarrow \\ 1 \\ 1 \\ \color{magenta}{1} \\ \color{magenta}{1} \\ \color{magenta}{0} \\ \color{magenta}{0} \end{bNiceArray}}
+\begin{bNiceArray}{c} 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceArray}
+\begin{bNiceArray}{c} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceArray}
+$
+\end{center}
+\end{example}

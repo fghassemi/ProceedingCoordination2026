@@ -1,0 +1,80 @@
+In this section, we prove that $\algoneset$ has uniformly bounded cutwidth, which, as a by-product, establishes the correctness of the algorithm.
+
+\subsubsection{Preliminary results}
+
+
+It is worth noting that both $\rb$ and $\patharrow$ are transitive. Indeed, given $\opa \rb \opb$ and $\opb \rb \opc$,   it follows naturally that $\opa\rb\opc$. Similarly, for  $\patharrow$, if $\opd \patharrow \ope$ and $\ope \patharrow \opf$, then $\opd \patharrow \opf$.
+
+For $\opa$ a vertex of a graph, we denote its out-degree as $deg_{out}(\opa)$, and its in-degree as $deg_{in}(\opa)$. The \textsl{out-degree} of a vertex is the number of edges connected to it that are directed away from the vertex. The \textsl{in-degree} is the number of connected edges directed towards the vertex.
+
+\begin{lemma}\label{lemma:degout}
+Let $G=(H,\rightarrow)\in\algoneset_m,m\in\mathbb{N}$. Then, for all $\opa\in H$, \mbox{$deg_{out}(\opa) \leq m$}.
+\end{lemma}
+
+\begin{proposition}\label{prop:finishesBeforeCollection}
+Let $H\in\historyset$ be a history. For $\opa,\opb \in H$,
+\begin{center}
+$\opa\rb\opb \Leftrightarrow $ there exists a tuple $(\oph_1,...,\oph_q),\; \oph_i \in H, q\in\mathbb{N}$ such that 
+$\opa \dsucp{p} \oph_1 \dsucp{p} \hdots \dsucp{p} \oph_q \dsucp{p} \opb$ with  $p:=\opb.proc$.
+\end{center}
+\end{proposition}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{proposition}\label{prop:looparrowPATH}
+Let $(H,\rightarrow)\in\algoneset_m,m\in\mathbb{N}$. For \mbox{$\opa,\opb \in H$}, $\opa\rb\opb \Leftrightarrow \opa\patharrow\opb$.
+\end{proposition}
+We have established that for a history $H\in\historyset$, each vertex of $G=\algone(H)$ has at most $m=|\mathbb{P}|$ outgoing edges. We now turn to the complementary property: showing that each vertex has at most $m$ incoming edges.
+\begin{lemma}\label{lemma:degin}
+Let $G=(H,\rightarrow)\in\algoneset_m,m\in\mathbb{N}$. Then, for all $\opa\in H$, \mbox{$deg_{in}(\opa) \leq m$}.
+\end{lemma}
+
+\subsubsection{Main proof}
+
+To prove cutwidth boundedness of a graph $G$, we need to define two specific sets of nodes  based on the definition of \textsl{cut}. These sets are as follows: the set containing the last operations launched on each process before the cut $\ell$ is denoted by $\Gamma_\ell(G)$, and the set containing the first operations launched on each process after the cut $\ell$ is denoted by $\Lambda_\ell(G)$. 
+% In order to formally define $\Gamma_\ell(G)$ and $\Lambda_\ell(G)$, we first need to introduce the sets $\gamma_p(L)$ and $\lambda_p(L)$: the singleton $\gamma_p(L)$ contains the last operation of $L$ to be launched on process $p$, and the singleton $\lambda_p(R)$ contains the first operation of $R$ to be launched on process $p$.
+
+Let $H\in\historyset$ be a history. For a set $O\subseteq H$, and a process $p$, 
+we write $\gamma_p(O)$ to denote the singleton containing the last operation of $O$ to be launched on process $p$, and $\lambda_p(O)$ to denote the singleton containing the first operation of $O$ to be launched on process $p$. Formally,
+$$
+\begin{array}{ccl}
+    \gamma_p(O) & \eqdef & \{a\in O\mid a.proc=p \mbox{ and }\forall \opb\in O.\;\opb\ssrel\opa\Rightarrow \opb.stime < \opa.stime \} \\
+    \lambda_p(O) & \eqdef & \{a\in O\mid  a.proc=p \mbox{ and }\forall \opb\in O.\;\opb\ssrel\opa\Rightarrow \opa.stime < \opb.stime \}
+\end{array}
+$$
+
+Let us fix $1\leq\ell\leq n$ and let $(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$.
+The sets \mbox{$\Gamma_\ell(G)$} and \mbox{$\Lambda_\ell(G)$} are now defined as\footnote{
+Observe that it is possible to have \mbox{$\gamma_p(L)=\emptyset$} and/or \mbox{$\lambda_p(R)=\emptyset$}.}
+\begin{gather*}
+\Gamma_\ell(G) := \displaystyle\bigcup_{p \in \mathbb{P}}\gamma_p(L)
+\quad\text{and}\quad
+\Lambda_\ell(G) := \displaystyle\bigcup_{p \in \mathbb{P}}\lambda_p(R)
+\end{gather*}
+
+\noindent By definition $|\Gamma_\ell(G)|,\;|\Lambda_\ell(G)|\leq|\mathbb{P}|$. We now introduce notation for the sets of remaining nodes not included in $\Gamma_\ell$ or $\Lambda_\ell$: $L_\ell := L \setminus \Gamma_\ell $ and $R_\ell := R \setminus \Lambda_\ell$.
+
+\begin{lemma}\label{prop:crossRedges}
+Let a history $H\in\historyset$ and $G=(H,\rightarrow)\in\algone(H)$. For a cut 
+\mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with \mbox{$1\leq\ell\leq|H|$}, there is no edge that crosses the cut $\ell$ from $R$ to $L$: $\nexists\; \opa,\opb\in H:\; \opa\rightarrow\opb\;\land\;\opa\in R\;\land\;\opb\in L$.
+\end{lemma}
+
+Let $G\in\algoneset_m,m\in\mathbb{N}$, and let \mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$} be a cut of $G$.
+By Lemma~\ref{prop:crossRedges} no edge originating from $R=\Lambda_\ell \cup R_\ell$ can cross the cut. Edges in $L_\ell\times R_\ell$ cannot crosse the cut either. However, edges in $L_\ell\times\Lambda_\ell$, $\Gamma_\ell\times\Lambda_\ell$ and $\Gamma_\ell\times R_\ell$ can cross the cut $\ell$. 
+
+We now aim to prove that no edge in $L_\ell\times R_\ell$ crosses the cut $\ell$.
+
+\begin{lemma}\label{lemma:noCrossingLlRl}
+Let a history $H\in\historyset$ and $G=(H,\rightarrow)\in\algone(H)$. For a cut 
+\mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with \mbox{$1\leq\ell\leq|H|$}, there is no edge that crosses the cut $\ell$ from $L_\ell(G)$ to $R_\ell(G)$: $\nexists\; \opa,\opb\in H:\; \opa\rightarrow\opb\;\land\;\opa\in L_\ell(G)\;\land\;\opb\in R_\ell(G)$.
+\end{lemma}
+
+\begin{theorem}\label{thm:cutwidthBounded}
+Let \mbox{$G\in\algoneset_m,m\in\mathbb{N}$}. Then, $cutwidth(G)\leq 2m^2$.
+\end{theorem}
+\begin{proof}
+Let a cut \mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with$1\leq\ell\leq|H|$. Let $\Gamma_\ell\eqdef \Gamma_\ell(G)$, $\Lambda_\ell\eqdef\Lambda_\ell(G)$, $L_\ell\eqdef L_\ell(G)$, $R_\ell\eqdef R_\ell(G)$. Cutwidth is traditionally defined for undirected graphs. However, by Lemma~\ref{prop:crossRedges}, only edges originating in $L$ can cross the cut at level $\ell$. Intuitively, this means that edges cross the cut only \say{from left to right}. For this reason, we retain the directed nature of the graph to maintain clarity throughout the proof. Thus, the core idea of the proof is to bound the number of edges that can \say{land} on the right-hand side of the cut; that is, the number of edges originating from $L_\ell\cup\Gamma_\ell$ and landing in $\Lambda_\ell\cup R_\ell$. 
+We have $|\Lambda_\ell| \leq m$, and by Lemma~\ref{lemma:degin} each element of $\Lambda_\ell$ has at most $m$ incoming edges. Therefore there are at most $m^2$ edges \say{landing} in $\Lambda_\ell$.
+By Lemma~\ref{lemma:noCrossingLlRl}, there are no edges in $L_\ell\times R_\ell$, which implies that each edge crossing the cut $\ell$ and landing in $R_\ell$ must originate from $\Gamma_\ell$. Since $|\Gamma_\ell| \leq m$ and Lemma~\ref{lemma:degout} states that each element of $\Gamma_\ell$ has at most $m$ outgoing edges, the number of edges in $\Gamma_\ell\times R_\ell$ is also bounded by $m^2$. This implies that at most $m^2$ edges cross the cut and land in $R_\ell$.
+Adding the two bounds, we obtain a total of at most $m^2+m^2=2m^2$ crossing edges, which establishes the result.
+
+\end{proof}

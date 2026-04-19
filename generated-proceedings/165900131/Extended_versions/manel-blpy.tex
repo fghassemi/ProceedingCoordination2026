@@ -1,0 +1,96 @@
+\section{The BLPy coordination language}
+%TODO JMJ et Manel : presenter Bach et l'implémentation en Python \\
+
+The \emph{Bach} coordination language belongs to the class of \emph{generative communication} models introduced with Linda by Gelernter~\cite{gelernter1985generative}. In this family of models, the coordination layer is decoupled from the computational layer: processes do not exchange messages directly but interact indirectly through a shared associative memory, commonly referred to as a \emph{tuple space}.
+
+Bach~\cite{jacquet2007coordinating} refines this paradigm by providing a compact and expressive set of coordination primitives defined over \emph{structured information terms} (Si-terms). In Bach, interaction is implicit: processes synchronize by producing, inspecting, or consuming Si-terms stored in a shared multiset structure. This data-driven approach offers an elegant and uniform abstraction for reasoning about distributed, parallel, and reactive systems.
+
+\subsection{Foundations of the Bach Model}
+
+\subsubsection{Structured Information Terms (Si-terms)}
+Si-terms constitute the atomic units of information manipulated by Bach. They provide a symbolic representation well suited for specifying coordination constraints declaratively. Their lightweight structure enables flexible patterns of information sharing
+in heterogeneous or dynamic environments.
+
+\subsubsection{Notion of a Shared Store}
+
+The Bach store is conceptually a multiset of Si-terms, partitioned by functor. All primitives operate on this store, which serves as the rendez-vous point for interacting processes. Synchronization emerges from changes in the state of the store, independently of the processes control flows.
+
+\subsubsection{Bach Primitives.}
+Bach relies on a compact but expressive set of four primitives acting on an SI-term~$t$.
+These operations define how processes interact with the shared store and form the
+foundation of Bach’s coordination model:
+
+\begin{itemize}
+    \item \textbf{tell($t$)}: inserts the term $t$ into the shared store, increasing its multiplicity if it already exists.
+    \item \textbf{ask($t$)}: verifies the presence of $t$; the operation succeeds only when at least one instance of $t$ is available.
+    \item \textbf{get($t$)}: retrieves and removes a single occurrence of $t$ from the store, thereby consuming information.
+    \item \textbf{nask($t$)}: succeeds only when $t$ is \emph{absent} from the store, enabling negative synchronization.
+\end{itemize}
+
+Together, these primitives support a declarative style of coordination based on the
+presence or absence of symbolic information. Their simplicity contributes to the
+elegance and analyzability of the Bach model.
+
+\subsubsection{Blocking vs. Non-Blocking Behavior}
+The execution of these primitives depends on the dynamic state of the store.
+Their operational semantics combine blocking and non-blocking behaviors:
+
+\begin{itemize}
+    \item \texttt{ask} and \texttt{nask} are potentially \emph{suspensive}:
+    they put a process on hold until the store contains (or no longer contains)
+    the required term. This suspension mechanism is essential in generative
+    communication, where synchronization emerges implicitly.
+    \item \texttt{tell} is always non-blocking; it immediately updates the store
+    and may resume previously suspended processes.
+    \item \texttt{get} block either until $t$ becomes available or fail immediately,
+    depending on the runtime environment or the implementation policy.
+\end{itemize}
+
+This combination of blocking and non-blocking behaviors gives Bach the ability
+to express both reactive and constraint-based synchronization patterns.
+
+\subsubsection{Expressiveness and Typical Patterns}
+Despite its minimalism, the Bach primitive set is expressive enough to encode a wide variety of coordination patterns central to concurrent programming. Among the most typical examples:
+
+\begin{itemize}
+    \item \emph{producer–consumer} pipelines, where \texttt{tell} and \texttt{get} regulate data availability;
+    \item \emph{guarded commands}, implemented using combinations of \texttt{ask} and \texttt{nask};
+    \item \emph{synchronization barriers}, achieved by waiting for multiple SI-terms to be present before proceeding;
+    \item \emph{mutual exclusion} patterns, expressible through negative conditions with \texttt{nask} to prevent concurrent access.
+\end{itemize}
+
+Such patterns are foundational in coordination languages and have been studied extensively in the literature~\cite{gelernter1985generative,jacquet2007coordinating}. Bach preserves this expressiveness while offering a structured, symbolic alternative to traditional tuple-based communication.
+
+\subsection{Python Data Structures: Representing the Store}
+
+\subsubsection{Internal Structure of the Store}
+In the Python implementation, the shared store is represented by a nested dictionary:
+
+\begin{verbatim}
+theStore = {
+    functor1: { si1: count, si2: count, ... },
+    functor2: { ... }
+}
+\end{verbatim}
+
+This structure behaves as a multiset indexed by functors: each functor maps to a collection
+of SI-terms together with their multiplicities. This representation allows constant-time
+lookup and efficient updates, which are essential for implementing the Bach primitives.
+
+\subsubsection{Waiting Lists for Suspended Operations}
+To support blocking coordination primitives, the interpreter maintains explicit waiting lists:
+
+\begin{itemize}
+    \item \texttt{theWaitingList} records suspended \texttt{ask} operations,
+    \item \texttt{theWaitingNList} records suspended \texttt{nask} operations.
+\end{itemize}
+
+Each entry in these lists contains a pair $(pid, si)$ identifying the blocked process and the
+SI-term it is waiting for. This design mirrors classical approaches used in coordination
+languages to manage suspension and reactivation of processes.
+
+
+
+
+
+\newpage

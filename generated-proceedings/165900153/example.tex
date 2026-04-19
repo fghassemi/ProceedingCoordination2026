@@ -1,0 +1,265 @@
+% !TEX root = ./main.tex
+
+We now apply the programming pattern presented in \cref{sec:progpat}
+to our running example and detail how the control loop of
+\cref{lst:control-loop} manages the reconfigurations specified by the
+policies established with the adaptation contracts in
+\cref{exe:contract}.
+
+\subsection{Deploying our running example}
+%
+Our control loop can be thought as a scheme for a \quo{combinator}
+that allows to build adaptable services from other services. One such
+a combinator is provided, the execution of an adaptable service would
+be as follows:
+\begin{enumerate}
+\item the communication with the local middleware is established and the communication contracts are registered in the middleware; 
+\item the service is connected to the communication channels created
+  by the middleware for its execution scenarios
+  % \item the control flow of \srv W is spawned and, with it, the decisions making procedure kicks in (see \cref{lst:control-loop});
+  and the decision making procedure executing our control loop is
+  spawned;
+\item \label{item:decision} the decisions making procedure requests
+  the monitor for an update on the adaptation data and chooses the
+  first adaptation contract satisfied by it (lines
+  \ref{lst:scenario-selection-start}-\ref{scenario-selection-end} of
+  \cref{lst:control-loop}).
+% \item if an update on the adaptation data violates the adaptation contract of the adaptation contract of the current execution scenario, then the process is terminated and the decision making procedure returns to  the previous step in order to adapt the runtime behaviour of the service to the current environmental conditions.
+\end{enumerate}
+
+While the selected execution scenario runs, the control loop continues
+by checking if an update of the control data violates the adaptation
+contract of the running execution scenario.
+%
+If such a violation occurs, the running execution scenario is
+terminated and the decision making procedure repeats
+step~\ref{item:decision} above in order to adapt the runtime behaviour
+of the adaptable service to the new environmental conditions.
+
+\input{cfsms}
+%
+We instantiate the procedure above to deploy an adaptable service
+\textcolor{mainProcessColor}{\textsf{WebUI}} of our running example
+using the communication contracts in \cref{fig:contracts}, which
+yields both the textual format of CFSMs (which \SEArch borrows
+from~\cite{chorgram}) and their usual graphical notation where initial
+states are marked by an incoming arrow with no source state and
+transitions are labelled with send or receive actions
+(e.g., $\aout[w][s][][query]$ represents the sending of message
+$\msg[query]$ done by $\ptp[w]$ to $\ptp[s]$ and
+$\ain[w][s][][query]$ is the dual receive action).
+
+We start by observing that the communication contract
+corresponding to $\mathcal{E}_3$ in \cref{fig:default-contract}
+consists just of a CFSM with a single state and no transitions
+since the adaptation does not involve any interactions (e.g., the
+default image can be read from a file on a local hard drive).
+%
+The contract involving the persistent service
+  (\cref{fig:fallback-contract}) consists of the CFSM \srv S
+  used to query the broker for a storage service that can
+  respond to a query from \textcolor{mainProcessColor}{\textsf{WebUI}}
+  by sending an image.
+  %
+  The CFSM \srv W in (\cref{fig:fallback-contract}) specifies the
+  behaviour of \textcolor{mainProcessColor}{\textsf{WebUI}} in this
+  scenario.
+  %
+  Likewise, the CFSM \srv W in \cref{fig:external-service-contract}
+  specifies how \textcolor{mainProcessColor}{\textsf{WebUI}} interacts
+  with an external image provider queried to the broker using the CFSM
+  \srv P which features a more complex protocol to allow
+  \textcolor{mainProcessColor}{\textsf{WebUI}} to repeatedly ask for
+  images when those provided by the external service are not suitable,
+  or to stop the interaction with \srv P.
+
+%\begin{figure}[t!]\centering
+%  \includegraphics[width = \textwidth]{adaptable-teastore}
+%  \caption{Architectural view of adaptable TeaStore}
+%  \label{fig:adaptable_teastore}
+%\end{figure}
+%
+%\begin{figure}[t!]
+%  \begin{subfigure}{\textwidth}\centering
+%    \includegraphics[width = 0.67\textwidth]{adaptable-teastore-a}
+%    \caption{\label{fig:external-service-arch}Architectural view according to the adaptation contract $\mathcal{E}_1$}
+%  \end{subfigure}
+%  \\[2em]
+%  \begin{subfigure}{\textwidth}\centering
+%    \includegraphics[width = 0.82\textwidth]{adaptable-teastore-b}
+%    \caption{\label{fig:fallback-arch}Architectural view according to the adaptation contract $\mathcal{E}_2$}
+%  \end{subfigure}
+%  \\[2em]
+%  \begin{subfigure}{\textwidth}\centering
+%    \includegraphics[width = 0.65\textwidth]{adaptable-teastore-c}
+%    \caption{\label{fig:default-arch}Architectural view according to the adaptation contract $\mathcal{E}_3$}
+%  \end{subfigure}
+%  \caption{Architectural views of the adaptable TeaStore according to the different environmental conditions}
+%  \label{fig:adaptable_teastore}
+%\end{figure}
+
+The architectural view of the scenario involving the external image provider
+is depicted in~\cref{fig:external-service-arch}.
+%
+\begin{figure}[t!]\centering
+  \includegraphics[width = 0.73\textwidth]{adaptable-teastore-a}
+  \caption{\label{fig:external-service-arch}Architectural view for the external service scenario}
+\end{figure}
+%
+This view casts the architecture in \cref{fig:adaptable_service} for
+the running example. More precisely, the \textcolor{mainProcessColor}{\textsf{WebUI}}:
+\begin{enumerate}
+\item registers the \textcolor{lightBlueCC}{\textsf{Image provider contract}}, used by the local
+  process \textcolor{processColor}{\textsf{Image provider proxy}} to
+  communicate with an external image provider service (see \cref{fig:external-service-contract}), 
+  %
+  the \textcolor{blueCC}{\textsf{Database contract}}, used by the local process
+  \textcolor{processColor}{\textsf{Local DB proxy}} to communicate with a locally hosted database service
+  \textcolor{mainProcessColor}{\textsf{Local DB}} (see \cref{fig:fallback-contract}), and
+  %
+  \textcolor{darkBlueCC}{\textsf{Default image contract}}, used by the local process
+  \textcolor{processColor}{\textsf{Default image}}\footnote{Recall that this contract yields a communication channel whose behaviour reflects that no communication will take place.} (see \cref{fig:default-contract}), 
+  in the \textcolor{middlewareColor}{\textsf{Middleware}}
+  
+\item initiates the execution of the \textcolor{red}{\textsf{Monitor}}, and
+\item spawns the decision making procedure executing the control loop, which asks the monitor for the first update and chooses one of the execution scenarios accordingly. 
+\end{enumerate}
+
+Let us now consider how the architecture can possibly evolve at
+runtime when control data changes.
+
+\subsection{No degradation of the interaction with the image provider}
+As long as runtime changes of control data do not invalidate the
+adaptation contract $\mathcal{E}_1$, the architecture stays as in
+\cref{fig:external-service-arch}; in fact,
+
+\begin{description}
+\item[Step 1] the \textcolor{red}{\textsf{Monitor}} responds to \textsf{monitor\_update()} with $\{L \mapsto 4.7, R \mapsto 0.6, C \mapsto 0.54\}$ (line \ref{monitor-update-selection});
+\item[Step 2] \textsf{not}
+  $\mathcal{E}_1[L \mapsto 4.7, R \mapsto 0.6, C \mapsto 0.54]$ is not
+  \textsf{SAT} (i.e., \textsf{UNSAT}) thus, the control loop creates a
+  thread for executing the local process
+  \textcolor{processColor}{\textsf{Image provider proxy}}, connected
+  to its associated communication channel generated from the contract
+  \textcolor{lightBlueCC}{\textsf{Image provider contract}} (lines
+  \ref{adaptation-condition-check-selection}-\ref{selection-execution}), 
+yielding the architecture in \cref{fig:external-service-arch};
+\item[Step 3] in this thread, the local process
+  \textcolor{processColor}{\textsf{Image provider proxy}} implements
+  the communication pattern of the CFSM \srv W in the contract of
+  \cref{fig:external-service-contract}; in particular, it starts by sending
+  the message $\msg[getImg]$ thus triggering the brokering
+  process in the \textcolor{serviceBrokerColor}{\textsf{Service
+		broker}} (see \cref{fig:service-brokering-procedure} and the
+  corresponding reference)
+\item[Step 4] the external service
+  \textcolor{mainProcessColor}{\textsf{Image provider}} (executing the
+  process \textcolor{processColor}{\textsf{Image provider}}) is bound
+  to the application and, since it implements a communication pattern
+  compliant to the CFSM \srv P in
+  \cref{fig:external-service-contract}, it receives the request and
+  returns an image to the caller by sending a message $\msg[img]$;
+\item[Step 5] as the thread executing the local process
+  \textcolor{processColor}{\textsf{Image provider proxy}} has not set
+  the shared variable \textsf{done} and there is no instruction to
+  stop the execution through the variable \textsf{stop}, the
+  invocation to \textsf{monitor\_update()} obtains an update of the
+  control data (line \ref{monitor-update}) from the
+  \textcolor{red}{\textsf{Monitor}}.
+\end{description}
+
+We now consider cases where the environmental conditions violate the
+adaptation contract $\mathcal{E}_1$ of the running execution scenario.
+
+\subsection{Degradation of the interaction with the image provider}
+\label{sec:imgp-fail}
+%\eMcomm[check pictures]{}
+\begin{figure}[t!]\centering
+  \includegraphics[width = 0.73\textwidth]{adaptable-teastore-b}
+  \caption{\label{fig:fallback-contract-arch}Reconfiguration according to adaptation contract $\mathcal{E}_2$ upon violation of $\mathcal{E}_1$}
+\end{figure}
+In our running example, a degradation of the interaction between \textcolor{mainProcessColor}{\textsf{WebUI}} (more specifically, the local process \textcolor{processColor}{\textsf{Image provide proxy}}) and the external service \textcolor{mainProcessColor}{\textsf{Image provider}} requires a reconfiguration when the latency ($L$) or the responsiveness ($R$) becomes too high.
+%
+Let us assume that the external
+image provider service becomes unresponsive, the other case is similar.
+\begin{description}
+
+\item[Step 6] while the local process \textcolor{processColor}{\textsf{Image provide proxy}} interacts with the service \textcolor{mainProcessColor}{\textsf{Image provider}} through the communication channel generated from the \textcolor{lightBlueCC}{\textsf{Image provider contract}}, the \textcolor{red}{\textsf{Monitor}} responds to \textsf{monitor\_update()} with $\{L \mapsto 5.3, R \mapsto 0.7, C \mapsto 0.51\}$  (line \ref{monitor-update});
+\item[Step 7] the control loop accounts for the change in \textsf{m}
+  and, as \textsf{not}
+  $\mathcal{E}_1[L \mapsto 5.3, R \mapsto 0.7, C \mapsto 0.51]$ now is
+  \textsf{SAT} because $L \geq 5ms$, terminates the thread executing
+  the local process \textcolor{processColor}{\textsf{Image provider proxy}}
+  using \textsf{terminate()} and returns to the code fragment that
+  performs the selection of an appropriate execution scenario
+  (lines \ref{scenario-selection-start}-\ref{scenario-selection-end});
+\item[Step 8] \textsf{not}
+  $\mathcal{E}_2[L \mapsto 5.3, R \mapsto 0.7, C \mapsto 0.51]$ is not
+  \textsf{SAT} thus, the control loop creates a thread for executing
+  the local process \textcolor{processColor}{\textsf{Local DB proxy}},
+  connected to its associated communication channel generated from the
+  contract \textcolor{blueCC}{\textsf{Database contract}} (lines
+  \ref{adaptation-condition-check-selection}-\ref{selection-execution}),
+  yielding the architecture in \cref{fig:fallback-contract-arch};
+\item[Step 9] in this thread, the local process
+  \textcolor{processColor}{\textsf{Local DB proxy}} implements
+  the communication pattern of the CFSM \srv W in the contract of
+  \cref{fig:fallback-contract}; in particular, it starts by sending
+  the message $\msg[query]$ thus triggering the brokering
+  process in the \textcolor{serviceBrokerColor}{\textsf{Service broker}} 
+  but fixing the local service \textcolor{mainProcessColor}{\textsf{Local DB}} as the provider;
+\item[Step 10] the service \textcolor{mainProcessColor}{\textsf{Local DB}} (executing the process \textcolor{processColor}{\textsf{Local DB}}) is bound to
+  the application and, since it implements a communication pattern compliant to the CFSM \srv S in
+  \cref{fig:fallback-contract}, it receives the request and returns an image to the caller
+  by sending a message $\msg[img]$.  
+\end{description}
+
+% \subsection{The image provider external service fails at providing a good quality image}
+% A different continuation is obtained whenever the image provider external service fails at providing a satisfactory service, up to the point in which the \textcolor{mainProcessColor}{\textsf{WebUI}} determines that a new brokering process is needed.
+% \begin{description}
+% \item[Step 7] the local process \textcolor{processColor}{\textsf{Image provider}} rejects the image received from the external service \textcolor{processColor}{\textsf{Image provider}} sending the message \textsf{reject} through \textcolor{darkBlueCC}{\textsf{P}}, and this same exchange pattern occurs 3 times in a row
+% \item[Step 8] the local process \textcolor{processColor}{\textsf{Image provider}} decides to finish the interaction with the external service \textcolor{processColor}{\textsf{Image provider}} sending the message \textsf{stop} through \textcolor{darkBlueCC}{\textsf{P}},
+% \item[Step 9] as the thread executing the local process \textcolor{processColor}{\textsf{Image provider}} terminates but has not set the shared variable \textsf{done}, the control loop is forced again into the code section that performs the execution scenario selection (lines \ref{scenario-selection-start}-\ref{scenario-selection-end}) where the \textcolor{red}{\textsf{Monitor}} responds to \textsf{monitor\_update()} and the \textcolor{mainProcessColor}{\textsf{WebUI}} is reconfigured according to an appropriate execution scenario whose adaptability contract is not violated.
+% \end{description}
+
+% \subsection{Both the image provider external service and the local image database fail}
+\subsection{Local node overloaded}
+\begin{figure}[t!]\centering
+  \includegraphics[width = 0.73\textwidth]{adaptable-teastore-c}
+  \caption{\label{fig:default-contract-arch}Reconfiguration according to adaptation contract $\mathcal{E}_3$ upon violation of $\mathcal{E}_2$}
+\end{figure}
+According to our adaptation contracts, the execution shown in
+\cref{sec:imgp-fail} requires a reconfiguration when the CPU gets
+overloaded.
+%
+Our control loop will therefore terminate the thread running the process \textcolor{processColor}{\textsf{Local DB proxy}}.
+\begin{description}
+\item[Step 11] while the local process \textcolor{processColor}{\textsf{Local DB proxy}} interacts with the service \textcolor{mainProcessColor}{\textsf{Local DB}} through the communication channel generated from the contract \textcolor{blueCC}{\textsf{Database contract}}, the \textcolor{red}{\textsf{Monitor}} responds to the invocation of \textsf{monitor\_update()} with $\{L \mapsto 6.2, R \mapsto 0.4, C \mapsto 0.92\}$  (line \ref{monitor-update});
+\item[Step 12] the control loop accounts for the change in \textsf{m}
+  and, as \textsf{not}
+  $\mathcal{E}_2[L \mapsto 6.2, R \mapsto 0.4, C \mapsto 0.92]$ now is
+  \textsf{SAT} because $C \geq 0.9$, terminates the thread executing
+  the local process \textcolor{processColor}{\textsf{Local DB proxy}}
+  using \textsf{terminate()} and returns to the code fragment that
+  performs the selection of an appropriate execution scenario (lines
+  \ref{scenario-selection-start}-\ref{scenario-selection-end});
+\item[Step 13] \textsf{not}
+  $\mathcal{E}_3[L \mapsto 6.2, R \mapsto 0.4, C \mapsto 0.92]$ is not
+  \textsf{SAT} thus, the control loop creates a thread for executing
+  the local process \textcolor{processColor}{\textsf{Default image}},
+  yielding the architecture in \cref{fig:default-contract-arch} (lines
+  \ref{adaptation-condition-check-selection}-\ref{selection-execution});
+\item[Step 14] the execution continues according to the behaviour of
+  the local process \textcolor{processColor}{\textsf{Default
+		image}}. This process is implemented satisfying
+  \textcolor{darkBlueCC}{\textsf{Default image contract}} so no communication takes place over the 
+  generated communication channel, consequently, the task of finding an image is
+  performed resorting only to resources that are locally accessible by
+  the local process \textcolor{processColor}{\textsf{Default image}}.
+\end{description}
+
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "main"
+%%% End:

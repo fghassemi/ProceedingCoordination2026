@@ -1,0 +1,92 @@
+%In the current paper we introduce \emph{timed scenario expressions}
+%and solve the problem of realisability of sets of
+%scenarios as scenario expressions.
+%That is, given a global model of the behaviours of a system, captured
+%by a set of scenarios, $\mathcal{S}$, we produce a scenario expression that expresses
+%the same set of behaviours that are allowed by the members of $\mathcal{S}$.
+%So our contribution is two fold:
+We introduced the notion of timed scenario expressions (expressions for
+short) and their semantics.
+A distributed timed scenario (DTS) is an expression.
+Expressions are also built by applying three operators, $|$, $\circ$ and $||$, to
+expressions. The operator
+$|$ specifies a choice between two alternatives, while $\circ$ and
+$||$ indicate the concatenation and the parallel composition of two
+expressions.
+%, respectively.
+We defined $\Sem{E}$, the semantics of expression $E$,
+in terms of the set of behaviours that are
+specified by $E$, and defined the consistency of $E$ in
+terms of its semantics.
+
+%A behaviour \Behaviour{B} of $\Xi$ is obtained by merging
+%the behaviours of the individual components in $\Xi$ in such a way that
+%the order of events does not violate $\ParSE{\DScenario}$, the
+%underlying (extended) partial order on events of \DScenario.
+%Moreover, each event that occurs in more than one component (called a
+%synchronizing event) occurs only once.
+
+%We formally define the consistency of distributed scenarios, in terms
+%of their semantics, and formulate a criterion
+%(Theorem \ref{thm-consistency}), as well as a practical method
+%for determining the consistency of a DTS.
+
+We tackled the problem of realisability of sets of (sequential)
+scenarios as scenario expressions.
+We developed an algorithm that, given a set of scenarios,
+$\mathcal{S}$, produces an expression $E$ that realises
+$\mathcal{S}$, i.e, $\Sem{\mathcal{S}}=\Sem{E}$.
+
+The set $\mathcal{S}$ can sometimes be realised by a single
+DTS. But, in general, realising $\mathcal{S}$
+involves dividing it into partitions, in such a way that each
+partition can be realised by a single DTS. The
+choice expression whose alternatives are these distributed
+scenarios would realise $\mathcal{S}$.
+
+%Our goal is to produce an expression that includes a reasonably few
+%number of alternatives, in particular, we avoid building a
+%trivial solution in which every member of $\mathcal{S}$ is a separate
+%alternative, when other solutions exist.
+
+We investigated the fundamental reasons when $\mathcal{S}$ is not
+realisble by a DTS.
+%, based on which we
+This investigation resulted in developing
+two methods for effectively dividing $\mathcal{S}$.
+One is based on reasoning about the underlying partial order in
+$\mathcal{S}$, and the other is based on the time constraints of
+$\mathcal{S}$.
+%We introduce two different measures, K-ranking and c-ranking, for
+%evaluating various divisions of $\mathcal{S}$.
+%Intuitively, the K-ranking and c-ranking of a division, $D$,
+%are measures of similarity of the
+%sequences of events, and of the time constraints
+%between the scenarios in each partition of $D$.
+%We call the divisions that are obtained based on this analysis
+%order-based divisions (OBDs) and constraint-based divisions (CBDs).
+%A division is of the form $D=(\mathcal{S}_1,\mathcal{S}_2)$, where
+%$\mathcal{S}_1\cup\mathcal{S}_2=\mathcal{S}$.
+We identified the necessary and sufficient conditions for realisability
+of a set of scenarios as a single DTS (Theorem \ref{thm-realisable}),
+and thereby solved the problem that was left open in our earlier
+work \cite{DTS-2025}.
+
+To illustrate the effectiveness of our approach
+we compared our algorithm with one that performs a complete
+breadth-first search to find
+%a division that results in
+an optimal
+solution, i.e., one with the minimum number of alternatives.
+Our experimental results confirm the effectiveness and efficiency of
+our algorithm.
+%While we do not claim optimality, in all our experiments our algorithm
+%always returned an optimal solution.
+
+%The algorithms for determining consistency of expressions and
+%realisability of sets of scenarios as expressions are
+%implemented and available on request.
+
+As our future work we plan to incorporate the Kleene star
+operator in scenario expressions, and to explore the usefulness of machine learning for
+solving the problem of realisability.

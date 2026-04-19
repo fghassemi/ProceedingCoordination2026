@@ -1,0 +1,2611 @@
+\documentclass[12pt]{article}
+
+\input{header}
+
+%\title{\bfseries Automated consistency verification\\for replicated data systems}
+%\author{Isabelle Coget\\
+%Institut Polytechnique de Paris\\
+%isabelle.coget@polytechnique.edu}
+%\date{\today}
+
+
+
+
+%\usepackage[a4paper, left=2.54cm, right=2.54cm]{geometry}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2.5cm}
+    
+    {\LARGE \textbf{Internship Report} \par}
+    \vspace{0.5cm}
+    {\large \slshape First Year of the Master of Computer Science -- Cyber-Physical Systems Specialization}
+    \vspace{2cm}
+    
+%    {\Large \textbf{Title of the Internship:} \par}
+    {\LARGE {Automated Consistency Verification\\ for Replicated Data Systems} \par}
+    \vspace{2cm}
+    
+    {\Large \textbf{Isabelle Coget} \par}
+    \vspace{1cm}
+    
+    Submitted to: \\
+    {\large \textbf{Institut Polytechnique de Paris} \par}
+    \vspace{0.5cm}
+    
+    Internship conducted at: \\
+    {\large \textbf{Laboratoire i3s, Université Côte d'Azur } \par}
+    
+   \vfill
+   
+   {\today}
+    
+\end{titlepage}
+
+%\twocolumn
+%\maketitle
+
+\begin{titlepage}
+  \centering
+  \vspace*{\fill} % stretchable vertical space before
+  \begin{minipage}{0.8\textwidth} % control width of abstract block
+    \begin{abstract}
+      As distributed systems grow increasingly complex, verifying the reliability of their behavior and program correctness becomes essential. Verification provides formal guarantees that a program behaves as intended under specific system assumptions.
+
+In this work, we define a formal framework for consistency verification in replicated data systems and identify its key constraints. Within this context, we prove that the consistency verification problem is decidable. We also propose a method to encode execution traces as finite words, enabling the concrete verification of trace properties. This approach enables verification of consistency for any execution trace over finite data domains.
+
+    \end{abstract}
+  \end{minipage}
+  \vspace*{\fill} % stretchable vertical space after
+\end{titlepage}
+
+
+\newpage
+
+\tableofcontents  % This generates the sommaire
+\newpage
+
+\section{Introduction}
+
+%$\patharrow$
+%Automated verification of concurrent and distributed systems
+%
+%Automated reasoning on consistency models
+
+Verification is a significant phase of software development, aimed at ensuring that a program behaves as intended. It highlights unexpected and undesired behaviors an execution can present, such as memory leaks, bugs and crashes. Notable failures that could have been prevented through proper verification include the Ariane 5 crash in 1996 and the software failure of the Bank of New York in 1985. Fortunately, advances in modern verification techniques enable early identification of such critical faults, preventing similar disasters from occurring. As systems become more complex and decentralized, robust program verification tools are essential to ensure correctness, particularly for replicated objects and distributed systems, on which this paper is focused. Distributed systems employ different communication models, such as message-passing and replicated object programs. The verification of the former focuses on the communication model itself, while the latter relies on consistency models.
+
+Message-passing communication models have been previously studied \citehybrid{MSCpaper} by means of message sequence charts. These charts keep track of message exchanges between agents throughout an execution, representing the different possible behaviors of the program. A message-passing program is said to be sound with respect to a property if all of its executions verify it. That is, the program is considered to have failed verification if even one execution violates the property. The latter may be expressed as a logical formula, thereby reducing verification to the satisfiability problem of monadic second-order (MSO) formulas over message sequence charts.
+%Indeed, verifying that any execution satisfies a formula, is equivalent to proving that no execution satisfies the logical negation of the formula. 
+%The Boolean Satisfiability Problem  commonly referred to as SAT, has been proven to be NP-complete \citehybrid{SATKarp}\citehybrid{SATCook}, meaning it is as hard as any problem whose solution can be verified in polynomial time. To date, no polynomial-time algorithm is known for solving SAT in the general case.  
+Therefore, to ensure the decidability of verification tasks involving message sequence charts, it is necessary to enforce certain restrictions, such as synchronizability or bounded buffer sizes \citehybrid{MSCpaper}.
+
+In contrast to message-passing programs, agents in replicated data systems communicate by updating data rather than through message exchange. All agents maintain replicas of the same data, but because updates propagate with uncertainty and delays, the copies may not be synchronized and can become inconsistent across different agents. Consitency models define restrictions on how these data updates are propagated accross the different replicas. Each consistency model provides a distinct level of guarantee regarding the visibility and ordering of updates in the system. 
+
+Just as message sequence charts track message exchanges in message-based systems, \textsl{histories} are used to record data updates in replicated data systems \citehybrid{PrinciplesOfEventualConsistency}. A \textsl{history} is defined as the set of all data updates that occur during a single execution of a program. These updates are referred to as \textsl{operations}. This paper considers only read and write operations, as many core actions in replicated data systems can be expressed using these primitives.
+An operation’s attributes include its start and return times, input and output values, target object, and performed action. The operations within a history must collectively satisfy certain consistency models (linearizability, eventual consistency, read-my-writes), which are expressed as logical formulas over operations \citehybrid{ViottiVukolic}.
+
+However, the logical formulas defined in \citehybrid{ViottiVukolic} do not correspond to any automated logical system (such as propositional, first-order, or second-order logic) and must therefore be reformulated within a more rigorous framework. Thus, we define the \textsl{logic over histories} in terms of MSO logic, the target formalism for this work. Our choice to restrict the logic to MSO is motivated by the following fundamental result, known as Courcelle's Theorem \citehybrid{CourcelleProof}: every graph property expressible in the monadic second order logic of graphs is decidable in linear time on graphs of bounded tree-width. Intuitively, \textsl{tree-width} is a measure of how close a graph is from being a tree, where a tree is a graph that contains no cycles\footnote{A cycle is a non-empty path in which the first and last vertices are the same}. The formal definiton of tree-width is provided in \hyperref[sec:appendix]{Appendix}.
+
+The first part of this report demonstrates how histories can be encoded as graphs of bounded tree-width, which, by Courcelle's theroem, ensures that model checking over these histories is decidable and can be performed in linear time. However, model checking is performed on a single history, while program verification requires that the specified properties hold over all possible histories, which considerably hardens the problem. Courcelle's Theorem is traditionally stated in the context of model checking; thus, to fit more naturally into the verification framework, it can be reformulated as follows: the satisfiability of an MSO property over $k$-bounded graphs\footnote{A graph is $k$-bounded if it has a structural property bounded by $k$} is decidable (although of non-elementary complexity\footnote{A problem has non-elementary complexity in $n$ if it grows faster than
+$\left.
+\begin{array}{c}
+2^{2^{\iddots^{2^n}}}
+\end{array}
+\right\} \; k
+$ for any $k$ finite}).
+% To the best of my knowledge, no solver supports the entirety of MSO logic. However, certain solvers exist for restricted fragments of MSO logic. For example, MiniSAT \cite{MiniSAT} and Glucose \cite{Glucose} which operate over propositional logic, which is considerably less expressive than the logic required by our approach and cannot handle the types of structures involved in our setting; or MONA, a tool designed to handle formulas restricted to specific fragments of MSO logic\footnote{MONA supports formulas in the Weak Monadic Second-Order Logic of One Successor (WS1S) and Two Successors (WS2S), which are decidable fragments of MSO logic over finite words and trees, respectively.}. MONA translates such formulas into finite state automata, and performs satisfiability checking and model checking on the resulting automaton. The second part of this paper describes how MONA can be applied to address the satisfiability problem of MSO formulas --- referred to as the \textsl{MSO satisfiability problem} --- over histories of replicated-object programs, detailing how these histories can be encoded to conform to the logical restrictions imposed by MONA.
+
+To the best of my knowledge, no solver supports the entirety of MSO logic. Existing solvers for restricted fragments include MiniSAT \cite{MiniSAT} and Glucose \cite{Glucose}, which operate over propositional logic. This logic is considerably less expressive than required by our approach and cannot handle the types of structures in our setting. In contrast, MONA\cite{MONA} is an MSO solver designed for specific decidable fragments\footnote{MONA supports formulas in the Weak Monadic Second-Order Logic of One Successor (WS1S) and Two Successors (WS2S), which are decidable fragments of MSO logic over finite words and trees, respectively.}, translating such formulas into finite-state automata to enable satisfiability and model checking on the resulting automaton. In the second part of this paper, we show how MONA can be applied to the MSO satisfiability problem over histories of replicated-object programs, and how these histories can be encoded to meet MONA's logical restrictions.
+
+Overall, this leads us to the central question:
+% What restrictions are required to make the satisfiability problem of MSO formulas over shared-object histories decidable, in order to verify consistency models? And how can consistency verification over shared-object programs be automated within these constraints?
+
+\begin{quote}
+\textbf{What restrictions are required to ensure the decidability of MSO satisfiability
+ over replicated-object histories, and how can consistency verification be automated under these constraints?}
+\end{quote}
+
+%\section{Overview}
+%
+%[TODO]
+
+
+\section{Histories}
+\label{sec:definitions}
+
+\tikzset{
+  withcaps/.style={
+    postaction={
+      decorate,
+      decoration={
+        markings,
+        mark=at position 0 with {\draw[-] (0pt,-5pt) -- (0pt,5pt);},
+        mark=at position 1 with {\draw[-] (0pt,-5pt) -- (0pt,5pt);}
+      }
+    }
+  }
+}
+
+
+
+Tracking the sequence of computed actions in replicated data systems can be achieved through various methods. In this paper, we base our approach on the notion of histories defined in \citehybrid{ViottiVukolic}. A history of a program execution is defined as a set of \textsl{operations} that represent all the actions performed during the computation. Histories can be visualized as timelines, where each process is represented by a horizontal line aligned to a global clock. The execution of an operation is shown as a solid segment, while dashed segments indicate periods when the process is idle. These timelines are read from left to right. Figure~\ref{fig:fig1} illustrates this graphic representation.
+ Each operation has the following attributes: the process launching the operation, the invocation time, the return time, the type of operation, the object on which the operation takes effect, the input value of the operation and the output value of the operation. For formalization purposes, it is essential to explicitly define the domain to which each attribute belongs.
+Since our objective is to encode these histories for analysis using MONA, we introduce certain constraints on these sets of attributes. In particular, MONA does not support infinite sets; hence, certain sets of attributes must be finite. Without this finiteness assumption, the encodings presented in this paper would not be computable.
+
+Thereby we define
+
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item $\mathbb{P}$ the set of processes from which operations are launched
+	\item $\mathbb{T}$ the set of types of operations
+	\item $\mathbb{O}$ the set of objects, which are the data to be modified or read by operations (objects can be registers or variables for instance)
+	\item $\mathbb{V}\cup\{\nabla,\Phi\}$ where $\mathbb{V}$ is the set of values that can be read or written on objects, and $\Phi$ represents a non-relevant or not needed value (for instance, we can claim that for a write operation, the input value is the value to be written, and the output value is $\Phi$; as a write operation does not necessarily need to return anything), and $\nabla$ stands for the \say{output value} of an operation that never returns (concretely, $\nabla$ represents the absence of a return value due to a never ending operation)
+\end{itemize}
+
+and $\mathbb{P},\mathbb{T},\mathbb{O},\mathbb{V}$ finite.
+
+Invocation and return times can be defined over either absolute or relative time, and are totally ordered. These times are defined in $\mathbb{R}^+\cup \{+\infty\}$. We include $+\infty$ to represent operations that never return. Assigning $+\infty$ as a return time reflects that, beyond a certain point, the operation is considered to never terminate. Since this threshold is proper to each system, we will keep the notation $+\infty$ throughout this paper, and will allow return times to take the value $+\infty$. 
+%We let time values range over $\mathbb{R}^+\cup \{+\infty\}$, rather than a finite subset, since return times can grow arbitrarily large. 
+%However, this choice makes the time domain infinite, which is not permitted in our setting, as previously explained. Consequently, to keep time bounded we need to restrict our histories to be finite. In such histories, there always exists a finite maximum return time (excluding $+\infty$).
+
+
+We recall the attributes from \citehybrid{ViottiVukolic} along with their respective domains. Throughout this paper, we adopt the object-oriented notation, namely $operation.attribute$.
+
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item $proc\in \mathbb{P}$ process on which the operation is executed
+	\item $stime\in \mathbb{R}^+$ invocation time
+	\item $rtime\in \mathbb{R}^+\cup \{+\infty\}$ return time, $+\infty$ if the operation never returns (we note that for any operation $\opa$ we have $\opa.stime<\opa.rtime$)
+	\item $type\in \mathbb{T}=\{read,write\}$ type of operation, here either $read$ or $write$
+	\item $obj\in \mathbb{O}$ object on which the operation takes effect
+	\item $ival\in \mathbb{V}$ input value, $\Phi$ if the operation is a $read$
+	\item $oval\in \mathbb{V}$ output value, $\Phi$ if the operation is a write, and $\nabla$ if the operation does not return
+\end{itemize}
+
+Here read operations are assumed to have no input value, which we denote by $\Phi$. Similarly, since write operations do not return a value, their output is also set to  $\Phi$.
+
+We define the set of all finite execution histories as follows. The symbol $\land$ denotes logical conjunction, which can be read as \say{and}.
+
+\begin{nameddefinition}[Execution History Set]
+Let $\mathbb{P}$, $\mathbb{T} = \{read,write\}$, $\mathbb{O}$, and $\mathbb{V}$ be finite sets representing, respectively, processes, operation types, objects, and values. We define $\historyset$ as the set of all well-defined finite histories of executions, where attributes are drawn from these sets. A history is considered well-defined if every operation has the appropriate attributes and if, for each process, operations do not overlap (a process executes one operation at a time, it launches a new execution only if the previous one has returned). Formally, this means
+
+\begin{gather*}
+\forall H\in\historyset.\;|H|<+\infty \;\land \\
+\forall\opa\in H.\;\big(\;\opa.proc\in\mathbb{P}\;\land\;\opa.stime\in\mathbb{R}^+\;\land\;\opa.rtime\in\mathbb{R}^+\;\land\;\opa.stime<\opa.rtime \;\land \\
+\opa.type\in\mathbb{T}\;\land\;\opa.obj\in\mathbb{O}\;\land\;\opa.ival\in\mathbb{V}\;\land\;\opa.oval\in\mathbb{V}\;\land\\
+(\opa.type=read\Rightarrow\opa.ival=\Phi)\;\land\;(\opa.type=write\Rightarrow\opa.oval=\Phi)\;\land\;(\opa.rtime=+\infty\Leftrightarrow\opa.oval=\nabla)
+\;\big)\;\land \\
+\forall \opb\in H.\;\forall \opc\in H.\; \opb.proc=\opc.proc\Rightarrow( \opb.rtime<\opc.stime\;\lor\;\opc.rtime<\opb.stime )
+\end{gather*}
+\end{nameddefinition}
+
+
+\begin{figure}
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+\begin{tikzpicture}[x=2cm, y=1cm,every node/.style={font=\large}]
+
+%  
+	\node[anchor=east] at (-0.1, 0) {\small \textit{Proc. 1}};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.1, -1) {\small \textit{Proc. 2}}; % Label for second set  
+
+  % First line of bars
+  \draw[withcaps] (0,0) -- (2,0) node[midway, above] {$\opa$};
+  \draw[dashed] (2,0) -- (2.5,0);
+  \draw[withcaps] (2.5,0) -- (3,0) node[midway, above] {$\opb$};
+  \draw[dashed] (3,0) -- (3.5,0);
+  \draw[withcaps] (3.5,0) -- (4,0) node[midway, above] {$\opc$};
+
+  % Second line of bars 
+  \draw[dashed] (0,-1) -- (0.25,-1); 
+  \draw[withcaps] (0.25,-1) -- (0.6,-1) node[midway, above] {$\opd$};
+  \draw[dashed] (0.6,-1) -- (1,-1);
+  \draw[withcaps](1,-1) -- (2.75,-1) node[midway, above] {$\ope$};
+  \draw[dashed] (2.75,-1) -- (3.75,-1);
+  \draw[withcaps](3.75,-1) -- (4,-1) node[midway, above] {$\opf$};
+
+\end{tikzpicture}
+}
+\end{center}
+\caption{\small \slshape A history on two processes, with operations $\opa$, $\opb$, $\opc$, $\opd$, $\ope$ and $\opf$}
+\label{fig:fig1}
+\end{figure}
+
+
+All operations can be compared based on their attributes, meaning that relations can be defined between operations. A relation is a property that involves one to a few operations; in our case, relations are binary --- that is, they relate pairs of operations. Among the relations defined by \citehybrid{ViottiVukolic}, we primarily use the \textsl{returns-before} and the \textsl{same-session} relation. For a history $H\in\historyset$ and operations \mbox{$\opa,\opb\in H$}, the returns-before relation denoted as $\opa\rb\opb$, means that $\opa$ returns before $\opb$ starts; formally, $\opa.rtime<\opb.stime$. As for the same-session relation denoted as $\opa\ssrel\opb$, means that $\opa$ and $\opb$ are launched on the same process; formally, $\opa.proc=\opb.proc$.
+
+The $\rb$ relation will constitute the foundation of our graph representation of histories; however, we will also need to introduce a more restrictive relation, which we call \textsl{direct succession}.
+
+\begin{nameddefinition}[Direct Successor]
+Let $H\in\historyset$ and $\opa,\opb\in H$. We say that $\opb$ is the direct successor of $\opa$ on process $p$, written $\opa \dsucp{p} \opb$, if $\opb$ is the first operation to be launched on process $p$ after $\opa$ returns.
+
+Formally, for $p \in \mathbb{P}$:
+
+\[
+\opa\dsucp{p}\opb \quad \Leftrightarrow \quad\opb.proc=p \;\land\; 
+\neg\exists\opc.\big( \opc\in H\land \opc\neq\opb\land \opc\ssrel\opb\land  \opa\rb\opc  \land  \opc\rb\opb   \big)
+\]
+
+The set of all such direct successors of $\opa$ is written as $\sigma(\opa)$ and defined as
+
+
+\begin{center}
+$\sigma(\opa) = \displaystyle\bigcup_{p \in \mathbb{P}} \{\opb \mid 
+\opb \in H  \land \opa\dsucp{p}\opb  \}
+\quad \subset H$
+\end{center} 
+
+Additionally, we say that $\opb$ is a direct successor of $\opa$, written $\opa\dsuc\opb$, if $\opb\in\sigma(\opa)$.
+
+Note that the relation $\opa\dsucp{p}\opb$ holds information about the process of $\opb$ (namely, $p$), but does not reveal any information about the process on which $\opa$ is executed.
+\end{nameddefinition}
+
+
+
+We note that for all $\opa \in H$, $|\sigma(\opa)| \leq |\mathbb{P}|$, because any operation has at most one direct successor on each process.
+
+\vspace{1em}
+
+Now that histories and their associated relations are well defined, we can proceed to study how to encode these histories as graphs; in particular, as a graphs of bounded tree-width.
+
+\section{Graphs of histories}
+
+A history of a program execution can be perceived as a timeline gathering different data updates. Key information held in a timeline includes when operations start and return, and the order in which they are performed. Since the \textsl{returns-before} relation holds exactly this information, it will serve as the foundation of our graphs. Graphs are data structures that relate some elements (referred to as \textsl{vertices} or \textsl{nodes}) according to some relation represented by \textsl{edges}. In this work, we focus on graphs that are restricted to edges having exactly two end-points. Since edges are intended to represent the \textsl{returns-before} relation, the \textsl{vertices} of these graphs correspond precisely to the operations in a history. 
+
+The usual notation for a graph $G$ is $G=(V,E)$ with $V$ the set of vertices and $E$ the set of edges. As an edge associates two vertices, the set $E$ is a subset of $V\times V$; i.e. an edge is a couple $(\opa,\opb)$ with $\opa,\opb\in V$. The set of edges in a graph can be represented either as a set of pairs or as a binary relation over the set of vertices. For instance, if a graph $G=(V,E)$ is such that $(\opa,\opb)\in E$ \emph{if and only if} $\opa\rb\opb$; then $G$ can equivalently be defined as $G=(V,\rb)$.
+%
+%Graphs fall into two main categories: directed and undirected. In a directed graph, edges are oriented; that is, $(\opa,\opb)\in E$ does not imply $(\opb,\opa)\in E$. Conversely, in an undirected graph, edges have no orientation; i.e. $(\opa,\opb)\in E$ if and only if $(\opb,\opa)\in E$. Since the relation $\rb$ is not symmetric (that is, $\opa\rb\opb$ and $\opb\rb\opa$ cannot be true simultaneously), our graphs must be directed. Examples of directed and undirected graphs are illustrated on Figure~\ref{fig:dirundir}
+%
+%\begin{figure}[!htbp]
+%\begin{center}
+%\begin{tikzpicture}[
+%    every node/.style={draw,circle},
+%    scale=1.5,
+%    >=Triangle
+%  ]
+%  \node (a) at (1, 0) {a};
+%  \node (b) at (0.125, -1) {b};
+%  \node (c) at (1.875, -1) {c};
+%  
+%  \node (d) at (5, 0) {d};
+%  \node (e) at (6.275, 0) {e};
+%  \node (f) at (6.275, -1) {f};
+%  
+%  \draw[->] (a) to[out=0, in=90] (c); 
+%  \draw[->] (a) to[out=180, in=90] (b); 
+%  \draw[->] (b) to[out=0, in=-90] (a); 
+%  
+%  \draw (d) to[out=-90, in=180] (f);
+%  \draw (e) to[out=-45, in=45] (f);
+%
+%
+%\end{tikzpicture}
+%\end{center}
+%\caption{\small \slshape An example of a directed and an undirected graph\\  with vertices $\lbrace a,b,c\rbrace$ and $\lbrace d,e,f\rbrace$, respectively.}
+%\label{fig:dirundir}
+%\end{figure}
+
+
+Although the \textsl{returns-before} relation denotes the desired information for our graphs, it is overly dense, inducing too many edges. For a history $H\in\historyset$ of arbitrary size, encoding $H$ on a graph $G=(H,\rb)$ results in $G$ being a clique --- a graph in which every pair of distinct vertices is connected by an edge. We recall the objective of this section: to encode any history $H\in\historyset$ as a graph of bounded tree-width. However, cliques of arbitrary size are not of bounded tree-width. Thus, the $\rb$ relation is not sufficiently refined for our study. 
+
+It is the transitivity
+\footnote{A relation R is said to be transitive when xRy$\land$yRz$\Rightarrow$xRz}
+ of $\rb$ that makes it too dense. Indeed, if there are operations such that \mbox{$\opa\rb\opb$}, \mbox{$\opb\rb\opc$} and \mbox{$\opa\rb\opc$}, the edge \mbox{$\opa\rb\opc$} in unnecessary as having \mbox{$\opa\rb\opb$} and \mbox{$\opb\rb\opc$} naturally implies \mbox{$\opa\rb\opc$}.
+ When a transitive relation is encoded on a graph, its transitivity is represented by \textsl{paths} in the graph. Intuitively, a path between two vertices is a sequence of edges that allows traversal from the first vertex to the second. Formally, for a binary relation $\rightsquigarrow$ over the set $V$, and a graph  $G=(V,\rightsquigarrow)$; a path between $\opa\in V$ and $\opb\in V$ is a sequence of vertices $(v_1,\cdots,v_n),n\geq 0$, such that 
+
+\begin{center}
+$\opa= v_1\rightsquigarrow\cdots\rightsquigarrow v_n=\opb$.
+\end{center}
+
+Since transitivity corresponds to the existence of a path, we aim to define a new binary relation $\rightarrow$ on operations, such that its transitive closure
+\footnote{The transitive closure of a relation $R$ is the smallest relation that contains $R$ and is transitive. The transitive closure of $R$ is traditionally denoted by $R^+$}
+ is the $\rb$ relation; and such that $G=(H,\rightarrow)$ is of bounded tree-width. Defining a graph of history using $\rightarrow$ significantly reduces the number of edges, while maintaining the \say{timeline} structure encoded by the \textsl{returns-before} relation.
+
+We use the notation $(H,\rightarrow)$ to denote a graph whose vertices are the operations in $H$, and whose edges are defined by the relation $\rightarrow$. We write $\opa\patharrow\opb$ to indicate that there exists a path from $\opa$ to $\opb$ in the graph.
+
+\vspace{1em}
+
+We now define the relation $\rightarrow$ using an algorithm. This choice is motivated by the need to minimize the number of edges that $\rightarrow$ induces in our graphs, which requires conditional logic (such as \emph{if-else} statements) only available when using algorithms. While it might be theoretically possible to define $\rightarrow$  without resorting to an algorithm (e.g., through unions or restrictions of relations over operations), proving that the resulting graph has bounded tree-width would likely be significantly more difficult. Therefore, in this paper, we do not provide a formal definition of $\rightarrow$ outside of its algorithmic construction.
+
+In this algorithmic construction, our goal is to reduce the edge set while preserving the necessary information. Specifically, if $\opa\rb\opb$, we require that this relationship can still be recovered from the graph induced by $\rightarrow$.
+
+\vspace{1em}
+
+We define a function \textsl{ord} that takes as input a history, and returns a tuple of ordered operations of the history.
+
+\begin{nameddefinition}[Ordering Function]
+Let $H\in\historyset$.
+
+\begin{center}
+$\textsl{ord}(H)\coloneq (\opa_1,...,\opa_n)$ such that $\{\opa_1,...,\opa_n\}=H$
+
+and for all $\opa_i,\opa_j$ with $i< j$: $\opa_i.stime\leq \opa_j.stime$
+\end{center}
+\end{nameddefinition}
+
+\vspace{1em}
+
+The algorithm operates as follows. It takes as input $\textsl{ord}(H)$, where \mbox{$H\in\historyset$}, and traverses  $\textsl{ord}(H)$ in reverse, starting from the last element and proceeding to the first. For each operation, its direct successors are extracted, sorted according to \textsl{ord}, and then processed one by one. If a path to a given successor already exists in the graph, no action is taken; otherwise, a direct edge to that successor is added. This procedure ensures that the number of edges is minimized.
+
+The algorithm is formalized as follows.
+
+\begin{algorithm}[H]
+\caption{Building a graph of history}\label{alg:alg1}
+\begin{algorithmic}[1]
+\Require $H\in\historyset$ with $\textsl{ord}(H)=(\opa_1,...,\opa_n)$, \mbox{$n \in \mathbb{N}$}
+\Ensure $G=(H,\rightarrow)$
+\State $i \gets n-1$
+\State $E\gets\emptyset$
+\State $G\gets (H,E)$
+\While{$i > 0$}
+\State $S \gets (b_1,...,b_m)=\textsl{ord}(\sigma(\opa_i))$
+\For{$j\in\{1,...,m\}$}
+\If{$\neg(\opa_i\patharrow\opb_m)$}
+	\State $E \gets E \cup \{ (\opa_i,\opb_m) \}$
+	\State $G \gets (H,E)$
+\EndIf
+\EndFor
+\State $i \gets i-1$
+\EndWhile
+
+
+\end{algorithmic}
+\end{algorithm}
+
+\begin{remark}
+When building a directed graph as above, each directed edge can be interpreted as a \say{jump forward in time} —-- that is, traversing an edge corresponds to moving along the timeline of certain operations in the history.
+\end{remark}
+
+\begin{example}
+
+As an example, we now apply this algorithm to the history depicted in Figure~\ref{fig:fig1}, which is reproduced below for convenience.
+
+\begin{figure}[H]
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+\begin{tikzpicture}[x=2cm, y=1cm,every node/.style={font=\large}]
+
+%  
+	\node[anchor=east] at (-0.1, 0) {\small \textit{Proc. 1}};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.1, -1) {\small \textit{Proc. 2}}; % Label for second set  
+
+  % First line of bars
+  \draw[withcaps] (0,0) -- (2,0) node[midway, above] {$\opa$};
+  \draw[dashed] (2,0) -- (2.5,0);
+  \draw[withcaps] (2.5,0) -- (3,0) node[midway, above] {$\opb$};
+  \draw[dashed] (3,0) -- (3.5,0);
+  \draw[withcaps] (3.5,0) -- (4,0) node[midway, above] {$\opc$};
+
+  % Second line of bars 
+  \draw[dashed] (0,-1) -- (0.25,-1); 
+  \draw[withcaps] (0.25,-1) -- (0.6,-1) node[midway, above] {$\opd$};
+  \draw[dashed] (0.6,-1) -- (1,-1);
+  \draw[withcaps](1,-1) -- (2.75,-1) node[midway, above] {$\ope$};
+  \draw[dashed] (2.75,-1) -- (3.75,-1);
+  \draw[withcaps](3.75,-1) -- (4,-1) node[midway, above] {$\opf$};
+
+\end{tikzpicture}
+}
+\end{center}
+\end{figure}
+
+Let $G=(H,\rightarrow)$ be the graph of history of \mbox{$H=\{\opa,\opb,\opc,\opd,\ope,\opf\}$} as represented above. The set of processes is $\mathbb{P}=\{p_1,p_2\}$, where the line labeled \emph{Proc.1} corresponds to $p_1$, and the line below to $p_2$. The operations are ordered by $\textsl{ord}(H)=(\opa,\opd,\ope,\opb,\opc,\opf)$. For now, $\rightarrow$ does not relate any operations; that is, at the beginning of the algorithm, $G$ is defined as $(H,\emptyset)$. At this stage, $G$ is as follows.
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+
+
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+The first operation processed is $\opf$, which has no direct successor. As a result, nothing is done. Next comes $\opc$, which also has no direct successors, so again, no action is taken. Then, $\opb$ is processed. Its ordered successors are $(\opc,\opf)$. There is no existing path from $\opb$ to $\opc$, thus the edge $\opb\rightarrow\opc$ is added. 
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+  
+  \draw[->] (b) to[out=45, in=135] (c); 
+
+
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+Similarly, as no path exists from $\opb$ to $\opf$, the edge $\opb\rightarrow\opf$ is added as well.
+
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+  
+  \draw[->] (b) to (f); 
+  \draw[->] (b) to[out=45, in=135] (c); 
+
+
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+Now is considered $\ope$, which has ordered successors $(\opc,\opf)$. Since no path exists from $\ope$ to $\opc$, we add the edge $\ope\rightarrow\opc$. 
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+  
+  \draw[->] (b) to (f); 
+  \draw[->] (b) to[out=45, in=135] (c); 
+    \draw[->] (e) to (c); 
+%  \draw[->] (e) to[out=-45, in=225] (f);
+
+
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+Likewise, as there is no existing path from $\ope$ to $\opf$, the edge $\ope\rightarrow\opf$ is added.
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+  
+  \draw[->] (b) to (f); 
+  \draw[->] (b) to[out=45, in=135] (c); 
+    \draw[->] (e) to (c); 
+  \draw[->] (e) to[out=-45, in=225] (f);
+
+
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+Continuing along our history, $\opd$ has successors $(\ope,\opb)$. Since no path exists from $\opd$ to $\ope$, we add the edge $\opd\rightarrow\ope$. 
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+  
+  \draw[->] (b) to (f); 
+  \draw[->] (b) to[out=45, in=135] (c); 
+  \draw[->] (e) to (c); 
+  \draw[->] (e) to[out=-45, in=225] (f);
+  \draw[->] (d) to[out=-45, in=225] (e);
+%  \draw[->] (d) to (b);
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+Likewise, as there is no existing path from $\opd$ to $\opb$, the edge $\opd\rightarrow\opb$ is added.
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+  
+  \draw[->] (b) to (f); 
+  \draw[->] (b) to[out=45, in=135] (c); 
+  \draw[->] (e) to (c); 
+  \draw[->] (e) to[out=-45, in=225] (f);
+  \draw[->] (d) to[out=-45, in=225] (e);
+  \draw[->] (d) to (b);
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+Finally, $\opa$ has successors $(\opb,\opf)$. Since there is no path between $\opa$ and $\opb$ the needed edge $\opa\rightarrow\opb$ is added. 
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={draw,circle},
+    scale=1.5,
+    >=Triangle
+  ]
+
+
+  % Process 1 segments as centered nodes
+  \node (a) at (1, 0) {a};
+  \node (b) at (2.75, 0) {b};
+  \node (c) at (4.375, 0) {c};
+
+  % Process 2 segments as centered nodes
+  \node (d) at (0.125, -1) {d};
+  \node (e) at (1.875, -1) {e};
+  \node (f) at (4.275, -1) {f};
+
+  \draw[->] (a) to[out=45, in=135] (b); 
+  \draw[->] (b) to (f); 
+  \draw[->] (b) to[out=45, in=135] (c); 
+  \draw[->] (e) to (c); 
+  \draw[->] (e) to[out=-45, in=225] (f);
+  \draw[->] (d) to[out=-45, in=225] (e);
+  \draw[->] (d) to (b);
+
+\end{tikzpicture}
+\end{center}
+\caption{\small \slshape The graph of history of \autoref{fig:fig1}.}
+\label{fig:fig2}
+\end{figure}
+
+However, a path now exists between $\opa$ and $\opf$, so no additional edge is added. The graph $G=(H,\rightarrow)$ is now complete.
+
+\end{example}
+
+\vspace{2em}
+
+We denote by $\algone(H)$ the graph of history $H$ computed by Algorithm~\ref{alg:alg1}. Let $\algoneset^m,m\in\mathbb{N}$ denote the set of all such graphs for histories in  $\historyset$ with $|\mathbb{P}|= m $. Formally, this set is defined as follows.
+
+\begin{nameddefinition}[Execution Graph Set]
+For $m\in\mathbb{N}$,
+
+\[
+\algoneset^m:=\big\{\;  \algone(H) \;\mid \;H \in \historyset \text{ and }|\mathbb{P}|= m  \;\big\}
+\]
+
+\end{nameddefinition}
+
+
+\vspace{1em}
+
+Let $G=(H,\rightarrow)\in\algoneset^m,m\in\mathbb{N}$. Although for $\opa,\opb\in H$, the existence of an edge $\opa\rightarrow\opb$ imples that $\opb$ is a direct successor of $\opa$, the converse does not necessarily hold.
+ This can be easily seen in the history shown in \autoref{fig:figExampleProof} and the corresponding graph in \autoref{fig:graphExampleProof}. Operation $\opd$ is a direct successor of $\opc$, yet there is no edge between the corresponding nodes in the graph. This property is significant, as it allows us to reduce the number of edges and consequently obtain a tighter bound on the tree-width.
+ 
+\paragraph{Note} Appendix \ref{apen:notation} lists all relations and functions defined earlier.
+
+
+\section{Tree-width boundedness}
+\label{sec:proof}
+
+\cite{ClassOfGraphsBoundedTreewidth} introduces multiple upper bounds on tree-width, such as \textsl{cutwidth}, which is the focus of this work. Among the proposed parameters, cutwidth provides the most intuitive interpretation for the types of graphs considered here.
+
+This section is dedicated to showing that the set $\algoneset^m,m\in\mathbb{N}$ has uniformly bounded tree-width, meaning there exists an integer that bounds the tree-width of every graph in $\algoneset^m$.
+
+The cutwidth of an undirected graph $G$ is the minimum \mbox{$k \in \mathbb{N}$} such that for some linear ordering of the vertices of ${G}$ along a horizontal axis, every vertical cut intersects at most $k$ edges. 
+Using the cutwidth is advantageous in our work, as vertices of graphs of history already represent a timeline, which is a linear ordering. 
+To rigouroulsy define the cutwidth of a graph, it is necessary to introduce the notion of \textsl{cut} of a graph. 
+
+\begin{nameddefinition}[Graph Cut]
+
+%Let a linear ordering $(v_1,...,v_n)$ of the vertices of $G$. For $1 \leq \ell \leq n$, 
+
+Let $G=(V,E)$ be a graph, let $\mathscr{L}(G)$ denote the set of all possible linear orderings of the vertices of $G$. For $n=|V|$, $\ell\in\mathbb{N}$ and $f=(v_1,...,v_n)\in\mathscr{L}(G)$,
+
+\begin{center}
+$Cut_\ell(f,G):=(\{v_1,...,v_\ell\},\{v_{\ell+1},...,v_n\})$
+\end{center}
+defines a bipartition of $G$, and is referred to as \textsl{a cut of $G$}. An edge $(u,v)$ crosses a cut \mbox{$(L,R):=Cut_\ell(f,G)$}, if \mbox{$(u,v) \in L\times R$} or \mbox{$(u,v)\in R\times L$}. 
+
+%For convenience, we refer to \say{the graph cut \mbox{$Cut_\ell(f,G)$}} as \say{the cut \ell}. 
+\end{nameddefinition}
+
+Formally, \textsl{cutwidth} is defined as follows.
+
+\begin{nameddefinition}[Cutwidth]
+
+
+For $G=(V,E)$ a graph, let $\mathscr{L}(G)$ denote the set of all possible linear orderings of the vertices of $G$. For $n=|V|$ and $\ell\in\mathbb{N}$,
+
+\begin{center}
+$cutwidth(G)=\displaystyle \min_{f\in \mathscr{L}(G)}\; \max_{1\leq\ell\leq n} \big|\big\{\;(v_i,v_j) \in E\;\big|\; i\leq\ell<j \text{ or }j\leq\ell<i \text{ , and } (v_1,...,v_n)=f \;\big\}\big|$.
+\end{center}
+
+Equivalently, using the notion of graph cut,
+
+\begin{center}
+$cutwidth(G)=\displaystyle \min_{f\in \mathscr{L}(G)}\; \max_{1\leq\ell\leq n} \big|\big\{\;
+(u,v)\;\big| \; (u,v)\in L\times R\text{ or }(v,u)\in L\times R \text{, for }(L,R):=Cut_\ell(f,G)
+\;\big\}\big|$.
+\end{center}
+
+\end{nameddefinition}
+
+\vspace{1em}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In this work, the cutwidth will be bounded using the linear ordering function  \textsl{ord} defined earlier.
+
+We now introduce the necessary results to establish that $\algoneset^m,m\in\mathbb{N}$ has uniformly bounded cutwidth.
+
+\subsection{Preliminary results}
+
+It is worth noting that both $\rb$ and $\patharrow$ are transitive. Indeed, given $\opa \rb \opb$ and $\opb \rb \opc$,   it follows naturally that $\opa\rb\opc$. Similarly, for  $\patharrow$, if $\opd \patharrow \ope$ and $\ope \patharrow \opf$, then $\opd \patharrow \opf$.
+
+\vspace{1em}
+
+For $\opa$ a vertex of a graph, we denote its out-degree as $deg_{out}(\opa)$, and its in-degree as $deg_{in}(\opa)$. The \textsl{out-degree} of a vertex is the number of edges connected to it that are directed away from the vertex. The \textsl{in-degree} is the number of connected edges directed towards the vertex.
+
+\begin{lemma}\label{lemma:degout}
+Let $G=(H,\rightarrow)\in\algoneset^m,m\in\mathbb{N}$. Then, for all $\opa\in H$, \mbox{$deg_{out}(\opa) \leq m$}.
+\end{lemma}
+\begin{proof}
+In Algorithm~\ref{alg:alg1}, line 5 marks the beginning of the iteration over all operations in $\textsl{ord}(H)$.
+Let $\opa$ denote the operation currently being processed in the algorithm. Between lines 7 and 12, the algorithm may add up to $m$ out-going edges from $\opa$, since by definition $\sigma(\opa)\leq |\mathbb{P}|=m$.
+
+As each vertex has its out-going edges built as above, all vertices of $G$ have an out-going degree of at most $m$.
+
+\end{proof}
+
+We now present two propositions that will support the proof of Lemma~\ref{lemma:degin}.
+
+\begin{proposition}\label{prop:finishesBeforeCollection}
+Let $H\in\historyset$ be a history. For $\opa,\opb \in H$,
+
+\begin{center}
+$\opa\rb\opb \Leftrightarrow $ there exists a tuple $(\oph_1,...,\oph_q),\; \oph_i \in H, q\in\mathbb{N}$ such that 
+$\opa \dsucp{p} \oph_1 \dsucp{p} \hdots \dsucp{p} \oph_q \dsucp{p} \opb$ with  $p:=\opb.proc$.
+\end{center}
+\end{proposition}
+
+\begin{proof}
+$\Rightarrow)$
+
+Let $\opa,\opb \in H$ with $\opa\rb\opb$, and let $T$ denote the tuple we aim to construct. We distinguish two main cases.
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item if $\opb$ is a direct successor of $\opa$; that is, there exists $p \in \mathbb{P}$ such that $\opa\dsucp{p}\opb$, then we set $T=()$
+	\item if $\opb$ is not a direct successor of $\opa$, we proceed as follows.
+\end{itemize}
+
+Let $p=\opb.proc$. Having $\opa\rb\opb$ implies that on process $p$ there are none or some operations executed after $\opa$ returns and before $\opb$ starts. We build $T$ by collecting all of those successive operations, starting with $\oph_1$ such that \mbox{$\opa\dsucp{p}\oph_1$}, and then $\oph_2,...,\oph_q$ with 
+\mbox{$\opa\dsucp{p} \oph_1 \dsucp{p} \oph_2 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$}. We set $T=(\oph_1,\oph_2,...,\oph_q)$.
+
+$\Leftarrow)$
+
+Let $\opa,\oph_1,...,\oph_q,\opb \in H$ with 
+\mbox{$\opa \dsucp{p} \oph_1 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$} and  $p\coloneq \opb.proc$. By definition of $\dsucp{p}$, we have for all \mbox{$1 \leq i \leq q$}, $\oph_i.rtime<\oph_{i+1}.stime$ as well as \mbox{$\opa.rtime<h_1.stime$} and \mbox{$\oph_q.rtime<\opb.stime$}. We recall that for all \mbox{$1 \leq i \leq q$}, $h_i.stime<h_i.rtime$. By the transitivity of $<$, we have $\opa.rtime<\opb.stime$ which means $\opa \rb\opb$ by definition.
+
+\end{proof}
+
+\vspace{1em}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{proposition}\label{prop:looparrowPATH}
+Let $G=(H,\rightarrow)\in\algoneset^m,m\in\mathbb{N}$. For \mbox{$\opa,\opb \in H$},
+\begin{center}
+$\opa\rb\opb \Leftrightarrow \opa\patharrow\opb$.
+\end{center}
+\end{proposition}
+\begin{proof}
+$\Rightarrow)$
+
+Let $G=(H,\rightarrow)\in\algoneset^m$, and $\opa,\opb \in H$ such that $\opa\rb\opb$. By Proposition~\ref{prop:finishesBeforeCollection}, there exists a tuple \mbox{$T=(\oph_1,...,\oph_q),\; \oph_i \in H, q\in\mathbb{N}$} such that 
+\begin{center}
+\mbox{$\opa\dsucp{p} \oph \dsucp{p} \oph_2 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$}
+
+\end{center}
+with  $p=\opb.proc$. 
+
+Lines 7 and 8 of Algorithm~\ref{alg:alg1} ensure that a path always exists from any operation to its direct successor on a given process, if such a successor exists. And since $\oph_i \dsucp{p} \oph_{i+1}$  is defined to mean that  $\oph_{i+1}\in\sigma(\oph_i)$, we have
+
+\begin{center}
+$\opa \patharrow \oph_1 \patharrow \oph_2 \patharrow ... \patharrow \oph_{q-1} \patharrow \oph_q \patharrow \opb$.
+\end{center}
+
+Thus, $\opa\patharrow\opb$ by transitivity of $\patharrow$.
+
+
+$\Leftarrow)$
+
+We have $\opa\patharrow\opb$. Let the $\oph_1,...,\oph_q$ be the vertices on the path from $\opa$ to $\opb$ such that
+
+\begin{center}
+$
+\opa \rightarrow \oph_1 \rightarrow \oph_2 \rightarrow ... \rightarrow \oph_{q-1} \rightarrow \oph_q \rightarrow \opb
+$
+\end{center}
+
+%By Observation~\ref{obs:directPREDandSUCC}, with  $p=\opb.proc$,
+
+By construction, $\forall \opc,\opd\in H:\opc\rightarrow\opd\Rightarrow \opc\dsucp{\opd.proc}\opd$. Thus, for $p=\opb.proc$,
+
+\begin{center}
+$
+\opa \rightarrow \oph_1 \rightarrow \oph_2 \rightarrow ... \rightarrow \oph_{q-1} \rightarrow \oph_q \rightarrow \opb
+ \quad\Rightarrow\quad$
+\mbox{$\opa \dsucp{p} \oph_1 \dsucp{p} ... \dsucp{p} \oph_q \dsucp{p} \opb$} 
+\end{center}
+
+$\Rightarrow \opa \rb \opb$ by Proposition~\ref{prop:finishesBeforeCollection}.
+\end{proof}
+
+\vspace{1em}
+
+\begin{remark}\label{rem:pathOnTheWay}
+Let $H\in\historyset$ a history and \mbox{$\textsl{ord}(H)=(\opa_1,...,\opa_n)$}. Algorithm~\ref{alg:alg1} traverses $\textsl{ord}(H)$ in reverse order; that is, it starts with $\opa_n$, then proceeds with $\opa_{n-1}$, continuing similarly until $\opa_1$. Each operation is processed using lines from 5 to 12 of the algorithm. Suppose the current operation being processed is $\opa_i$. Then, upon completion of line 12, a path exists from $\opa_i$ to all $\opb\in H$ such that $\opa\rb\opb$. Consequently, for all operations $\opa_i, \opa_{i+1}, \ldots, \opa_n$, there exists a path to any operation being launched after their completion.
+\end{remark}
+
+\vspace{1em}
+
+We have established that for a history $H\in\historyset$, each vertex of $G=\algone(H)$ has at most $m=|\mathbb{P}|$ outgoing edges. We now turn to the complementary property: showing that each vertex has at most $m$ incoming edges.
+\vspace{1em}
+
+\begin{lemma}\label{lemma:degin}
+Let $G=(H,\rightarrow)\in\algoneset^m,m\in\mathbb{N}$. Then, for all $\opa\in H$, \mbox{$deg_{in}(\opa) \leq m$}.
+\end{lemma}
+\begin{proof}
+
+We proceed by showing that each vertex  has at most one incoming edge from each process. 
+Formally, we aim to prove that for all $\opc \in H$, no $\opa,\opb\in H$ exist such that $\opa\ssrel\opb\land\opa\rightarrow\opc \land \opb\rightarrow\opc$~.
+
+We proceed by contradiction. Suppose that there exists $\opa,\opb\in H$ such that $\opa\rightarrow\opc\land\opb\rightarrow\opc\land\opa\ssrel\opb$. 
+
+As $\opa$ and $\opb$ are executed on the same process, we either have $\opa \rb \opb$ or $\opb \rb \opa$. Let $\opa \rb \opb$ without loss of generality. We also have $\opa \rb \opc$ and $\opb \rb \opc$ as $\opc$ starts after both $\opa$ and $\opb$ finish by definition of $\rightarrow$.
+
+Our algorithm traverses $\textsl{ord}(H)$ in reverse order; meaning that our operations will be treated in the following order: first $\opc$, then $\opb$ and finally $\opa$. Between each, other operations may be processed, though not impacting our reasoning, so we will ignore them.
+
+Let $p$ be the process on which $\opa$ and $\opb$ are executed.
+
+Here is how our algorithm will proceed:
+
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item Processing operation $\opc$: adding the needed out-going edges (will not matter in our proof as those edges are towards operations that occured after $\opc$ finished, and we are focused of $\opa$ and $\opb$ that occur before $\opc$)
+	\item Processing operation $\opb$: for the moment there are no out-going edges from $\opb$. We supposed the existence of the edge $\opb\rightarrow\opc$ which we therefore add to the graph, and which implies $\opb\rb\opc$
+	\item Processing operation $\opa$: as we supposed $\opa\rightarrow\opc$ to be at some point an edge of the graph we have by construction that $\opc$ is a direct successor of $\opa$. Let $\opf \in H$ be the operation such that $\opa \dsucp{p} \opf$; then either $\opf\rb\opb$ or $\opf=\opb$. In either case, the proof holds. Upon the completion of the processing of operation $\opa$, we have $\opa \patharrow \opf$ as well as $\opf \patharrow \opb$ by Remark~\ref{rem:pathOnTheWay}. Since $\opb\rightarrow\opc$ implies $\opb \patharrow \opc$, by transitivity of $\patharrow$ we have $\opa \patharrow \opc$. Since there already exists a path from $\opa$ to $\opc$, the edge $\opa\rightarrow\opc$ will not be added during the processing of $\opa$.
+	
+Hence the contradiction.
+\end{itemize}
+
+We have thus proven that each vertex has at most one in-coming edge from each process. Consequently, across all processes, each vertex can have at most $m$ in-coming edges.
+\end{proof}
+
+\subsection{Main proof}
+
+
+To prove cutwidth boundedness, we need to define two specific sets of nodes  based on the definition of \textsl{cut}. These sets are as follows:
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item the set of the last operations launched on each process before the cut $\ell$, denoted by $\Gamma_\ell(G)$, and
+	\item the set of the first operations launched on each process after the cut $\ell$, denoted by $\Lambda_\ell(G)$
+\end{itemize}
+
+In order to formally define $\Gamma_\ell(G)$ and $\Lambda_\ell(G)$, we first need to introduce the sets $\gamma_p(L)$ and $\lambda_p(L)$:
+
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item the singleton $\gamma_p(L)$ contains the last operation of $L$ to be launched on process $p$
+	\item the singleton $\lambda_p(R)$ contains the first operation of $R$ to be launched on process $p$
+\end{itemize}
+
+\begin{definition}
+Let $H\in\historyset$ be a history with \mbox{$\textsl{ord}(H)=(\opa_1,...,\opa_n)$}, and let \mbox{$G=\algone(H)$}.
+For \mbox{$(L,R):=\textsl{Cut}_\ell(\textsl{ord},G)$} with $1\leq\ell\leq n$, and for $p\in\mathbb{P}$, we define
+
+
+\begin{gather*}
+\gamma_p(L):= \{\opa\}\subset L \quad\text{ such that }\quad
+\opa.proc=p\;
+\land\;(\forall \opb\in L.\;\opb\ssrel\opa\Rightarrow \opb.stime < \opa.stime )
+\\
+\\
+\lambda_p(R):=\{\opc\}\subset R \quad\text{ such that }\quad
+\opc.proc=p\;
+\land\;(\forall \opd\in R.\;\opd\ssrel\opc\Rightarrow \opc.stime < \opd.stime )
+\end{gather*}
+
+We note that it is possible to have \mbox{$\gamma_p(L)=\emptyset$} and/or \mbox{$\lambda_p(R)=\emptyset$}.
+
+\vspace{1em}
+
+\noindent The sets \mbox{$\Gamma_\ell(G)$} and \mbox{$\Lambda_\ell(G)$} are now defined as 
+
+\begin{gather*}
+\Gamma_\ell(G) := \displaystyle\bigcup_{p \in \mathbb{P}}\gamma_p(L)
+\quad\text{and}\quad
+\Lambda_\ell(G) := \displaystyle\bigcup_{p \in \mathbb{P}}\lambda_p(R)\quad\text{with }(L,R):=\textsl{Cut}_\ell(\textsl{ord},G)
+\end{gather*}
+
+\noindent By definition $|\Gamma_\ell(G)|,\;|\Lambda_\ell(G)|\leq|\mathbb{P}|$.
+
+
+We now introduce notation for the sets of remaining nodes not included in $\Gamma_\ell$ or $\Lambda_\ell$.
+
+\[
+L_\ell := L \setminus \Gamma_\ell \quad\text{and}\quad R_\ell := R \setminus \Lambda_\ell.
+\]
+\end{definition}
+
+\vspace{1em}
+
+\autoref{fig:figExampleProof} depicts a history and \autoref{fig:graphExampleProof} its associated graph. On the graph the red nodes represent the $\Gamma_\ell$ set, and the green nodes the $\Lambda_\ell$ set of the blue dashed cut $\ell$.
+
+
+
+\begin{figure}
+\begin{center}
+\resizebox{0.7\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; % Label for second set  
+  \node[anchor=east] at (-0.3, -2) {$p_3$};  
+
+  \draw[dashed,line width=1pt] (0,0) -- (19,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (19,-1);
+  \draw[dashed,line width=1pt] (0,-2) -- (19,-2);
+  
+  \draw[withcaps] (3,0) -- (10,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (12,0) -- (16,0) node[midway, above] {$\opb$};
+
+  
+  \draw[withcaps] (0,-1) -- (2,-1) node[midway, above] {$\opc$};
+  \draw[withcaps] (6,-1) -- (8,-1) node[midway, above] {$\opd$};
+  \draw[withcaps] (11,-1) -- (14,-1) node[midway, above] {$\ope$};
+  \draw[withcaps] (15,-1) -- (18,-1) node[midway, above] {$\opi$};
+  
+  \draw[withcaps] (3,-2) -- (5,-2) node[midway, above] {$\oph$};
+  \draw[withcaps] (8.5,-2) -- (12,-2) node[pos=0.45, above] {$\opg$};
+  \draw[withcaps] (15.5,-2) -- (19,-2) node[midway, above] {$\opf$}; 
+  
+%  \draw[dashed,blue, thick] (10.5,-2.5) -- (10.5,0.5);
+  
+\end{tikzpicture}
+}
+\end{center}
+\caption{\small \slshape A history of operations on three processes}
+\label{fig:figExampleProof}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\resizebox{0.6\textwidth}{!}{
+\begin{tikzpicture}[
+	x=1cm, y=1.25cm,
+    every node/.style={draw,circle},
+%    scale=1.5,
+    >=Triangle
+  ]
+
+  \node[fill=red!20] (a) at (2, 0) {$\opa$};
+  \node[fill=green!20] (b) at (6, 0) {$\opb$};
+  \node (c) at (0, 0) {$\opc$};
+  \node[fill=red!20] (d) at (3, 0) {$\opd$};
+  \node[fill=green!20] (e) at (5, 0) {$\ope$};
+  \node[fill=green!20] (f) at (8, 0) {$\opf$};
+  \node[fill=red!20] (g) at (4, 0) {$\opg$};
+  \node (h) at (1, 0) {$\oph$};
+  \node (i) at (7, 0) {$\opi$};
+  
+  \draw[->] (c) to[out=-60, in=225] (h);
+  \draw[->] (c) to[out=45, in=135] (a);
+  \draw[->] (h) to[out=45, in=135] (d);
+  \draw[->] (d) to[out=45, in=135] (g);
+  \draw[->] (d) to[out=45, in=135] (e);
+  \draw[->] (d) to[out=45, in=135] (b);
+  \draw[->] (e) to[out=45, in=135] (i);
+  \draw[->] (e) to[out=45, in=135] (f);
+  
+  \draw[->] (a) to[out=-45, in=225] (e);
+  \draw[->] (a) to[out=-45, in=225] (b);
+  \draw[->] (g) to[out=-45, in=225] (i);
+  \draw[->] (g) to[out=-45, in=225] (f);
+  
+  \draw[dashed, blue, thick] (4.5,-1) -- (4.5,1);
+
+
+\end{tikzpicture}
+}
+\end{center}
+\caption{\small \slshape  The graph of the history of \autoref{fig:figExampleProof}}
+\label{fig:graphExampleProof}
+\end{figure}
+
+
+If $G$ is the graph of Figure~\ref{fig:graphExampleProof} with a cut $\ell$ being represented by the blue dashed line, the sets are the following:
+
+\begin{gather*}
+\Gamma_\ell(G) \coloneq \{\opa,\opd,\opg\} \qquad
+\Lambda_\ell(G) \coloneq \{\ope,\opb,\opf\}\\
+L_\ell(G) \coloneq \{\opc,\oph\} \qquad
+R_\ell(G) \coloneq \{\opi\}
+\end{gather*}
+
+\begin{lemma}\label{prop:crossRedges}
+Let a history $H\in\historyset$ and a graph \mbox{$G=(H,\rightarrow)\in\algone(H)$}. For a cut 
+\mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with \mbox{$1\leq\ell\leq|H|$}, there is no edge that crosses the cut $\ell$ from $R$ to $L$. That is, 
+
+\begin{gather*}
+\nexists\; \opa,\opb\in H:\; \opa\rightarrow\opb\;\land\;\opa\in R\;\land\;\opb\in L
+\end{gather*}
+\end{lemma}
+
+\begin{proof}
+We proceed by contradiction. Suppose there is such an edge $ \opa\rightarrow\opb$ with $\opa\in R$ and $\opb\in L$. Algorithm~\ref{alg:alg1} is designed so that any edge $\opc\rightarrow\opd$ implies $\opd\in\sigma(\opc)$, and therefore $\opc$ must return before $\opd$ starts. In particular, $\opa\rightarrow\opb$ implies $\opa.rtime<\opb.stime$.
+
+However, by the definition of the cut $Cut_\ell(\textsl{ord},G)$, since $\opa\in R$ and $\opb\in L$, we also have \mbox{$\opb.stime\leq\opa.stime$}. Combining these inequalities, we obtain:
+\begin{gather*}
+\opa.rtime<\opb.stime\leq\opa.stime
+\end{gather*}
+ 
+which is a contradiction, as it violates the property that $\opa.stime<\opa.rtime$. Hence, such an edge cannot exist.
+\end{proof}
+
+
+We present the following table which specifies the types of edges that can cross a cut induced by the linear ordering \textsl{ord}.
+Let $G\in\algoneset^m,m\in\mathbb{N}$, and let \mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$} be a cut of $G$.
+By Lemma~\ref{prop:crossRedges} no edge originating from $R=\Lambda_\ell \cup R_\ell$ can cross the cut. Therefore, edges with source in $R$ are excluded from the table.
+
+\begin{center}
+\begin{tabular}{||c c c ||} 
+ \hline
+ $\opa\in$ & $\opb\in$ & $(\opa,\opb)$ can cross the cut $\ell$\\ [0.5ex] 
+ \hline\hline
+% $L_\ell$ &  $L_\ell$ & \ding{55}\\
+% $L_\ell$ &  $\Gamma_\ell$ & \ding{55} \\
+ $L_\ell$ &  $\Lambda_\ell$ & \checkmark \\
+ $L_\ell$ & $R_\ell$ & \ding{55} \\
+ \hline\hline
+% $\Gamma_\ell$ & $L_\ell$ & \ding{55} \\
+% $\Gamma_\ell$ & $\Gamma_\ell$ & \ding{55} \\
+ $\Gamma_\ell$ & $\Lambda_\ell$ & \checkmark\\
+ $\Gamma_\ell$ & $R_\ell$ & \checkmark\\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+\autoref{fig:graphExampleProof2} illustrates a graph containing an edge $(\opa,\opc)$ in $L_\ell \times \Lambda_\ell$  (using the same coloring convention as before). Examples of edges in $\Gamma_\ell\times \Lambda_\ell$ and $\Gamma_\ell\times R_\ell$ are shown in \autoref{fig:graphExampleProof}. The edges \mbox{$\opa\rightarrow\ope$}, \mbox{$\opa\rightarrow\opb$}, \mbox{$\opd\rightarrow\ope$}, \mbox{$\opd\rightarrow\opb$} are in \mbox{$\Gamma_\ell\times \Lambda_\ell$}; while the edge \mbox{$\opg\rightarrow\opi$} is in \mbox{$\Gamma_\ell\times R_\ell$}.
+
+
+\begin{figure}[h]
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; % Label for second set 
+
+  \draw[dashed,line width=1pt] (0,0) -- (14,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (14,-1);
+  
+  \draw[withcaps] (6,0) -- (10,0) node[midway, above] {$\opb$};
+  \draw[withcaps] (2,0) -- (4,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (8.5,-1) -- (12,-1) node[pos=0.45, above] {$\opc$};
+  
+%  \draw[dashed,blue, thick] (10.5,-2.5) -- (10.5,0.5);
+  
+\end{tikzpicture}
+}
+\end{center}
+\caption{\small \slshape A history of operations on two processes}
+\label{fig:figExampleProof2}
+\end{figure}
+
+
+\begin{figure}[h]
+\begin{center}
+%\resizebox{0.5\textwidth}{!}{
+\begin{tikzpicture}[
+	x=1cm, y=1.25cm,
+    every node/.style={draw,circle},
+%    scale=1.5,
+    >=Triangle
+  ]
+
+
+  \node (d) at (3, 0) {$\opa$};
+  \node[fill=green!20] (e) at (5, 0) {$\opc$};
+  \node[fill=red!20] (g) at (4, 0) {$\opb$};
+  
+  \draw[->] (d) to[out=45, in=135] (e);
+  \draw[->] (d) to[out=-45, in=225] (g);
+  
+  \draw[dashed, blue, thick] (4.5,-1) -- (4.5,1);
+
+
+\end{tikzpicture}
+%}
+\end{center}
+\caption{\small \slshape The graph of the history of \autoref{fig:figExampleProof2}}
+\label{fig:graphExampleProof2}
+\end{figure}
+
+We now aim to prove that no edge in $L_\ell\times R_\ell$ crosses the cut $\ell$.
+
+\begin{lemma}\label{lemma:noCrossingLlRl}
+Let a history $H\in\historyset$ and the graph \mbox{$G=(H,\rightarrow)\in\algone(H)$}. For a cut 
+\mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with \mbox{$1\leq\ell\leq|H|$}, there is no edge that crosses the cut $\ell$ from $L_\ell(G)$ to $R_\ell(G)$. That is, 
+
+\begin{gather*}
+\nexists\; \opa,\opb\in H:\; \opa\rightarrow\opb\;\land\;\opa\in L_\ell(G)\;\land\;\opb\in R_\ell(G)
+\end{gather*}
+\end{lemma}
+\begin{proof}
+We proceed by contradiction. Let suppose the existence of $\opa\in L_\ell(G),\opb\in R_\ell(G)$ such that $\opa\rightarrow	\opb$, and let $p=\opa.proc$ and $q=\opb.proc$.
+
+As $\opa\notin \Gamma_\ell(G)$, there exists a vertex $\opc\in \Gamma_\ell(G)$ executed after $\opa$ on the same process $p$ . And as $\opb\notin \Lambda_\ell(G)$, there exists a vertex $\opd\in \Lambda_\ell(G)$ executed before $\opb$ on the same process $q$. By definition of $\Lambda_\ell(G)$ and $\Gamma_\ell(G)$ we have
+
+\begin{center}
+$\opa.rtime<\opc.stime<$
+$\opd.stime<\opb.stime$.
+\end{center}
+
+Having $\opa\rightarrow\opb$ implies that $\opb$ is a direct successor of $\opa$, meaning that $\opb$ is the first operation to occur on its process $q$ after $\opa$ finishes. But there exists $\opd$ on process $q$ which starts after $\opa$ finishes, and occurs before $\opb$. This implies that $\opb$ is not a direct successor of $\opa$. By construction of the algorithm, if $\opb$ is not a direct successor of $\opa$, then the edge $\opa\rightarrow\opb$ cannot exist. This leads to a contradiction.
+
+Thus, there is no edge in $L_\ell(G)\times R_\ell(G)$ that crosses the cut~$\ell$.
+\end{proof}
+
+
+\begin{theorem}\label{thm:cutwidthBounded}
+Let \mbox{$G\in\algoneset^m,m\in\mathbb{N}$}. Then,
+\begin{center}
+$cutwidth(G)\leq 2m^2$
+\end{center}
+\end{theorem}
+\begin{proof}
+
+Let a cut \mbox{$(L,R)=\textsl{Cut}_\ell(\textsl{ord},G)$}, with \mbox{$1\leq\ell\leq|H|$}. Let \mbox{$\Gamma_\ell\coloneq\Gamma_\ell(G)$}, \mbox{$\Lambda_\ell\coloneq\Lambda_\ell(G)$}, \mbox{$L_\ell\coloneq L_\ell(G)$}, \mbox{$R_\ell\coloneq R_\ell(G)$}.
+
+
+We recall the following results that were established earlier:
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item Lemma~\ref{lemma:degout}: for all $\opa\in H, deg_{out}(\opa) \leq m$
+%	\item Lemma~\ref{lemma:uniquePredecessorPerProcess}: any operation of $H$ has at most one direct predecessor on each process
+	\item Lemma~\ref{lemma:degin}: for all $\opa\in H,deg_{in}(\opa)\leq m$
+	\item Lemma~\ref{prop:crossRedges}: no edge starting from the set $R$ can cross the cut $\ell$
+	\item Lemma~\ref{lemma:noCrossingLlRl}: there is no edge in $L_\ell\times R_\ell$ that crosses the cut~$\ell$
+\end{itemize}
+
+Cutwidth is traditionally defined for undirected graphs. However, by Lemma~\ref{prop:crossRedges}, only edges originating in $L$ can cross the cut at level $\ell$. Intuitively, this means that edges cross the cut only \say{from left to right}. For this reason, we retain the directed nature of the graph to maintain clarity throughout the proof. Thus, the core idea of the proof is to bound the number of edges that can \say{land} on the right-hand side of the cut; that is, the number of edges originating from $L_\ell\cup\Gamma_\ell$ and landing in $\Lambda_\ell\cup R_\ell$
+ 
+We have $|\Lambda_\ell| \leq m$, and by Lemma~\ref{lemma:degin} each element of $\Lambda_\ell$ has at most $m$ incoming edges. Therefore there are at most $m^2$ edges \say{landing} in $\Lambda_\ell$.
+
+By Lemma~\ref{lemma:noCrossingLlRl}, there are no edges in $L_\ell\times R_\ell$, which implies that each edge crossing the cut $\ell$ and landing in $R_\ell$ must originate from $\Gamma_\ell$. Since $|\Gamma_\ell| \leq m$ and Lemma~\ref{lemma:degout} states that each element of $\Gamma_\ell$ has at most $m$ outgoing edges, the number of edges in $\Gamma_\ell\times R_\ell$ is also bounded by $m^2$. This implies that at most $m^2$ edges cross the cut and land in $R_\ell$.
+
+Adding the two bounds, we obtain a total of at most $m^2+m^2=2m^2$ crossing edges, which establishes the result.
+
+\end{proof}
+
+We now present a corollary that captures the central contribution of this work.
+
+\begin{corollary}\label{theorem:graphTWbounded}
+The graph class $\algoneset^m,m\in\mathbb{N}$ has uniformly bounded tree-width.
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:cutwidthBounded}, for all \mbox{$G\in\algoneset^m,m\in\mathbb{N}$}, we have $cutwidth(G)\leq 2m^2$. That is to say, the graph class $\algoneset^m$ is of uniformly bounded cutwidth. Since by \citehybridpage[12-13]{ClassOfGraphsBoundedTreewidth} cutwidth is an upper bound over tree-width, it follows that the graph class $\algoneset^m$ has uniformly bounded tree-width.
+\end{proof}
+%
+%\noindent\rule{\linewidth}{0.4pt}
+%
+%[Under the line is to be updated]
+%
+%\noindent\rule{\linewidth}{0.4pt}
+
+
+
+By modeling our class of history as tree-width bounded graphs, we have shown that any property expressible in MSO logic can be verified in linear time.
+
+\section{Consistency verification}
+
+%What encoding means ? Why encode a history on words ? How (quick go through of all the different steps)?
+
+We now present an approach for verifying program consistency: modeling histories as finite words. Representing a history as a single word will allow us to use the MONA tool, which takes MSO formulas over words as input and outputs their satisfiability --- precisely the computation we desire. The precise syntax of MONA will be detailed in Section~\ref{sec:MSObitvectors}.
+Our exposition proceeds in three steps. First, we formalize consistency models using MSO over histories. Next, we encode histories as words. Finally, we describe the reduction from MSO formulas over histories to equivalent MSO formulas over words, allowing consistency models to be expressed directly as MSO formulas over words. Together, these steps provide the complete foundation for leveraging MONA to verify program consistency.
+
+\vspace{1em}
+
+\subsection{MSO logic of histories}
+
+\subsubsection{Definition}
+
+\paragraph{Monadic second order logic (MSO)} is the restriction of second-order logic where second-order quantifications are limited to quantifications over sets \cite{DefMSOlogic}; that is, a logic over objects and sets of objects, which only allows the following quantifications: \say{for all \textbf{objects}},\say{there exists an \textbf{object}},\say{for all \textbf{sets of objects}} and \say{there exists a \textbf{set of objects}}. MSO logic naturally inherits the basic boolean operators \textbf{and,or,not}. Sets of objects are denoted by capital letters, whereas individual objects are represented by lowercase letters. Formally, the grammar of the MSO logic of histories is the following, with $\opa$ and $\opb$ some operations:
+
+\begin{itemize}[label=$\mid$,itemsep=0pt,parsep=0pt]
+    \item[$\phi :=$] $\opa.proc=\opb.proc$
+    \item $\opa.type=\opb.type$
+    \item $\opa.obj=\opb.obj$
+    \item $\opa.ival=\opb.ival$
+    \item $\opa.oval=\opb.oval$
+    \item $t<t$
+    \item $\forall \opa.\phi$
+    \item $\exists \opa.\phi$
+    \item $\forall A.\phi$
+    \item $\exists A.\phi$
+    \item $\phi\land\phi \mid \phi\lor\phi \mid \neg\phi \mid (\phi)$
+\end{itemize}
+
+\noindent $t\coloneq \opa.stime$
+
+$\;\mid\quad \opa.rtime$
+
+
+\vspace{1em}
+
+We use the symbol $\equiv$ and notation $a\equiv b$ as \say{$a$ is logically equivalent to $b$}. The usual implication symbol $\Rightarrow$ is defined in logic as $\phi \Rightarrow\psi\coloneq\neg\phi\lor\psi$, and the equivalence $\Leftrightarrow$ as 
+\vspace{0.4em}
+\begin{gather*}
+\phi\Leftrightarrow\psi\coloneq(\neg\phi\lor\psi)\land(\neg\psi\lor\phi).
+\end{gather*}
+
+Also, the symbol $\top$ means \say{true} and the symbol $\bot$ means \say{false}.
+
+As a quick example, we can translate the following sentence as an MSO formula: \say{there exists a set of operations of the same type, and one of those operations never returns}. In our syntax, an operation does not return if its output value is $\nabla$. This phrase would be written as
+
+\begin{gather*}
+\exists X.\Big((\forall x.\forall y.x\in X\land y\in X \Rightarrow x.type=y.type)\\
+\land(\exists z.z\in X\land z.oval=\nabla)\Big)
+\end{gather*}
+
+We can also define predicates, which represent a relation or a property. For instance we can declare a predicate $P$ that takes as input a single variable, and state that $P(a)$ is true if $a$ is the last operation to be launched on its process. In MSO we will rewrite this property as \say{there is no other operation launched on the same process after $a$ completed}. The predicate $P$ is therefore defined as
+\vspace{0.4em}
+\begin{gather*}
+P(a)\coloneq\neg\exists b.(b.proc=a.proc\land b.stime>a.rtime)
+\end{gather*}
+
+\subsubsection{Formalization of consistency models}
+
+Using MSO logic over histories, we can define consistency models as MSO formulas. Our representation of consistency is based on the formulas presented in \cite{ViottiVukolic}. To formalize consistency properties in monadic second-order logic (MSO), two additional relations over operations are required, as defined in \cite{PrinciplesOfEventualConsistency}: namely, the \textsl{visibility} and \textsl{arbitration} relations.
+
+\vspace{2em}
+
+\say{
+Visibility tells us about the relative timing of update propagation and operations. It is an acyclic relation. If an operation $\opa$ is visible to $\opb$ (written $\opa\vis\opb$), it means that the effect of $\opa$ is visible to the client performing $\opb$. In a system where updates are communicated by messages, this may mean that the message about operation $\opa$ reached the client that performed operation $\opb$ before the operation $\opb$ was performed.
+ 
+ Arbitration is used to indicate how the system resolves update conflicts, $i.e.$ how it handles concurrent updates that do not commute. It is a total order on operations.  If an operation $\opa$ is arbitrated before $\opb$ (written $\opa\ar\opb$), it means that the system considers the operation $\opa$ to happen earlier than operation $\opb$. In practice, systems can arbitrate operations in various ways; most often, arbitration is represented by some kind of timestamp. The timestamp can be taken from a physical or logical clock on the node that performs the operation, or it can be affixed to the operation later, for example when it is processed on a single server
+ that provides a serialization point.}\citehybridpage[46]{PrinciplesOfEventualConsistency}
+
+\vspace{2em}
+
+\say{\textsc{EventualVisibility} mandates that, eventually, an operation $op$ will be visible to another operation $op'$ invoked after the completion of $op$} \citehybridpage[10]{ViottiVukolic}. In our framework of finite histories, \textsc{EventualVisibility} consistency cannot be applied, as \say{eventually} suggests a non finite execution. Thus, in this work, we do not consider the \textsc{EventualVisibility} consistency.
+
+The \textsl{return value} consistency model ensures all operations return the appropriate and correct values. In this work, this means that any read operation should output the most recent value written to the corresponding object. The following formula intuitively captures the following behavior: it holds if all \textsl{writes} return the empty value $\Phi$, and if every \textsl{read} either accesses an object that has not been written to before, or retrieves the most recent value written to that object.
+
+\vspace{10pt}
+$\textsc{RVal} \coloneqq$
+
+
+\begin{gather*}
+\forall \opa.\; \Big[ 
+    \Big( \opa.type = write \Rightarrow \opa.oval = \Phi \Big) 
+    \lor\; 
+    \Big( 
+        \opa.type = read \Rightarrow 
+        \big[ 
+        \neg \exists \opx.\; \big( \opx \ar \opa \land \opx.type = write \land \opx.obj = \opa.obj \big) \\
+    \lor\; 
+        \exists x.\; \Big(
+            x.obj = \opa.obj \land x.type = write \land \opx\ar\opa \land \\
+            \forall y\; (
+                y \ne x \land y.obj = x.obj \land y.type = write \Rightarrow y \xrightarrow{ar} x 
+            ) \land 
+            x.ival = \opa.oval
+    \Big)
+    \big]
+\Big]
+\end{gather*}
+
+
+\textsl{Eventual consistency} guarantess that all correct operations are eventually applied to all correct replicas, and that all operations return. Moreover, all correct replicas that had the same write operations performed will eventually reach an \say{equivalent state}. An operation or a replica is \textsl{correct} if it does not fail. To define eventual consistency, the \textsc{NoCircularCausality} consistency model must be defined. In \cite{ViottiVukolic}, it is defined as \mbox{$acyclic(hb)$}, where $hb := (\xrightarrow{so} \cup \vis)^+$ represents the \textsl{happens-before} relation, and $\xrightarrow{so}$ denotes the \textsl{session order} relation. Specifically, we have $\opa \xrightarrow{so} \opb$ if and only if $\opa \ssrel \opb \land \opa \rb \opb$. The relation $hb$ is MSO-expressible, as it is a transitive closure. Consequently, $acyclic(hb)$ is also MSO-expressible, since it is a restriction of $hb$. \textsl{Eventual consistency} is defined in \cite{ViottiVukolic} as the logical conjunction \mbox{$\textsc{EventualVisibility}\land\textsc{NoCircularCausality}\land\textsc{RVal}$}. However, since $\textsc{EventualVisibility}$ is not relevant in our framework, it is defined as follows.
+
+\begin{center}
+$\textsc{EventualConsistency} \coloneqq \textsc{NoCircularCausality}\land\textsc{RVal}$
+\end{center}
+
+\textsl{Monotonic reads} states that \say{if a process has read a certain value $v$ from an object, any successive read operation
+ will not return any value written before $v$}\cite{ViottiVukolic}. Formally, it is defined as follows.
+
+$\textsc{MonotonicReads} \coloneqq$
+\begin{gather*}
+\forall a. \forall b.\forall c.\Big( b.type=read\land c.type=read \Rightarrow \\
+((a\xrightarrow{vis}b\land b\xrightarrow{so}c)\Rightarrow a\xrightarrow{vis}c ) \Big)
+\end{gather*}
+
+\textsl{Read your writes} ensures that if a \textsl{write} and then a \textsl{read} are performed by the same process, the \textsl{write} will be visible to the \textsl{read}.
+
+$\textsc{ReadYourWrites} \coloneqq$
+\begin{gather*}
+\forall	a.\forall b.\Big( a.type=write\land b.type=read\Rightarrow ( a\xrightarrow{so}b \Rightarrow a\xrightarrow{vis}b  ) \Big)
+\end{gather*}
+
+\textsl{Real time} guarantees that any two operations not concurrently executed are ordered by \textsl{arbitration}.
+
+$\textsc{RealTime} \coloneqq$
+\begin{gather*}
+\forall a.\forall b. a\xrightarrow{rb}b \Rightarrow a\xrightarrow{ar}b 
+\end{gather*}
+
+\textsl{Single order} defines a global order that defines \textsl{visibility} and \textsl{arbitration}.
+
+$\textsc{SingleOrder}\coloneqq$
+\begin{gather*}
+\exists X.( \forall x.x\in X\Rightarrow x.oval=\nabla )\land\forall a.\forall b.(a\xrightarrow{vis}b \Leftrightarrow a\xrightarrow{ar}b\land\neg(a\in X))
+\end{gather*}
+
+\textsl{Linearizability}, also knows as \textsl{strong consistency} states that \say{each operation shall appear to be applied instantaneously at a
+ certain point in time between its invocation and its response}\cite{ViottiVukolic}. This \say{point} is called the linearization point of an operation.
+
+\begin{center}
+$\textsc{Linearizability} \coloneqq \textsc{SingleOrder}\land\textsc{RealTime}\land\textsc{RVal}$
+\end{center}
+
+\subsection{Encoding histories as words}
+
+
+\paragraph{Words} in computer science are strictly similar to the words we read and write everyday. Words are, as we know them, a sequence of letters that belong to a certain alphabet. However there exists several different alphabets: latin alphabet, cyrillic alphabet, greek alphabet, arabic alphabet... Each of those alphabets are sets of symbols. We are free to define a letter as something more than a symbol; a structure that can hold more information than a single symbol. In our case, using vectors as letters is suitable for the information we want a single letter to hold. We will discuss why a vector is appropriate further later; for now we will develop the syntax to be used for words and the semantics behind it.
+
+The usual symbol for representing an alphabet is $\Sigma$; hence, we will denote our alphabet by $\Sigma$. We also use the $*$ symbol which stands for the Kleene star. The Kleene star is an operation of arity one which for a set $S$, will be written as $S^*$ and mean that $S^*$ is the set of all sequences of elements of $S$ of length zero or more. For example, if $\Sigma=\{a,b\}$ is an alphabet with letters $a$ and $b$, $\Sigma^*$ is the set of all sequences of letters of $\Sigma$. We have $\Sigma^*=\{\varepsilon,a,ab,b,ba,abb,aab,aba,bba,abab,...\}$ and so on. To denote the \say{empty word} (the word of length zero) we use the symbol $\varepsilon$, and $\varepsilon\in\Sigma^*$. Usually words are described as strings of letters, but as our letters will be vectors and not symbols, we will prefer to use the term \say{sequence of letters} in the next pages.
+
+Let $\Sigma$ be our alphabet. Our \textsl{letters} will be column vectors of a certain finite dimension $n$; i.e. each letter will be of the form
+
+\begin{center}
+{
+$\begin{bmatrix}
+\alpha_1 \\
+\alpha_2 \\
+\vdots \\
+\alpha_{n-1} \\
+\alpha_n
+\end{bmatrix}$
+}
+
+\end{center}
+\vspace{1em}
+
+Each $\alpha_i$ is called a component or a coordinate. When we write 
+$\begin{bmatrix} \vdots \\ \alpha_i \\ \vdots \end{bmatrix}
+$
+we mean that $\alpha_i$ is the $i$-th component of the vector, i.e. that it is \say{on the $i$-th line}. Using the symbol \# for a component will mean that it can take any value possible given a certain context. For instance if the vectors are defined in $\{0,1\}^n$ (i.e. are of length $n$ and each component is either 0 or 1), \# represents either 0 or 1. The vertical dots $\vdots$ keep their usual meaning, which is for example: 
+$\begin{bmatrix}
+a \\
+\vdots \\
+a
+\end{bmatrix}$ is the vector containing only $a$, and 
+$\begin{bmatrix}
+\alpha_1 \\
+\vdots \\
+\alpha_n
+\end{bmatrix}$ the vector that has as components $\alpha_1,\alpha_2,\alpha_3$ and so on until $\alpha_n$.
+
+For an alphabet $\Sigma := \{0,1\}^2$ we have all the words over $\Sigma$ defined as $\Sigma^* := (\{0,1\}^2)^*$, and for instance 
+$
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+0 \\ 1
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1 \\ 1
+\end{bmatrix}
+,
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+0 \\ 1
+\end{bmatrix}
+,
+\begin{bmatrix}
+0 \\ 1
+\end{bmatrix},
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix}\!\cdots\!
+\begin{bmatrix}
+0 \\ 0
+\end{bmatrix},\varepsilon
+ \in \Sigma^*$.
+
+%\paragraph{MONA} is a....
+
+\vspace{3em}
+
+%Which pieces of information are to be encoded? How ? (timeline)
+
+Our goal is to define an encoding function $Enc$ that takes as input a history, a visibility relation, and an arbitration relation \citep{PrinciplesOfEventualConsistency}, and outputs a word on an alphabet of vectors. We restrict the components of vectors to the value 0 and 1 to fit the requirements of MONA. Thus, for \mbox{$H\in\historyset$},
+
+\begin{center}
+$Enc :\; H\;\mapsto\; Enc(H)\in (\{0,1\}^{|\mathbb{P}|})^*$
+\end{center}
+
+Each letter of $Enc(H)$ represents the operations and relations of $H$ at a certain point in time. Thus, the word $Enc(H)$ forms a sequence of states of $H$ over time, providing a timeline of its evolution. An important amount of information is needed to be encoded. For a clearer explanation of the $Enc$ function, we will progressively enrich its output, starting with the most basic information and moving towards the most intricate. Examples will be provided along the way. The outline is the following: 
+
+\textsl{{1) Building the timeline}}
+
+\textsl{{2) Adding information about types and values}}
+
+\textsl{{3) Representing arbitration and visibility}}
+
+\vspace{1em}
+\noindent The most basic information mentioned above is the start and return time of each operation. This information is encoded first.
+
+
+\vspace{1em}
+\subsubsection{Building the timeline}
+
+
+$Enc(H)$ will represent a timeline we want to read \say{from left to right}, and each of its letters depicts an instant. Our column vector letters will be of length $|\mathbb{P}|$ as $\mathbb{P}$ is finite, and each coordinate will hold information about a single process. When an operation is running on process $p$, the coordinate of process $p$ will hold 1; and when no operation is running it will hold 0. If a history is run on processes $p_1,p_2,...,p_i$, the coordinates of a vector of its encoding will hold from top to bottom information about $p_1,p_2,...,p_i$.
+
+\begin{example}
+
+The history $H_1$ below is run on three processes.
+
+\begin{figure}[H]
+\begin{center}
+\resizebox{0.6\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; % Label for second set  
+  \node[anchor=east] at (-0.3, -2) {$p_3$};  
+
+  \draw[dashed,line width=1pt] (0,0) -- (19,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (19,-1);
+  \draw[dashed,line width=1pt] (0,-2) -- (19,-2);
+  
+  \draw[withcaps] (2,0) -- (5,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (10,0) -- (14,0) node[pos=0.45, above] {$\opb$};
+  \draw[withcaps] (15.5,0) -- (18,0) node[midway, above] {$\opc$}; 
+  
+  \draw[withcaps] (3,-1) -- (7,-1) node[midway, above] {$\opd$};
+  \draw[withcaps] (12,-1) -- (17,-1) node[midway, above] {$\ope$};
+
+  \draw[withcaps] (8,-2) -- (11,-2) node[midway, above] {$\opf$};
+  
+%  \draw[dashed,blue, thick] (10.5,-2.5) -- (10.5,0.5);
+  
+\end{tikzpicture}
+}
+\end{center}
+%\caption{A history of operations on three processes}
+\label{fig:encodingExample1}
+\end{figure}
+
+Each time an operation starts or returns, we put a mark. 
+
+\begin{figure}[H]
+\begin{center}
+\resizebox{0.6\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; 
+  \node[anchor=east] at (-0.3, -2) {$p_3$};  
+
+  \draw[dashed,line width=1pt] (0,0) -- (19,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (19,-1);
+  \draw[dashed,line width=1pt] (0,-2) -- (19,-2);
+
+  % Horizontal operations
+  \draw[withcaps] (2,0) -- (5,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (10,0) -- (14,0) node[pos=0.45, above] {$\opb$};
+  \draw[withcaps] (15.5,0) -- (18,0) node[midway, above] {$\opc$}; 
+  
+  \draw[withcaps] (3,-1) -- (7,-1) node[midway, above] {$\opd$};
+  \draw[withcaps] (12,-1) -- (17,-1) node[midway, above] {$\ope$};
+
+  \draw[withcaps] (8,-2) -- (11,-2) node[midway, above] {$\opf$};
+
+  % Vertical time lines at starts and ends
+  \foreach \x/\t in {
+  0/T_0,
+  2/T_1,
+  3/T_2,
+  5/T_3,
+  7/T_4,
+  8/T_5,
+  10/T_6,
+  11/T_7,
+  12/T_8,
+  14/T_9,
+  15.5/T_{10},
+  17/T_{11},
+  18/T_{12}
+  } {
+    \draw[dashed,blue] (\x,-2) -- (\x,0) node[below] at (\x,-2.5) {$\t$};
+  }
+
+\end{tikzpicture}
+}
+\end{center}
+%\caption{A history of operations on three processes with timestamps}
+\label{fig:encodingExample1Time}
+\end{figure}
+One vector will represent one mark.
+Let our alphabet be the vectors of length three, and of coordinates 0 or 1, i.e. $\Sigma\coloneq \{0,1\}^3$. We have \mbox{$Enc(H_1)\in (\{0,1\}^3)^*$}. The result of its encoding is depicted below, each letter being under the associated mark.
+
+\begin{figure}[H]
+\begin{center}
+\resizebox{0.6\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; 
+  \node[anchor=east] at (-0.3, -2) {$p_3$};  
+
+  \draw[dashed,line width=1pt] (0,0) -- (19,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (19,-1);
+  \draw[dashed,line width=1pt] (0,-2) -- (19,-2);
+
+  % Horizontal operations
+  \draw[withcaps] (2,0) -- (5,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (10,0) -- (14,0) node[pos=0.45, above] {$\opb$};
+  \draw[withcaps] (15.5,0) -- (18,0) node[midway, above] {$\opc$}; 
+  
+  \draw[withcaps] (3,-1) -- (7,-1) node[midway, above] {$\opd$};
+  \draw[withcaps] (12,-1) -- (17,-1) node[midway, above] {$\ope$};
+
+  \draw[withcaps] (8,-2) -- (11,-2) node[midway, above] {$\opf$};
+
+  % Vertical time lines at starts and ends
+  \foreach \x/\t/\vone/\vtwo/\vthree in {
+  0/T_0/0/0/0,
+  2/T_1/1/0/0,
+  3/T_2/1/1/0,
+  5/T_3/0/1/0,
+  7/T_4/0/0/0,
+  8/T_5/0/0/1,
+  10/T_6/1/0/1,
+  11/T_7/1/0/0,
+  12/T_8/1/1/0,
+  14/T_9/0/1/0,
+  15.5/T_{10}/1/1/0,
+  17/T_{11}/1/0/0,
+  18/T_{12}/0/0/0,
+  } {
+    \draw[dashed,blue] (\x,-2) -- (\x,0) 
+	node[below=10em,black] {$\begin{bmatrix} \vone \\ \vtwo \\ \vthree \end{bmatrix}$}
+    node[below] at (\x,-2.20) {$\t$};
+  }
+
+\end{tikzpicture}
+}
+\end{center}
+%\caption{A history of operations on three processes with timestamps and vectors}
+\label{fig:encodingExample1AllVectors}
+\end{figure}
+
+Each encoding starts with the vector zero ($T_0$ here). At $T_1$, operation $\opa$ starts on process $p_1$, thereby we set to 1 the bit of its process. When comes $T_2$, another operation starts while $\opa$ is still running. We let the $p_1$ bit as it is, and set the new operation's bit to 1 on $p_2$'s coordinate. On $T_3$, $\opa$ that stops running: its bit is set back to 0. 
+
+We traverse the history this way until the last operation returns.
+
+Finally,
+
+\begin{gather*}
+Enc(H_1)=
+\begin{bmatrix}
+0 \\ 0 \\ 0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1 \\ 0 \\ 0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1 \\ 1 \\ 0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+0 \\1\\0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+0 \\0\\0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1\\0\\1
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1\\0\\0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1\\1\\0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+0\\1\\0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1\\1\\0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+1\\0\\0
+\end{bmatrix}\!\!
+\begin{bmatrix}
+0\\0\\0
+\end{bmatrix}\!\!
+\end{gather*}
+
+\end{example}
+
+This intuitive explanation of the encoding method is a bit more meticulous to describe as a general algorithm. We first need to order the history on the attributes $stime$ and $rtime$ (which were marked by the $T_i$ in our example), and then iterate over them. If $H$ is a history, we collect the $stime$ and $rtime$ data with $Timeline(H)$ that is defined as
+
+%\begin{gather*}
+%Timeline(H)\coloneq\\
+%
+%\text{ SortedOnTime}\Big(\bigcup\limits_{\substack{a\in H\\a.rtime\neq\Omega}}
+%\{ 
+%(p,time)\mid p=a.proc,\; time=a.stime
+% \} \cup \{
+% (p,time)\mid p=a.proc,\; time=a.rtime
+% \}
+% \Big)
+%\end{gather*}
+
+\begin{gather*}
+Timeline(H) \coloneq \\
+SortedOnTime\Big(
+  \bigcup\limits_{\substack{a \in H}} 
+  \big\{(a.proc, a.stime),  
+  (a.proc,a.rtime)\big\}\setminus \{(\cdot,time)\mid time=\Omega\}
+\Big)
+\end{gather*}
+
+
+where $SortedOnTime$ sorts this set of couples of process–-time pairs in ascending order of time; outputting a collection $C=((p_1,time_1),(p_2,time_2),...)$. To get the first pair we use $First(C)$, which here is $(p_1,time_1)$; and to get the rest of the collection we use $Tail(C)$, which here is $((p_2,time_2),...)$.
+
+The notation $a\cdot b$ will be used to mean the concatenation of $a$ and $b$. If $\begin{bmatrix}
+\alpha_1 & \hdots & \alpha_j\end{bmatrix}$ is a row vector, we write the transpose by $^\top$ and 
+\begin{center}
+$\begin{bmatrix}
+\alpha_1 , \cdots , \alpha_j
+\end{bmatrix}^\top\coloneq
+\begin{bmatrix}
+\alpha_1 \\ \vdots \\ \alpha_j
+\end{bmatrix}$ and 
+$\begin{bmatrix}
+\alpha_1 \\ \vdots \\ \alpha_j
+\end{bmatrix}^\top\coloneq
+\begin{bmatrix}
+\alpha_1 , \cdots , \alpha_j
+\end{bmatrix}$.
+\end{center}
+ We will use the transposes of row vectors to represent column vectors in our algorithms, as it facilitates the reading.
+
+\begin{algorithm}[H]
+\caption{Basic Timeline}\label{alg:basicTimeline}
+\begin{algorithmic}[1]
+\Require $H_\mathbb{P}$ a history over \mbox{$\mathbb{P}=\{p_1,p_2,...\}$} finite with $|\mathbb{P}|=n$
+\Ensure \mbox{$Enc\in(\{0,1\}^n)^*$ a word over the alphabet $\{0,1\}^n$}
+\State $C \gets Timeline(H)$
+\State $Enc \gets \begin{bmatrix} 0 , \cdots ,0 \end{bmatrix}^\top\in \{0,1\}^n $
+\State $LastVec\gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^n$
+\While{$C \neq ()$}
+	\State $(p_i,time)\gets First(C)$
+	\State $C\gets Tail(C)$
+	\State $\begin{bmatrix}\alpha_1 , \cdots , \alpha_n\end{bmatrix}^\top \gets LastVec$
+	\State $LastVec\gets\begin{bmatrix}\alpha_1 , \cdots , \neg\alpha_i , \cdots , \alpha_n\end{bmatrix}^\top$ 
+	\State $Enc\gets Enc\cdot LastVec$
+\EndWhile
+
+\end{algorithmic}
+\end{algorithm}
+
+\vspace{1em}
+
+As an example, we apply this last algorithm to the history shown in Figure~\ref{fig:exampleEncoding}, resulting in the encoding of Figure~\ref{enc:one}. The full computation is provided in \hyperref[sec:appendix]{Appendix}, Example~\ref{ex:one}.
+
+\begin{figure}
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; % Label for second set 
+
+  \draw[dashed,line width=1pt] (0,0) -- (14,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (14,-1);
+  
+  \draw[withcaps] (6,0) -- (10,0) node[midway, above] {$\opb$};
+  \draw[withcaps] (2,0) -- (4,0) node[midway, above] {$\opa$};
+  \draw[withcaps] (8.5,-1) -- (12,-1) node[pos=0.45, above] {$\opc$};
+  
+%  \draw[dashed,blue, thick] (10.5,-2.5) -- (10.5,0.5);
+  
+\end{tikzpicture}
+}
+\end{center}
+\caption{\small \slshape A history on two processes}\label{fig:exampleEncoding}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{NiceTabular}{cccc}[hvlines]
+\CodeBefore
+	\rectanglecolor{blue!10}{1-1}{1-4}
+	\rectanglecolor{blue!10}{1-1}{8-1}
+\Body
+& $\opa$ & $\opb$ & $\opc$ \\
+$proc$ & $p_1$ & $p_1$ & $p_2$ \\
+$stime$ & $T_1$ & $T_3$ & $T_4$ \\
+$rtime$ & $T_2$ & $T_5$ & $T_6$ \\
+$type$ & $write$ & $read$ & $write$ \\
+$obj$ & $y$ & $x$ & $x$ \\
+$ival$ & 14 & $\Phi$ & $"fly"$ \\
+$oval$ & $\Phi$ & $"bee"$ & $\Phi$
+\end{NiceTabular}
+\end{center}
+\caption{\small \slshape Information for history of Figure~\ref{fig:exampleEncoding}}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\[
+\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix}1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 0 \end{bmatrix}\!\!
+	\begin{bmatrix} 1 \\ 1 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 1 \end{bmatrix}\!\!
+	\begin{bmatrix} 0 \\ 0 \end{bmatrix}
+\]
+\end{center}
+\caption{\small \slshape Encoding of history of Figure~\ref{fig:exampleEncoding} with Algorithm~\ref{alg:basicTimeline}}\label{enc:one}
+\end{figure}
+
+We may now desire to add data about types, values and objects.
+
+\vspace{1em}
+
+\subsubsection{Adding information about types, values, and objects}
+
+For now the only data encoded were the start and return times. We want to enrich the encoding with the $type$, $ival$/$oval$ and $obj$ attributes. We will do so by adding coordinates to our existing vectors given by the algorithm above. However, we must restrict the set of possible $Types$, $Values$ and $Objects$ to finite sets. Here our $Types$ are only $read$ and $write$, but the possible $Values$ are not specified. Therefore we will assume the set $Values$ to be finite. Since we aim to encode such types, values and objects on binary coordinates, we need to encode them a special way. For the read and write operations we can simply state that a $read$ is a 0, and a $write$ is a 1. For $Values$, as it is a finite and thereby enumerable set, we can assign to each value a number, and convert this number to its binary encoding. For example, if $Values=\{a,b,c\}$ we can assign 0 to $a$, 1 to $b$, 2 to $c$; and encode $a$ as $00_2=0_{10}$, $b$ as $01_2=1_{10}$ and $c$ as $10_2=2_{10}$ (the notation $\alpha_\beta$ stands for \say{$\alpha$ is represented in base $\beta$}). To encode the values as what we will call \say{binary words}, $\left\lceil \log_2 |Values| \right\rceil$ bits are needed.
+
+To encode $Objects$ we use exactly the same method as $Values$; that is to represent objects by binary words (which is possible because $Objects$ is a finite enumerable set).
+
+In Algorithm \autoref{alg:basicTimeline}, two successive vectors differ in only one coordinate. This means, in particular, that when introducing a new operation $\opa$ on a vector $w$, we only need to encode data about $\opa$. Thus, $w$ is a proper letter to hold more information about $\opa$, such as its $type$,$ival/oval$ and $obj$.
+
+Since $\left\lceil \log_2 |Types| \right\rceil=\left\lceil \log_2 (2) \right\rceil=1$, each vector will hold $|\mathbb{P}|+1 + \left\lceil \log_2 |Values| \right\rceil + \left\lceil \log_2 |Objects| \right\rceil$ coordinates.
+
+For $\mathbb{P}=\{p_1,...p_n\}$, and $H$ a history, each letter of $Enc(H)$ will be of the form
+
+\vspace{1em}
+$
+\begin{bNiceArray}{c}[last-col,margin]
+p_1 & \Vbrace{3}{\text{\normalsize encoding given in Algorithm \autoref{alg:basicTimeline} }}\\
+\vdots \\
+p_n \\
+t & \Vbrace{1}{\text{\normalsize $type$ attribute, 0 for $read$ and 1 for $write$ }} \\
+v_1 & \Vbrace{3}{\text{\normalsize binary encoding of $ival$ if $t=1$ and $oval$ if $t=0$}} \\
+\vdots \\
+v_k \\
+o_1 & \Vbrace{3}{\text{\normalsize binary encoding of $obj$ attributes}} \\
+\vdots \\
+o_\ell
+\end{bNiceArray}
+$
+
+\vspace{1em}
+
+A $read$ operation does not have an input value and a $write$ operation does not have an output value, therefore we either encode the $ival$ or $oval$ attribute as only one is relevant at a time. With the encoding of the $type$ we deduce whether $v_1\hdots v_k$ encodes an $ival$ or $oval$ attribute.
+\vspace{1em}
+
+To formally present this encoding, a bijective function to transform a value into a binary word is necessary. We define it as
+
+\begin{center}
+ $f\;:Values\;\mapsto\;\{0,1\}^k$\quad with $k=\left\lceil \log_2 |Values| \right\rceil$
+\end{center}
+ For the example provided before with $Values=\{a,b,c\}$ and 0 assigned to $a$, 1 to $b$ and 2 to $c$; we have \mbox{$f(a)=00$}, $f(b)=01$ and $f(c)=10$.
+ 
+The bijective function to convert an object to a binary word is
+
+\begin{center}
+ $g\;:Objects\;\mapsto\;\{0,1\}^\ell$\quad with $\ell=\left\lceil \log_2 |Objects| \right\rceil$
+\end{center}
+ 
+We also define a function $ioput$ that takes as input an operation and outputs its $ival$ if it is a $write$ and outputs its $oval$ if it is a $read$:
+ 
+\begin{gather*}
+ioput\;:H\;\rightarrow\;Values \\
+h\;\mapsto 
+\begin{cases}
+ival \text{\quad if $h.type=write$} \\ oval \text{\quad if $h.type=read$}
+\end{cases}
+\end{gather*}
+
+\noindent We enrich the $Timeline$ function's output with the needed data and call this new function $Timeline_2$:
+
+\begin{gather*}
+Timeline_2(H) \coloneq \\
+SortedOnTime_2\Big(
+  \bigcup\limits_{\substack{a \in H}} 
+  \big\{(a.proc, a.stime,a.type,ioput(a),a.obj),
+  (a.proc,a.rtime,a.type,ioput(a),a.obj)\big\}
+  \\
+  \setminus \{(\cdot,time,\cdot,\cdot,\cdot)\mid time=\Omega\}
+\Big)
+\end{gather*}
+
+where $SortedOnTime_2$ sorts this set of process-time-type-value tuples in ascending order of time; outputting a collection \mbox{$C=((p_1,time_1,type_1,value_1,obj_1),...)$}.
+
+To get the first tuple we use $First(C)$, which here is $(p_1,time_1,type_1,value_1,obj_1)$; and to get the rest of the collection we use $Tail(C)$, which here is $((p_2,time_2,type_2,value_2,obj_2),...)$.
+
+\vspace{1em}
+
+Below is Algorithm~\autoref{alg:basicTimeline} enriched with the types and values data encoding. For a better readability we highlight in \textcolor{blue}{blue} the bits of code modified, and in \textcolor{purple}{pink} the added parts. We comment the code in \textcolor{teal}{teal}.
+
+
+\begin{algorithm}[H]
+\caption{Basic Timeline+TypesValuesObjects}\label{alg:basicTimelineTypesValues}
+\begin{algorithmic}[1]
+\Require $H_\mathbb{P}$ a history over \mbox{$\mathbb{P}=\{p_1,...,p_n\}$} finite with $|\mathbb{P}|=n$ \textcolor{blue}{, $Types=\{read,write\}$, \mbox{$k=\left\lceil \log_2 |Values| \right\rceil$}, \mbox{$\ell=\left\lceil \log_2 |Objects| \right\rceil$} and \mbox{$m=n+k+\ell+1$}}
+\Ensure \mbox{$Enc\in(\{0,1\}^m)^*$ a word over the alphabet $\{0,1\}^m$}
+\State $C \gets \textcolor{blue}{Timeline_2(H)}$
+\State $Enc \gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^m $
+\State $LastVec\gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^m$
+\While{$C \neq ()$}
+	\State \textcolor{blue}{$(p_i,time,type,value,obj)\gets First(C)$}
+	\State $C\gets Tail(C)$	
+	\State $\begin{bmatrix}\alpha_1 , \cdots  , \alpha_m\end{bmatrix}^\top \gets LastVec$
+	\color{purple}
+	\If {$\alpha_i=0$}  \textcolor{teal}{[new operation to encode]}
+		\State $\gamma_1\hdots\gamma_k\gets f(value)$
+		\State $\lambda_1\hdots\lambda_\ell\gets g(obj)$
+		\If {$type=read$}
+			\State $t\gets 0$
+		\Else
+			\State $t\gets 1$
+		\EndIf
+		\State $LastVec\gets\big[\alpha_1 , \cdots , \neg\alpha_i ,\cdots ,\alpha_n  ,t,\gamma_1 ,\cdots  ,\gamma_k,\lambda_1,\cdots,\lambda_\ell\big]^\top$
+	\Else
+		\color{black}
+		\State $LastVec\gets\big[\alpha_1, \cdots , \neg\alpha_i , \cdots , \alpha_n,0,\cdots,0\big]^\top\in\{0,1\}^m$
+	\color{purple}	
+	\EndIf
+	\color{black}
+	\State $Enc\gets Enc\cdot LastVec$
+%\If{}
+%\EndIf
+%\For{}
+%\EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+As an example, we apply this last algorithm to the history shown in Figure~\ref{fig:exampleEncoding}, resulting in the encoding of Figure~\ref{enc:two}. The full computation is provided in \hyperref[sec:appendix]{Appendix}, Example~\ref{ex:two}.
+
+\begin{figure}
+\begin{gather*}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 1 \\ 0 \\ 0 \\ 1 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 1 \\ 1 \\ 1 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\end{gather*}
+\caption{\small \slshape Encoding of history of Figure~\ref{fig:exampleEncoding} with Algorithm~\ref{alg:basicTimelineTypesValues}}\label{enc:two}
+\end{figure}
+
+\vspace{1em}
+
+Finally, in \citehybrid{PrinciplesOfEventualConsistency} are described two other important relations: arbitration and visibility. We cite:
+\vspace{1em}
+
+\say{
+Visibility tells us about the relative timing of update propagation and operations. Is is an acyclic relation. If an operation $a$ is visible to $b$ (written $a\xrightarrow{vis}b$), it means that the effect of $a$ is visible to the client performing $b$. In a system where updates are communicated by messages, this may mean that the message about operation $a$ reached the client that performed $b$ before the operation $b$ was performed.
+} \citehybridpage[46]{PrinciplesOfEventualConsistency}
+\vspace{1em}
+
+
+\say{
+Arbitration is used to indicate how the system resolves \textit{update conflicts, i.e.} how it handles concurrent updates that do not commute. It is a total order on operations. If an operation $a$ is arbitrated before $b$ (written $a\xrightarrow{ar}b$), it means that the system considers the operations $a$ to happen earlier than operation $b$.
+} \citehybridpage[46]{PrinciplesOfEventualConsistency}
+\vspace{1em}
+
+The next step is to encode these two relations.
+
+\vspace{1em}
+\subsubsection{Representing arbitration and visibility}
+\vspace{1em}
+
+To represent arbitration and visibility, some constraints are needed. We will assume the \textsc{RealTime} \citep{PrinciplesOfEventualConsistency} consistency model which states that if an operation $a$ returns before operation $b$ starts, then $a$ is arbitrated before $b$. This assumption will significantly simplify our encoding technique while still remaining realistic. Indeed, if an operation ends before another one starts, it is natural to assume that this first operation has been \say{done} before the other. With this restriction, the only arbitration to encode is between two operations being run concurrently at a given time. The \say{given time} will mean, here, on a single vector of our encoding. That is, if two operations $\opa$ and $\opb$ are running concurrently on two different processes, which one is arbitrated before the other ? $\opa$ before $\opb$ or $\opb$ before $\opa$?
+
+
+
+\vspace{1em}
+\noindent\paragraph{\textsl{Arbitration}} at a given time $t$, can be represented by a matrix where rows and columns are indexed by the processes. For the set of processes $\mathbb{P}=\{p_1,\hdots,p_n\}$ the matrix will be of the form
+
+\NiceMatrixOptions{code-for-first-row = \color{blue},code-for-first-col=\color{blue}}
+\[
+\begin{bNiceMatrix}[first-row,first-col,margin]
+   &  p_1 & \Cdots &        &       p_n \\
+p_1  &  0   & \alpha_{12} & \Cdots & \alpha_{1n} \\
+\Vdots  &  \neg\alpha_{12} & \Ddots & \Ddots & \Vdots  \\
+   &  \Vdots & \Ddots & \Ddots & \alpha_{(n-1)n}  \\
+p_n  &  \neg\alpha_{1n} & \Cdots & \neg\alpha_{(n-1)n} & 0
+\end{bNiceMatrix} \in\mathcal{M}_{n,n}(\{0,1\})
+\]
+
+where $\mathcal{M}_{n,n}(\{0,1\})$ denotes the set of $n\times n$ matrices with entries in $\{0,1\}$. A variable $\alpha_{ij}$ is set to 1 if the operation on process $i$ is arbitrated before the operation on process $j$, and is set to 0 if not. Since here we either have $i$ arbitrated before $j$ (shortened $i\xrightarrow{ar}j$) or $j$ arbitrated before $i$ (shortened $j\xrightarrow{ar}i$), if we have $i\xrightarrow{ar}j$ it means that we have $\neg(j\xrightarrow{ar}i)$; which is the reason we use $\neg$ is the matrix. This primarily means that for processes $\{p_1,\hdots,p_n\}$ the only $\alpha_{ij}$ needed to encode arbitration are the one of the upper triangular section of the matrix above; that is a total of \mbox{$(n-1)+(n-2)+...+1=\frac{(n-1)n}{2}$} values. Indeed the first row contains $n-1$ relevant values, the second $n-2$, and so on until the second to last row of 1 value only. The diagonal is not relevant, as an operation cannot be arbitrated before itself; therefore all diagonal values are automatically set to zero.
+
+On three processes $p_1,p_2$ and $p_3$, the matrix will look like
+
+\[
+\begin{bNiceMatrix}[first-row,first-col,margin]
+   &  p_1 & p_2 & p_3 \\
+p_1  &  0   & \alpha_{12} & \alpha_{13} \\
+p_2 & \neg\alpha_{12} & 0 & \alpha_{23} \\
+p_3 &  \neg\alpha_{13} & \neg\alpha_{23} & 0
+\end{bNiceMatrix}\in\mathcal{M}_{3,3}(\{0,1\})
+\]
+
+\noindent and the relevant values are $\alpha_{12},\alpha_{13}$ and $\alpha_{23}$; that respectively represent if $p_1\xrightarrow{ar}p_2,p_1\xrightarrow{ar}p_3$ and $p_2\xrightarrow{ar}p_3$. In our encoding we can store those $\alpha_{ij}$ in increasing order of $i$ and then $j$; so here it will be $\alpha_{12},\alpha_{13}$ and then $\alpha_{23}$. If we had to have a history over those three processes, a vector containing the arbitration relation data would be of the form 
+
+\vspace{1em}
+$
+\begin{bNiceArray}{c}[last-col,margin]
+p_1 & \Vbrace{3}{\text{\normalsize encoding given in Algorithm \autoref{alg:basicTimeline} }}\\
+p_2 \\
+p_3 \\
+t & \Vbrace{1}{\text{\normalsize $type$ attribute}} \\
+v_1 & \Vbrace{3}{\text{\normalsize binary encoding of $ival/oval$}} \\
+\vdots \\
+v_k \\
+o_1 & \Vbrace{3}{\text{\normalsize binary encoding of $obj$}} \\
+\vdots \\
+o_\ell \\
+\alpha_{12} & \Vbrace{3}{\text{\normalsize arbitration encoding}} \\
+\alpha_{13} \\
+\alpha_{23}
+\end{bNiceArray}
+$
+
+\vspace{1em}
+
+Continuing with our example of Figure~\ref{fig:exampleEncoding}: it is a history on 2 processes, so a single $\alpha_1$ can encode arbitration: 
+
+$\alpha_1=\top\Leftrightarrow p_1\xrightarrow{ar}p_2$,\quad $\alpha_1=\bot\Leftrightarrow p_2\xrightarrow{ar}p_1$. 
+
+The encoding we had so far of this history is:
+
+\begin{center}
+$
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 1 \\ 0 \\ 0 \\ 1 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 1 \\ 1 \\ 1 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bNiceMatrix}
+$
+\end{center}
+
+
+Let $\opb\xrightarrow{ar}\opc$. We add a single coordinate to our vectors to be able to encode arbitration:
+
+\begin{center}
+$
+\begin{bNiceArray}{c}[last-row] 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ \text{\#} \\ T_1 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 1 \\ 0 \\ 1 \\ 0 \\ 0 \\ 1 \\ \text{\#} \\ T_2 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ \text{\#} \\ T_3 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0 \\ \text{\#} \\ T_4 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 1 \\ 1 \\ 1 \\ 1 \\ 0 \\ 0 \\ \text{\#} \\ T_5 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row] 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ \text{\#} \\ T_6 \end{bNiceArray}
+\begin{bNiceArray}{c}[last-row,last-col] 0 & p_1\\ 0 & p_2\\ 0 & \\ 0 &  \\ 0 &  \\ 0 & \\ \text{\#} & p_1\xrightarrow{ar}p_2 \text{ ?} \\ T_7 & \end{bNiceArray}
+$
+\end{center}
+
+
+We recall that \textbf{for any given time $T_i$ there is a matrix} containing data about arbitration. This matrix is relevant \textbf{if and only if} at least two operations are concurrently being executed at this moment, that is there are at least two bits set to 1 among the processes' coordinates. In our example this occurs only at $T_5$, where $\opb$ and $\opc$ are run in parallel. Since $\opb\xrightarrow{ar}\opc$ and $\opb.proc=p_1,\opc.proc=p_2$, we put $T_5$'s bit to 1 and all the others $T_i$'s bit to zero, as they are not relevant. The encoding is now the following:
+
+\begin{center}
+$
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0  \\ 0\end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 1 \\ 0 \\ 0 \\ 1  \\ 0\end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0  \\ 0\end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ 0  \\ 0\end{bNiceMatrix}
+\begin{bNiceMatrix} 1 \\ 1 \\ 1 \\ 1 \\ 0 \\ 0 \\1\end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0  \\ 0\end{bNiceMatrix}
+\begin{bNiceMatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0  \\ 0\end{bNiceMatrix}
+$
+\end{center}
+
+
+This approach requires to keep track of which operations are being currently run. It can be tackled by defining a set named $Current$ that contains current operations. Thereby $Current\subset H$. The reviewed timeline function $Timeline_3$ is defined as 
+
+
+\begin{gather*}
+Timeline_3(H) \coloneq \\
+SortedOnTime_3\Big(
+  \bigcup\limits_{\substack{a \in H}}
+  \big\{(a, a.stime), (a,a.rtime)\big\}
+  \setminus \{(\cdot,time)\mid time=\Omega\}
+\Big)
+\end{gather*}
+
+where $SortedOnTime_3$ sorts this set of operation-time couples in ascending order of time; outputting a collection \mbox{$C=((op_1,time_1),...)$}.
+
+To get the first tuple we use $First(C)$, which here is $(op_1,time_1)$; and to get the rest of the collection we use $Tail(C)$, which here is $((op_2,time_2),...)$.
+
+For $|\mathbb{P}|=\{p_1,...,p_n\}$, arbitration is encoded on \mbox{$a=\frac{(n-1)n}{2}$} values. For a better readability we highlight in \textcolor{blue}{blue} the bits of code modified to encode arbitration, and in \textcolor{purple}{pink} the added parts. We comment the code in \textcolor{teal}{teal}. In our algorithm we have that
+
+\begin{itemize}[label=$\ast$,itemsep=0pt,parsep=0pt]
+	\item $Current$ is a list indexed from 1 to $length(Current)$ included
+	\item list concatenation is denoted as $\cdot$
+	\item and $Current.remove(op)$ removes $op$ from $Current$ (suitable here, as operations are unique in the list)
+\end{itemize}
+
+\vspace{1em}
+
+\begin{algorithm}[H]
+\caption{Basic Timeline+TypesValuesObjects+Ar}\label{alg:basicTimelineTypesValuesAr}
+\begin{algorithmic}[1]
+\Require $H_\mathbb{P}$ a history over \mbox{$\mathbb{P}=\{p_1,...,p_n\}$} finite with $|\mathbb{P}|=n$, $Types=\{read,write\}$, \mbox{$k=\left\lceil \log_2 |Values| \right\rceil$}, \mbox{$\ell=\left\lceil \log_2 |Objects| \right\rceil$}, \textcolor{blue}{$a=\frac{(n-1)n}{2}$} and \mbox{$m=n+k+\ell+1$}\textcolor{blue}{$+a$}
+\Ensure \mbox{$Enc\in(\{0,1\}^m)^*$ a word over the alphabet $\{0,1\}^m$}
+\State $C \gets \textcolor{blue}{Timeline_3(H)}$
+\State $Enc \gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^m $
+\State $LastVec\gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^m$
+\State \textcolor{purple}{$Current\gets [\;]$}
+\While{$C \neq ()$}
+	\State \textcolor{blue}{$(op,time)\gets First(C)$}
+	\State $C\gets Tail(C)$	
+	\State $\begin{bmatrix}\alpha_1 , \cdots  , \alpha_m\end{bmatrix}^\top \gets LastVec$
+	\If {$\alpha_i=0$} \textcolor{teal}{[new operation to encode]}
+		\State $\gamma_1\hdots\gamma_k\gets f(\textcolor{blue}{ioput(op)})$
+		\State $\lambda_1\hdots\lambda_\ell\gets g(\textcolor{blue}{op.obj})$
+		\If {$type=read$}
+			\State $t\gets 0$
+		\Else
+			\State $t\gets 1$
+		\EndIf
+		\color{purple}
+		\State $Current\gets Current\cdot [op]$
+		\State $L \gets length(Current)$
+		\State $\delta_1\hdots \delta_a \gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^a$
+		\State $c \gets 1$
+		\If {$L \geq 2$}
+			\For{$1\leq j< L$} 
+				\For{$j< q\leq L$} \textcolor{teal}{\quad with $j,q\in \mathbb{N}$}
+					\If{$Current[j]\xrightarrow{ar}Current[q]$}
+						\State $\delta_c=1$
+					\EndIf
+					\State $c\gets c+1$
+				\EndFor
+			\EndFor
+		\EndIf
+		\color{black}
+		\State $LastVec\gets\big[\alpha_1 , \cdots , \neg\alpha_i ,\cdots ,\alpha_n  ,t,\gamma_1 ,\cdots  ,\gamma_k,\lambda_1,\cdots,\lambda_\ell 
+		\textcolor{blue}{,\delta_1,\cdots,\delta_a}\big]^\top$
+	\Else
+		\State \textcolor{purple}{$Current\gets Current.remove(op)$}
+		\State $LastVec\gets\big[\alpha_1, \cdots , \neg\alpha_i , \cdots , \alpha_n,0,\cdots,0\big]^\top\in\{0,1\}^m$
+	\EndIf
+	\State $Enc\gets Enc\cdot LastVec$
+%\If{}
+%\EndIf
+%\For{}
+%\EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+\noindent\paragraph{\textsl{Visibility}} is challenging to encode due to its message-passing nature. Intuitively, visibility captures which information has been propagated and is therefore \say{visible} to certain operations. 
+We recall that $\opa\vis\opb$ denotes that it \say{may mean that the message about operation $\opa$ reached the client that performed operation $\opb$ before operation $\opb$ was performed}\cite{PrinciplesOfEventualConsistency}. According to this definition, $\opa\vis\opb$ can hold only if $\opa$ starts before $\opb$ ends. Indeed, if $\opb\rb\opa$, then $\opb$ could not have observed the effects of $\opa$, since $\opa$ is starting after the completion of $\opb$. Thus, a way to represent visibility with respect to an operation $\opa$, is to encode, for each process $p$, the most recent operation initiated on $p$ that is visible to $\opa$. 
+
+As a modeling convenience, we assumed for arbitration that if $\opa \rb \opb$, then $\opa \ar \opb$. Similarily for visibility we assume that if $\opa \ssrel \opb$ and $\opa \rb \opb$, then $\opa \vis \opb$. Moreover, we assume that for each pair of processes ($p$,$q$), updates from $p$ to $q$ are propagated in a FIFO manner. That is, if two operations $\opa$ and $\opb$ are executed on $p$ with $\opa\rb\opb$, and an operation $\opc$ is executed on $q$, then if $\opc$ has not received the update from $\opa$, it cannot receive the update from $\opb$. Formally $\neg(\opa\vis\opc)\Rightarrow\neg(\opb\vis\opc)$. 
+
+For $\opa\in H$, with $H\in\historyset$ and $p\in\mathbb{P}$, we define:
+
+\[
+\xi_p(a):=\textsl{ord}(\;\{ \opb\;|\;\opb\in H\land \opb.proc=p\land\opb.stime <\opa.rtime\}\;)=(\opc_n,\cdots,\opc_2,\opc_1)
+\]
+
+the ordered tuple of operations starting on process $p$ before $\opa$ end. 
+
+Using this notation, we aim to encode, for each $p\in\mathbb{P}$, the integer $i$, with $i\in \{1, \ldots, n\}$, such that \mbox{$\opc_i\vis\opa$} and $\neg(\opc_{i-1}\vis\opa)$. We denote this index by $\mu_p(a)$. This index is uniquely defined under the assumption that $\opc_n\vis\cdots\vis\opc_2\vis\opc_1$, and due to the FIFO propagation property, which ensures that $\neg(\opc_i\vis\opa)$ implies $\neg(\opc_{i-1}\vis\opa)$.
+%Formally,
+
+%\begin{gather*}
+%\mu_p(a) := i \text{ such that, 
+%given } \xi_p(a) = (\opc_n, \ldots, \opc_2, \opc_1),\\
+% \text{ there does not exist } j > i,\; j \in \{1, \ldots, n\}, \text{ such that } \opc_j \vis \opa \land \neg(\opc_{j-1} \vis \opa).
+%\end{gather*}
+
+
+Since the encoding operates on finite vectors, we must set an upper bound on this index. If all such indices are bounded by $2^S$ for some $S\in\mathbb{N}$, then up to $S$ bits per process are required for the encoding. As previously, this information is encoded on the first bit vector that indicates the start of an operation $\opa$. For $\mathbb{P}=\{p_1,\cdots,p_n\}$, the bit vectors are now of the following form.
+
+\vspace{1em}
+
+$
+\begin{bNiceArray}{c}[last-col,margin]
+  \# & \Vbrace{3}{\text{\normalsize previous encoding}} \\
+  \vdots \\
+  \# & \\
+  p_{1,1} & \Vbrace{3}{\text{\normalsize binary representation of  $\mu_{p_1}(\opa)$} } \\
+  \vdots  \\
+  p_{1,S}  \\
+  p_{2,1} & \Vbrace{3}{\text{\normalsize binary representation of $\mu_{p_2}(\opa)$}} \\
+  \vdots  \\
+  p_{2,S}  \\
+  \Vdots  \\
+  p_{n,1} & \Vbrace{3}{\text{\normalsize binary representation of $\mu_{p_n}(\opa)$} } \\
+  \vdots \\
+  p_{n,S} 
+\end{bNiceArray}
+$
+
+\vspace{1em}
+
+\begin{figure}
+\begin{center}
+\resizebox{0.6\textwidth}{!}{
+\begin{tikzpicture}[x=1cm, y=1.25cm,line width=2pt, every node/.style={font=\LARGE}]
+  
+  \node[anchor=east] at (-0.3, 0) {$p_1$};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.3, -1) {$p_2$}; % Label for second set  
+  \node[anchor=east] at (-0.3, -2) {$p_3$};  
+
+  \draw[dashed,line width=1pt] (0,0) -- (19,0);
+  \draw[dashed,line width=1pt] (0,-1) -- (19,-1);
+  \draw[dashed,line width=1pt] (0,-2) -- (19,-2);
+  
+\draw[withcaps] (2,0)     -- (4.5,0)   node[midway, above] {$\opa$};
+\draw[withcaps] (10.5,0)  -- (14,0)    node[pos=0.45, above] {$\opb$};
+\draw[withcaps] (15,0)  -- (17.5,0)  node[midway, above] {$\opc$}; 
+
+% Process p2
+\draw[withcaps] (2.7,-1)   -- (7,-1)   node[midway, above] {$\opd$};
+\draw[withcaps] (13,-1)    -- (16.5,-1)  node[midway, above] {$\ope$};
+
+% Process p3 — fine-grained segments, slightly offset
+\draw[withcaps] (1,-2)     -- (1.7,-2)   node[midway, above] {$\opf$};
+\draw[withcaps] (3.1,-2)   -- (4,-2)     node[midway, above] {$\opg$};
+\draw[withcaps] (5.2,-2)   -- (6.1,-2)   node[midway, above] {$\oph$};
+\draw[withcaps] (7.3,-2)   -- (8.2,-2)   node[midway, above] {$\opi$};
+\draw[withcaps] (9.4,-2)   -- (10,-2)  node[midway, above] {$\opj$};
+\draw[withcaps] (11.5,-2)  -- (12.4,-2)  node[midway, above] {$\opk$};
+\draw[withcaps] (13.6,-2)  -- (14.5,-2)  node[midway, above] {$\opl$};
+\draw[withcaps] (15.7,-2)  -- (17,-2)  node[midway, above] {$\opm$};
+\draw[withcaps] (18,-2)  -- (18.7,-2)  node[midway, above] {$\opn$};
+  
+\end{tikzpicture}
+}
+\end{center}
+\caption{\small \slshape A history of operations on three processes}
+\label{fig:encodingVISexample}
+\end{figure}
+
+\renewcommand{\arraystretch}{1.5}
+
+\begin{figure}
+\begin{center}
+\begin{NiceTabular}{|p{1cm}|cccccccccccccc}[hvlines]
+\CodeBefore
+	\rectanglecolor{pink!20}{1-1}{1-15}
+	\rectanglecolor{pink!20}{1-1}{4-1}
+\Body
+  \diagbox{\makebox[3em][c]{$p$}}{\makebox[3em][c]{$op$}} & $\opa$ & $\opb$ & $\opc$ & $\opd$ & $\ope$ & $\opf$ & $\opg$ & $\oph$ & $\opi$ & $\opj$ & $\opk$ & $\opl$ & $\opm$ & $\opn$ \\
+  $p_1$ & $\varnothing$ & 1 &1 &1 &2 &$\varnothing$ &1 &1 &1 &1 &2 &1 &2 &1 \\
+  $p_2$ & $\varnothing$ &1 &1 &$\varnothing$ &1 &$\varnothing$ &1 &1 &1 &1 &1 &1 &1 &1 \\
+  $p_3$ & 3 & 4 &2 &3 &5 &$\varnothing$ &1 &1 &1 &1 &1 &1 &1 &1 \\
+\end{NiceTabular}
+\end{center}
+\caption{\small \slshape Visibility table of history of Figure~\ref{fig:encodingVISexample} containing the $\mu_p(op)$ values.}\label{vis:encodingVItable}
+\end{figure}
+
+\renewcommand{\arraystretch}{1.0}
+
+\vspace{1em}
+We consider, as an example, the history depicted in Figure~\ref{fig:encodingVISexample} with visibility relation defined in Figure~\ref{vis:encodingVItable}. The symbol $\varnothing$ denotes the absence of visibility. For instance, $\mu_{p_1}(\opf)=\varnothing$ because $\opf$ has no operation visible on process $p_1$. The $\varnothing$ symbol will be encoded as a 0. In the Figure~\ref{vis:encodingVItable}, the greatest index value is 5; thus, encoding visibility requires $\left\lceil \log_2 5 \right\rceil=\left\lceil 2.3219 \right\rceil=3$ bits per process. The encoding corresponding to Figure~\ref{fig:encodingVISexample} is shown below. We omit the details of the encoding for types, values, objects, and arbitration.
+
+\input{figure-visibility}
+
+The first lines encode the process timelines as usual. The symbol $\vdots$ indicates the encoding for types, values, objects, and arbitration. The background colors correspond to the following elements:
+
+\begin{gather*}
+\colorbox{Orchid!20}{$\mu_{p_1}$}\quad
+\colorbox{Salmon!20}{$\mu_{p_2}$}\quad
+\colorbox{Lavender!30}{$\mu_{p_3}$}
+\end{gather*}
+
+The updated algorithm with visibility included is the following. As before, we highlight in \textcolor{blue}{blue} the bits of code modified to encode visibility, and in \textcolor{purple}{pink} the added parts. We comment the code in \textcolor{teal}{teal}.
+
+\vspace{1em}
+The encoding of histories in $\historyset$ is now complete.
+
+
+\begin{algorithm}[H]
+\caption{Complete encoding}\label{alg:basicTimelineTypesValuesArVis}
+\begin{algorithmic}[1]
+\Require $H_\mathbb{P}$ a history over \mbox{$\mathbb{P}=\{p_1,...,p_n\}$} finite with $|\mathbb{P}|=n$, $Types=\{read,write\}$, \mbox{$k=\left\lceil \log_2 |Values| \right\rceil$}, \mbox{$\ell=\left\lceil \log_2 |Objects| \right\rceil$}, $a=\frac{(n-1)n}{2}$, \textcolor{blue}{$S\in\mathbb{N}$} and \mbox{$m=n+k+\ell+1+a$}\textcolor{blue}{$+S$}
+\Ensure \mbox{$Enc\in(\{0,1\}^m)^*$ a word over the alphabet $\{0,1\}^m$}
+\State $C \gets Timeline_3(H)$
+\State $Enc \gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^m $
+\State $LastVec\gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^m$
+\State $Current\gets [\;]$
+\While{$C \neq ()$}
+	\State $(op,time)\gets First(C)$
+	\State $C\gets Tail(C)$	
+	\State $\begin{bmatrix}\alpha_1 , \cdots  , \alpha_m\end{bmatrix}^\top \gets LastVec$
+	\If {$\alpha_i=0$} \textcolor{teal}{[new operation to encode]}
+		\State $\gamma_1\hdots\gamma_k\gets f(ioput(op))$
+		\State $\lambda_1\hdots\lambda_\ell\gets g(op.obj)$
+		\If {$type=read$}
+			\State $t\gets 0$
+		\Else
+			\State $t\gets 1$
+		\EndIf
+		\State $Current\gets Current\cdot [op]$
+		\State $L \gets length(Current)$
+		\State $\delta_1\hdots \delta_a \gets \begin{bmatrix} 0 , \cdots , 0 \end{bmatrix}^\top\in \{0,1\}^a$
+		\State $c \gets 1$
+		\If {$L \geq 2$}
+			\For{$1\leq j< L$} 
+				\For{$j< q\leq L$} \quad \textcolor{teal}{ with $j,q\in \mathbb{N}$}
+					\If{$Current[j]\xrightarrow{ar}Current[q]$}
+						\State $\delta_c=1$
+					\EndIf
+					\State $c\gets c+1$
+				\EndFor
+			\EndFor
+		\EndIf
+		
+		\State $\textcolor{purple}{\psi_{1,1}\hdots\psi_{1,S}\gets[\mu_{p_1}(op)]_2}$ \quad \textcolor{teal}{where $[\cdot]_2$ represents the binary representation of the integer input}
+		\State $\textcolor{purple}{\vdots}$
+		\State $\textcolor{purple}{\psi_{n,1}\hdots\psi_{n,S}\gets[\mu_{p_n}(op)]_2}$
+		
+%		\color{black}
+		\State $LastVec\gets\big[\alpha_1 , \cdots , \neg\alpha_i ,\cdots ,\alpha_n  ,t,\gamma_1 ,\cdots  ,\gamma_k,\lambda_1,\cdots,\lambda_\ell,\delta_1,\cdots,\delta_a, \textcolor{blue}{ \psi_{1,1}\cdots\psi_{1,S},\cdots, \psi_{n,1}\cdots\psi_{n,S}} \big]^\top$
+	\Else
+		\State $Current\gets Current.remove(op)$
+		\State $LastVec\gets\big[\alpha_1, \cdots , \neg\alpha_i , \cdots , \alpha_n,0,\cdots,0\big]^\top\in\{0,1\}^m$
+	\EndIf
+	\State $Enc\gets Enc\cdot LastVec$
+\EndWhile
+
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+
+\subsection{MSO logic of words of bit vectors}\label{sec:MSObitvectors}
+
+We express consistency models in MSO logic over bit vectors that encode histories. To enable automated verification with MONA, we restrict this logic to the WS1S fragment supported by MONA. WS1S --- Weak Second-Order Logic of One Successor --- allows quantification over integers and sets of integers. These integers are referred to as positions, for the following reason. In MONA, sets $P=\{1,4\}$ and $Q=\{1,2,3\}$ would be represented as
+
+\begin{center}
+$\begin{bNiceArray}{c}[first-col, last-row]
+P & 0 \\
+Q & 0  \\
+ & \small 0
+\end{bNiceArray}$
+$\begin{bNiceArray}{c}[last-row]
+1 \\ 1 \\ \small 1
+\end{bNiceArray}$
+$\begin{bNiceArray}{c}[last-row]
+0 \\ 1 \\ \small 2
+\end{bNiceArray}$
+$\begin{bNiceArray}{c}[last-row]
+0 \\ 1 \\ \small 3
+\end{bNiceArray}$
+$\begin{bNiceArray}{c}[last-row,last-col]
+1 & \Vbrace{2}{\textit{set composition}}\\ 
+0 \\ 
+\small 4 & \Vbrace{1}{\textit{natural numbers}}
+\end{bNiceArray}$
+\end{center}
+
+
+with bits set to 1 indicating that the corresponding indexed integer belongs to the set. Hence the use of the term \say{position}. The MONA User Manual \cite{MONAguide} proposes the following example: a program that verifies the satisfiability of $P$ and $Q$ being sets of positions with $P\setminus Q=\{0,4\}\cup\{1,2\}$. The MONA code is the following \citehybridpage[4]{MONAguide}.
+
+\vspace{1em}
+\hspace*{1cm}%
+\begin{minipage}{\dimexpr\linewidth-2cm\relax}
+\small
+\begin{verbatim}
+var2 P,Q;
+P\Q = {0,4} union {1,2};
+\end{verbatim}
+\end{minipage}
+\vspace{1em}
+
+Running the code above, saved in a file named \verb|example.mona|, with the command \verb|mona example.mona| outputs several lines. The relevant outputs here are the counter-example and the satisfying example.
+
+\vspace{1em}
+\hspace*{1cm}%
+\begin{minipage}{\dimexpr\linewidth-2cm\relax}
+\small
+\begin{verbatim}
+ANALYSIS
+A counter-example of least length (0) is:
+P               X 
+Q               X 
+
+P = {}
+Q = {}
+
+A satisfying example of least length (5) is:
+P               X 11101
+Q               X 000X0
+
+P = {0,1,2,4}
+Q = {}
+\end{verbatim}
+\end{minipage}
+\vspace{1em}
+
+\subsubsection{Definition}
+
+We define the MSO logic of words over bit vectors as follows, restricted to WS1S logic. Lowercase letters represent positions and uppercase letters represent sets of positions.
+
+\begin{itemize}[label=$\mid$,itemsep=0pt,parsep=0pt]
+    \item[$\psi :=$]  $\forall x.\psi$
+    \item $\exists x.\psi$
+    \item $\forall X.\psi$
+    \item $\exists X.\psi$
+    \item $x=\text{succ}(y)$ \quad with succ$(y):=y+1$
+    \item $x=y$ \quad equality of positions
+    \item $x\in X$ \quad \say{position $x$ is in the set $X$}
+    \item $\psi\land\psi \;|\; \psi\lor\psi \;|\; \neg\psi \;|\; (\psi)$
+\end{itemize}
+
+\vspace{1em}
+
+Using the formula $x\notin X\equiv\neg(x\in X)$, the statement \say{there exists $P$ and $Q$ being sets of positions with $P\setminus Q=\{0,4\}\cup\{1,2\}$} is expressed with this logic as
+\begin{center}
+$
+\exists P .\; \exists Q .\; \forall x .\; 
+\Big( (x \in P \land x \notin Q) \Leftrightarrow (x = 0 \lor x = 1 \lor x = 2 \lor x = 4) \Big)
+$
+\end{center}
+
+We may now \say{translate} the grammar of the MSO logic of histories into the grammar of the MSO logic of words of bit vectors encoding histories.
+
+\vspace{1em}
+
+
+\subsubsection{Translation from MSO of histories to MSO of words of bit vectors}
+
+We present the translation for quantification. We recall that for formulas in MSO logic of histories, $\opa$ is an operation and $A$ a set of operations; and that for MSO logic of words of bit vectors, $x$ is an integer and $X$ a set of integers. Let $P_i,i\in\{1,...,n\}$ be the sets representing the rows encoding the processes. We define a predicate $op(x)$ in the MSO of words over bit vectors, which holds if $x$ is a position corresponding to an operation.
+
+\begin{align*}
+op(x) := \Big(
+	(x\in P_1 \land \exists y. &\text{succ}(y)=x \land y\notin P_1)\lor \\
+ &\vdots \\
+ (x\in P_{n-1} \land \exists &y. \text{succ}(y)=x \land y\notin P_{n-1})\lor \\
+ (x\in P_n \land \exists y. &\text{succ}(y)=x \land y\notin P_n)\Big)
+\end{align*}
+
+\renewcommand{\arraystretch}{1.75}
+\begin{table}[H]
+\centering
+\begin{tabular}{l|l}
+MSO of histories & MSO of words of bit vectors \\
+\hline
+$\forall \opa.\phi$ & $\forall x.op(x)\Rightarrow \psi$ \\
+
+\hline
+
+$\exists \opa.\phi$ &  $\exists x.op(x)\land\psi$  \\
+
+\hline
+
+$\forall A.\phi$ & $\forall X.\big( (\forall x. x\in X\Rightarrow op(x) )\Rightarrow \psi \big)$ \\
+
+\hline
+
+$\exists A.\phi$ & $\exists X.\big( (\forall x. x\in X\Rightarrow op(x) )\land \psi \big)$ \\
+
+\end{tabular}
+\end{table}
+\renewcommand{\arraystretch}{1}
+
+%\begin{table}[H]
+%\centering
+%\begin{tabular}{l|l}
+%MSO of histories & MSO of words of bit vectors \\
+%\hline
+%$\forall \opa.\phi$ &  $\forall x. \Big(
+%	(x\in P_1 \land \exists y. \text{succ}(y)=x \land y\notin P_1)\lor$ \\
+%& $\vdots$ \\
+%& $(x\in P_{n-1} \land \exists y. \text{succ}(y)=x \land y\notin P_{n-1})\lor$ \\
+%& $(x\in P_n \land \exists y. \text{succ}(y)=x \land y\notin P_n)\Big)\Rightarrow\psi$ \\
+%
+%\hline
+%
+%$\exists \opa.\phi$ &  $\exists x. \Big(
+%	(x\in P_1 \land \exists y. \text{succ}(y)=x \land y\notin P_1)\lor$ \\
+%& $\vdots$ \\
+%& $(x\in P_{n-1} \land \exists y. \text{succ}(y)=x \land y\notin P_{n-1})\lor$ \\
+%& $(x\in P_n \land \exists y. \text{succ}(y)=x \land y\notin P_n)\Big)\land\psi$ \\
+%
+%\hline
+%
+%$\forall A.\phi$ & $\forall X. x\in X\Rightarrow\Big(
+%	(x\in P_1 \land \exists y. \text{succ}(y)=x \land y\notin P_1)\lor$ \\
+%& $\vdots$ \\
+%& $(x\in P_{n-1} \land \exists y. \text{succ}(y)=x \land y\notin P_{n-1})\lor$ \\
+%& $(x\in P_n \land \exists y. \text{succ}(y)=x \land y\notin P_n)\Big)\Rightarrow\psi$ \\
+%
+%\hline
+%
+%$\exists A.\phi$ & $\exists X. x\in X\Rightarrow\Big(
+%	(x\in P_1 \land \exists y. \text{succ}(y)=x \land y\notin P_1)\lor$ \\
+%& $\vdots$ \\
+%& $(x\in P_{n-1} \land \exists y. \text{succ}(y)=x \land y\notin P_{n-1})\lor$ \\
+%& $(x\in P_n \land \exists y. \text{succ}(y)=x \land y\notin P_n)\Big)\land\psi$
+%
+%\end{tabular}
+%\end{table}
+
+
+%The comparison of attributes between two objects cannot be expressed directly in the MSO logic of words over bit vectors. Instead, the formula must include a context that identifies where the operation is encoded in the word.
+
+As an example, we encoded in MONA the \textsc{RealTime} consistency property for two processes, using slightly different constraints and representations of arbitration and visibility, as explained in the code comments.
+
+\lstset{
+    basicstyle=\ttfamily,
+    columns=fullflexible,
+    keepspaces=true,
+    moredelim=**[is][\color{teal}]{@}{@}
+}
+
+\begin{example}
+
+\textsc{RealTime} consistency property expressed in MONA.
+\small
+\begin{lstlisting}
+var2 Process_P, Process_Q;      @# 1 if an operation is currently being run, else 0@
+var2 Process_P_type,Process_Q_type;     @# 0 if  READ, 1 if WRITE@
+var2 Process_P_value,Process_Q_value;       @# input value if WRITE, output value if READ@
+var2 P_arbitrated_before_Q;     @# 1 if true, else 0@
+var2 P_visible_to_Q;        @#1 if the current operation on Q is visible by
+			the last operation done before on P, 0 if visible by the second to last@
+var2 Q_visible_to_P;       @ #1 if the current operation on P is visible by
+			the last operation done before on P, 0 if visible by the second to last@
+
+pred is_operation(var1 a)=
+    (a-1 notin Process_P & a in Process_P) | (a-1 notin Process_Q & a in Process_Q);
+
+pred is_end(var1 b,var1 e)=
+    (
+        b in Process_P & b-1 notin Process_P => 
+        (b <= e & (all1 a: (a >=b & a <= e) => a in Process_P))
+    ) | (
+        b in Process_Q & b-1 notin Process_Q => 
+        (b <= e & (all1 a:(a >= b & a <= e) => a in Process_Q))
+    );
+
+pred arbitrated_before(var1 a, var1 b)=
+    ex1 end_a,end_b:
+    (
+        (a in Process_P & b in Process_P | 
+        	a in Process_Q & b in Process_Q) & is_end(a,end_a) & end_a<b-1
+    )|(
+        is_end(a,end_a) & is_end(b,end_b) & (
+            ex1 i : i in P_arbitrated_before_Q =>  (i>=a & i<=end_a & i>=b & i<=end_b)
+        )
+    );
+
+pred rb(var1 a,var1 b)=
+    (
+        ex1 end_a : is_end(a,end_a) & end_a<b
+    );
+
+
+pred real_time()=
+    (all1 a: is_operation(a) => (
+        all1 b: is_operation(b) => (rb(a,b) => arbitrated_before(a,b))
+    ));
+    
+real_time();
+\end{lstlisting}
+
+
+\end{example}
+
+The complete translation of the MSO grammar of histories into the grammar of MSO over words of bit vectors, as well as the translation of the previously mentioned MSO formulas of histories for consistency models, is still ongoing. This work could not be finalized during the internship due to limited time and may be continued in the future.
+
+\newpage
+
+\section{Conclusion}
+
+%automatiser model checking / mso sur historique décidable ?
+
+In this work, we have shown that any MSO-definable property is decidable in linear time over finite execution traces in replicated data systems. Building on this, we introduced an encoding of execution traces suitable for consistency verification using the MONA tool under minimal assumptions about the structure of these traces. This approach enables a general verification framework that is not limited to a specific consistency model. In contrast to recent work focusing on particular models --- such as verification techniques for strong eventual consistency \cite{PAPER1} or weak consistency \cite{PAPER3} --- our framework supports reasoning about a broader class of consistency properties within a unified logical setting. Since our encoding can be used with MONA, which builds automata from logical specifications, this effectively allows us to link execution traces of replicated data systems to automata. 
+
+Knowing that a trace can be represented by an automaton is valuable for several reasons. Since our framework is restricted to finite processes and histories, the execution of a program over these processes can be decomposed into a separate automaton per process. Each process is therefore associated with a finite automaton that captures the specific code fragments it executes. To verify that any history resulting from the parallel execution of these automata satisfies a given consistency model, we proceed in two steps: first we define a class of histories that captures all possible outcomes of the program; and then verify whether each of these histories satisfies the specified consistency property. These constraints can be formalized as intersections of finite automata. Since each finite automaton corresponds to a regular language, the problem reduces to checking whether the intersection language is empty. If the intersection is empty, then no execution of the program satisfies the consistency model.
+
+However, our work is currently restricted to finite domains. An immediate extension would be to investigate the decidability of MSO-definable properties over infinite traces. The current decidability result relies on an algorithmic construction, which is only applicable to finite traces. Nonetheless, if the underlying graph structure of execution traces can be expressed purely in logical terms --- using unions, intersections, and negations of relations, rather than an explicit algorithm --- then it is possible to extend the decidability result to infinite traces.
+
+
+Overall, our approach offers a new perspective in the field of consistency verification and opens several avenues for future improvements, such as support for infinite executions and even weaker assumptions regarding visibility and arbitration.
+
+\newpage
+
+{
+
+  \vspace*{\fill} % stretchable vertical space before
+  \begin{center}
+  \begin{minipage}{0.8\textwidth} % control width of abstract block
+  
+  \section*{Acknowledgments}
+      I would like to warmly thank the i3s laboratory, and especially my internship supervisors, Étienne and Cinzia, for their support and guidance throughout this experience. Having known them for several years since my bachelor studies, I was particularly happy to meet them again and work with them during this internship. I also thank the team members who attended the seminar during which I presented my work, in particular my fellow interns and PhD students —-- Anna, Anderson, Gabriele, Erik, and Dalim —-- who welcomed me and made this experience all the more enriching, as well as Françoise and Pascal, with whom I also had valuable discussions on interesting points to explore in the continuation of my work. I would also like to sincerely thank the members of the jury for dedicating their time and attention to reading my work.
+      \end{minipage}
+  \end{center}
+    
+  
+  \vspace*{\fill} % stretchable vertical space after
+}
+
+%
+%Je tiens à remercier chaleureusement le laboratoire I3S, et tout particulièrement mes tuteurs de stage, Étienne et Cinzia, pour leur accueil et leur accompagnement tout au long de cette expérience. Je remercie également les membres de l’équipe qui ont assisté au séminaire lors duquel j’ai présenté mes travaux, notamment mes collègues stagiaires et doctorants — Anna, Anderson, Gabrielle, Erik, Dalim — qui m’ont intégrée et ont rendu cette expérience d’autant plus enrichissante, et Françoise et Pascal, avec lesquel j’ai également pu échanger sur des points intéressants à approfondir dans la continuité de mon travail.
+%Pour terminer, je remercie le jury de stage pour le temps consacré à la lecture de ce rapport.
+
+\newpage
+
+%\appendix
+%\addcontentsline{toc}{section}{Apendices} 
+\section{Appendices}\label{sec:appendix}
+%\renewcommand{\thesection}{\emph{Appendix \Alph{section}}}
+%\clearpage
+
+\subsection{Tree-width definition}
+We adopt the definition of tree-width as proposed in \cite{ClassOfGraphsBoundedTreewidth}.
+
+
+Let $G = (V, E)$ be a graph. A tree-decomposition of $G$ is a pair 
+$\bigl(\{X_i \mid i \in I\}, T = (I, F)\bigr)$, with 
+$\{X_i \mid i \in I\}$ a family of subsets of $V$, and $T$ a tree, with the following properties:
+\begin{itemize}
+    \item $\bigcup_{i \in I} X_i = V$
+    \item For every edge $e = (v, w) \in E$, there is a subset $X_i$, $i \in I$ with $v \in X_i$ and $w \in X_i$.
+    \item For all $i, j, k \in I$, if $j$ lies on the path in $T$ from $i$ to $k$, then 
+    \[
+        X_i \cap X_k \subseteq X_j.
+    \]
+\end{itemize}
+
+The \emph{tree-width} of a tree-decomposition $\bigl(\{X_i \mid i \in I\}, T\bigr)$ is 
+\[
+    \max_{i \in I} |X_i| - 1.
+\]
+
+The tree-width of $G$, denoted by $\operatorname{tree\text{-}width}(G)$, is the minimum tree-width 
+of a tree-decomposition of $G$, taken over all possible tree-decompositions of $G$.
+
+
+\subsection{Summary of Binary Relations and Other Useful Notations}\label{apen:notation}
+
+\contexthistory 
+ Let $H\in\historyset$, and let $G=(H,\rightarrow)\coloneq\text{Alg1}(H)$.
+ 
+\vspace{1em}
+\renewcommand{\arraystretch}{1.6} % 1.5 times the default height
+
+{\centering \small
+\begin{tabular}{||c | >{\centering\arraybackslash}p{2cm}
+	| >{\centering\arraybackslash}p{3cm}
+	|>{\centering\arraybackslash}p{4cm} 
+	|>{\centering\arraybackslash}p{5cm} ||} 
+%% notation domain relation-name meaning formal-meaning
+ \hline
+\textsc{Notation} & \textsl{Domain} & \textsl{Name} & \textsl{Meaning} & \textsl{Formally} \\ [0.5ex] 
+ \hline\hline
+$\opa\rb\opb$ & $H\times H$ & Returns before & $\opa$ returns before $\opb$ starts & $\opa.rtime<\opb.stime$ \\
+ \hline
+$\opa\ssrel\opb$ & $H\times H$ & Same session & $\opa$ and $\opb$ are launched by the same process & $\opa.proc=\opb.proc$ \\
+ \hline
+$\opa\dsucp{p}\opb$ & $H\times H$ and $p\in\mathbb{P}$ & Direct succession on a process & $\opb$ is the direct successor of $\opa$ on process $p$ & $\opb.proc=p \;\land\; 
+\neg\exists\opc.\big( $\mbox{$\opc\in H$}$\land $ \mbox{$\opc\neq\opb$} $\land$ \mbox{$\opc\ssrel\opb$} $\land$ \mbox{$\opa.rtime<\opc.stime$} $\land$ \mbox{$\opc.rtime<\opb.stime$} $\big)$ \\
+ \hline
+ $\sigma(\opa)$ & $H$ & Direct successors set & All the direct successors of $\opa$ across all processes & $\displaystyle\bigcup_{p \in \mathbb{P}} \{\opb \mid 
+\opb \in H  \land \opa\dsucp{p}\opb  \}$ \\
+\hline
+$\opa\dsuc\opb$ & $H\times H$ & Direct succession & $\opb$ is a direct successor of $\opa$ & $\opb\in\sigma(\opa)$ \\
+\hline
+$\opa\rightarrow\opb$ & $H\times H$ & Edge & There is a directed edge from $\opa$ to $\opb$ in the graph & \\
+\hline
+$\opa\patharrow\opb$ & $H\times H$ & Path & There exists a directed path from $\opa$ to $\opb$ in the graph & $\exists\; h_1,\cdots,h_n\in H$ such that $\opa\rightarrow h_1\rightarrow h_2\rightarrow \hdots\rightarrow h_n\rightarrow \opb$ \\
+\hline
+\end{tabular}
+}
+
+\subsection{Examples}
+\input{examples}
+
+\clearpage
+%\twocolumn
+
+
+\onecolumn
+
+
+%\begin{thebibliography}{9}
+%\bibitem{cutwidthGTtreewidth}
+%Hans L. Bodlaender, \emph{Classes of graphs with bounded tree-width}, Utretch University, 1986. Available at: \url{https://ics-archive.science.uu.nl/research/techreps/repo/CS-1986/1986-22.pdf}
+%\end{thebibliography}
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+
+
+\end{document}

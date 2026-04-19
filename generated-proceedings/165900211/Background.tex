@@ -1,0 +1,584 @@
+%!TEX root = newmain.tex
+
+To set the stage for our translation-based verification method, we
+briefly review the relevant background. Section \ref{subsect:stipula}
+presents the {\Stipula} language, emphasising its constructs for
+assets, states, and timed events.  Section \ref{subsect:key}
+introduces the {\KeY} system, which we employ as the verification
+backend.
+
+\subsection{{\Stipula}}
+\label{subsect:stipula}
+
+A {\Stipula} contract consists of a set of parties, states, assets,
+fields, and a set of functions and events. The declaration of a
+contract is defined in Figure~\ref{tab:stipula-syntax}, where
+\stipula{C} is the name of the contract, $\vect{\tt h}$ and
+$\vect{\tt x}$ are the \emph{assets} and \emph{fields}, respectively,
+$\vect{\tt A}$ are the \emph{parties}.
+%
+\begin{figure}[t]
+  {\small
+    \begin{tabular}{l@{\quad}l}
+      $
+      \begin{array}{l}
+        \stipula{stipula C \{}
+        \\
+        \qquad \stipula{assets} \; \vect{\tt h}
+        \\
+        \qquad \stipula{fields} \; \vect{\tt x} 
+        \\
+        \qquad \stipula{agreement(} \vect{\tt A} \stipula{) \{  }
+        \\
+        \qquad \qquad \vect{{\tt A}_1} \; : \; \vect{{\tt x}_1}
+        \\
+        \qquad \qquad \cdots 
+        % \quad {\tt //} \; \bigcup_{i \in 1..n} \vect{{\tt A}_i} \subseteq \vect{{\tt A}}   \; , \quad  \bigcup_{i \in 1..n} \vect{{\tt x}_i} \subseteq\vect{{\tt x}} \; , \quad	\bigcap_{i \in 1..n} \vect{{\tt x}_i} = \varnothing
+        \\
+        \qquad \qquad  \vect{{\tt A}_n} \; : \; \vect{{\tt x}_n}
+        \\
+        \qquad \stipula{\}} \tostate \Qwithat  
+        \\
+        \qquad     F
+        \\
+        \stipula{\}}
+      \end{array}
+      $
+      &
+        $
+        \begin{array}{l@{\quad}l@{\quad}l}
+          \mathit{Functions} & F \; ::= & \zero  \quad | \quad   \Qwithat \,\A : \, {\f}(\vect{\tt y})[\vect{\tt k}]\,(E)\{
+                                          \,S\, ; \, W\,\} \,\tostate\, \Qwithat'\,  F
+          \\
+          \mathit{Prefixes} & P \; ::= & E \, \send \, {\x} \quad | \quad E \send \, \A \quad | \quad E \lolli {\h}, {\h}' 
+\\
+                             & & |\quad E \lolli {\h} ,  \A 
+          \\
+          \mathit{Statements} & S \; ::= &  \zero  \quad | \quad P \; S \quad | \quad \ifte{E}{S}{S} \, S
+          \\
+          \mathit{Events} &  W \; ::= & \zero  \quad | \quad \stipula{now + t} \,\event\, \Qwithat\, \{ \, S \,\} \,\tostate\, \Qwithat'\,  W 
+          \\
+          \mathit{Expressions }& E \; ::= &  v \quad | \quad \stipula{now} \quad | \quad X    
+                                            \quad | \quad   E \, \stipula{op} \, E \quad | \quad  \stipula{nop} \, E
+%\\
+%\mathit{Values} & v ::= &  n \quad |\quad \stipula{false} \quad |\quad \stipula{true} \quad | \quad  s %\quad | \quad \Time \quad |\quad a 
+          \\
+          \\
+          \\
+          \\
+\end{array}
+        $
+    \end{tabular}
+    \vspace{-.6cm}
+  }
+  \caption{\label{tab:stipula-syntax} Syntax of {\Stipula}}
+  \vspace{-.5cm}
+\end{figure}
+%
+The \stipula{agreement} construct declares the parties that set the
+initial value of the fields. For example, if the agreement has three
+parties $\A_1, \A_2, \A_3$ and the contract has two fields
+$\x_1, \x_2$, if it declares $\A_1: \x_1$ and $\A_2, \A_3 : \x_2$ then
+$\x_1$ will be set by $\A_1$ and $\x_2$ will be set upon agreement on
+the value between $\A_2$ and $\A_3$.
+%
+When the agreement is concluded, the initial state of the contract is
+set and the parties may invoke a function in $F$.
+
+A \emph{function} $\f$ declared as
+$\Qwithat\,\A :\,{\f}(\vect{\tt y})[\vect{\tt k}]\,(E)\{\,S;\,W\,\}\,\tostate\,\Qwithat'$ 
+can be invoked by a party $\A$ if the contract is in state $\Q$ and the guard $E$ is
+\emph{true}.  The names $\vect{\tt y}$ and $\vect{\tt k}$ are the
+formal parameters of {\f}; they are kept separate because
+$\vect{\tt y}$ are \emph{field} values while $\vect{\tt k}$ are
+\emph{asset} quantities.
+
+Function bodies are \emph{statements} $S$ followed by \emph{events}
+$W$.  The former include value transfers, asset movements, conditional
+logic, and field assignments. {\Stipula} distinguishes between
+different transfer operations: field updates and messages use the
+symbol $\rightarrow$ with the usual semantics of assignment, while
+asset transfers, called \emph{moves}, use the linear operator $\lolli$
+to emphasise the conservation semantics. For instance, an expression
+like ``$1 \lolli \stipula{wallet}, \stipula{Seller}$'' denotes
+exclusive transfer of a unit in {\tt wallet} to the {\tt Seller} and,
+\emph{at the same time}, the decrease by 1 of {\tt wallet}.  In
+contrast ``\stipula{wallet} $\rightarrow$ \stipula{Seller}'' specifies
+that the value currently stored in \stipula{wallet} is communicated to
+\stipula{Seller}, while leaving the state of \stipula{wallet}
+unchanged.  It is common practice in {\Stipula} to use the
+abbreviations $\h\lolli\h'$ and $\h\lolli\A$, which stand for
+$\h\lolli\h,\h'$ and $\h\lolli\h,\A$, respectively.
+% These abbreviations improve readability and conciseness by omitting
+% redundant information while preserving the underlying semantic
+% structure of the corresponding move operations.
+
+Events
+$\stipula{now + t} \,\event\, \Qwithat\, \{ \, S \,\} \,\tostate\,
+\Qwithat'$ define a statement
+$S$ to be executed if, \emph{after} \stipula{t} time units from the
+current execution, the contract is in the state $\Q$. The expression \stipula{t}
+is either a non-negative number or a variable (a formal parameter or a 
+field) or a variable plus a non-negative number.
+If the event is
+executed, the contract will transit to the state $\Q'$. The expression
+\stipula{now + t} is called \emph{time guard}.  Functions and events
+are generically called \emph{clauses}.
+
+Expressions $E$ include integer constant values $v$, the keyword
+\stipula{now} (that stands for a non-negative integer value), names of
+assets, fields and parameters generically ranged over by $X$, standard
+arithmetic and Boolean operations \stipula{op} (binary) and
+\stipula{nop} (unary). Booleans are encoded by integers in the usual
+way. Actually, {\Stipula} has a richer set of values (reals, strings, time and
+asset values). For the time being, we stick to integer arithmetic,
+where deductive verification systems exhibit a high degree of
+automation. Other datatypes require corresponding support in automated
+theorem provers and SMT solvers: experimentation is needed to
+determine what is possible. We also want to keep the presentation simple.
+
+% We refer to article~\cite{CrafaLSV23} for background on the design
+% of {\Stipula}.
+%
+The semantics of {\Stipula} is defined operationally by means of a
+transition relation between \emph{configurations}
+$\contract {\comma} \Time$, where $\Time$ is a positive integer value
+representing the system's global clock and $\contract$ is a tuple
+$\C(\State\semi\ell\semi \Sigma \semi\SemEvent)$, where:
+%
+\begin{itemize}
+\item $\C$ is the {\Stipula} contract name;
+\item $\State$ is the contract's current state: either $\zero$ (for no
+  state) or a contract state \state;
+\item $\ell$ maps names (parties, fields, assets, function parameters)
+  to values;
+\item $\Sigma$ is the (possibly empty) residual of a function body or
+  of an event handler, \emph{i.e.}~$\Sigma$ is either $\zero$ or a
+  term $S\ W \tostate \texttt{@}\state$;
+\item $\SemEvent$ is a (possibly empty) multiset of \emph{pending
+    events} to be executed. We let $\SemEvent$ be $\zero$ when there
+  are no pending events, or
+  %
+  \begin{equation}
+    \label{eq:psi}
+    {\Time}_1 \,\event_{\ev_1}\, \Qwithat_1\, \{ \, S_1 \,\}
+    \,\tostate\, \Qwithat_1' \quad|~ \cdots ~|\quad {\Time}_n \,\event_{\ev_n}\,
+    \Qwithat_n\, \{ \, S_n \,\} \,\tostate\, \Qwithat_n'\enspace,
+  \end{equation}
+  %
+  where $\Time_i$ are the values of the expressions \stipula{now +}
+  \stipula{t}$_i$ of the corresponding events.  The indices $\ev_i$
+  are introduced by rule~\rulename{function} when the body of a
+  function is incorporated into the configuration and denotes a unique
+  identifier
+  % . Each such index denotes the unique integer identifier
+  statically assigned to the event.
+\end{itemize}
+
+The transition relation of {\Stipula} is
+$\contract {\comma} \Time \lred{\mu} \contract' {\comma} \Time'$,
+where $\mu$ may be empty, or an initial agreement, or
+$A:\f(\wt{u})[\wt{v}]$ (in case of function invocations) or an event.
+%
+Its formal definition is given in Table~\ref{tab:controlrules} for the
+control transition rules, see \cite{CrafaLSV23} for the agreement and
+statement rules. The former rule set requires a specific
+{\JML}/{\Java} encoding, whereas the latter are translated in a
+standard way and are inessential for the understanding of this paper.
+%
+\begin{table}[t]
+{\small
+$
+\begin{array}{c}
+\mathrule{Function}{
+	\begin{array}{c}
+	\texttt{@}\state\,\A\,\texttt{:}\,\f\texttt{(} \wt{\mbox{{\tt y}}} \texttt{)[} \wt{\mbox{{\tt k}}} \texttt{]\,(} E {\tt )}\,{\tt \{}\,S\,W\,{\tt \}} \tostate \texttt{@}\state' \in \C
+	\\
+	\nored{\SemEvent}{\Time}
+	%\quad \vect{v} \geq 0 
+	\\
+	\ell(\A) = A
+	\quad
+	\ell' = \ell [ \wt{\mbox{{\tt y}}} \mapsto \wt{u}, \wt{\mbox{{\tt k}}} \mapsto \wt{v} ]
+	\quad
+	\sem{E}_{\ell'} \neq 0
+	\end{array}
+	}{
+	\C(\state \semi \ell \semi \zero \semi \SemEvent) \comma \Time 
+	    \lred{A : \texttt{f}(\wt{u})[\wt{v}]}
+	\C(\state \semi \ell' \semi S\,W \tostate \texttt{@}\state' 
+	\semi \SemEvent) \comma \Time
+}	
+\quad
+\mathrule{State-Change}{
+    \sem{W\subst{\Time}{\texttt{now}}}_{\ell} = \SemEvent'
+    }{
+    \begin{array}{l}
+	\C(\state \semi \ell \semi \zero \,W\tostate \texttt{@}\state' \semi \SemEvent) 
+	\comma \Time 
+	\\
+	\qquad \lred{}
+	\C(\state' \semi \ell \semi \zero \semi \SemEvent' ~|~\SemEvent) 
+	\comma \Time
+	\end{array}
+}
+\\
+\\
+\mathrule{Event-Match}{
+	\begin{array}{c}
+	\SemEvent = \Time \event_{\ev_\kappa} \texttt{@}\state~\{~S~\} \tostate \texttt{@}\state' ~|~ \SemEvent'
+	\end{array}
+	}{
+	\begin{array}{l}
+	\C(\state \semi \ell \semi \zero \semi \SemEvent) \comma \Time 
+%	\\
+%	\qquad 
+\lred{\ev_\kappa}
+	\C(\state \semi \ell \semi S \tostate \texttt{@}\state' \semi \SemEvent') 
+	\comma \Time  
+	\end{array} 
+}
+\quad
+\mathrule{Tick}{
+	\nored{\SemEvent}{\Time}
+	}{
+	\begin{array}{l}
+	\C(\state \semi \ell \semi \zero \semi \SemEvent) \comma \Time 
+	\\
+	\qquad 
+\lred{} 
+	\C(\state \semi \ell \semi \zero \semi \SemEvent\downarrow_{\Time}) \comma \Time + 1
+	\end{array}
+	}
+\\
+\\
+\end{array}
+$
+}
+\caption{\label{tab:controlrules} The control transition rules of {\Stipula}}
+\vspace{-.6cm}
+\end{table}
+
+The formal definition of
+$\contract {\comma} \Time \lred{\mu} \contract' {\comma} \Time'$ uses
+the following auxiliary predicates and functions:
+%
+\begin{itemize}
+\item $\sem{E}_{\ell}$ is a \emph{partial function} returning the
+  value of $E$ in memory $\ell$.
+  % \item $\sem{E}_\ell^\mathsf{a}$ is the partial function returning
+  %   asset values. This evaluation differs from $\sem{E}_{\ell}$
+  %   because it never return negative values (assets are always
+  %   nonnegative)
+\item $\sem{W\{^\Time/_{{\tt now}}\}}_\ell$ is the multiset of
+  scheduled events obtained from the sequence $W$ by replacing every
+  {\tt now} by $\Time$ and evaluating every expression in the time
+  guards.
+\item $\nored{\SemEvent}{\Time}$ is a predicate that is \emph{true}
+  whenever $\SemEvent$ is as in equation~\eqref{eq:psi}
+  % $\SemEvent = \Time_1 \event \texttt{@}\state_1 \{ S_1 \} \tostate
+  % \texttt{@}\state_1' ~|~ \cdots ~|~ \Time_n \event \texttt{@}\state_n
+  % \{ S_n \} \tostate \texttt{@}\state_n'$
+  and, for every $1 \leq i \leq n$, $\Time_i \neq \Time$. It is
+  \emph{false} otherwise.
+\item
+$\SemEvent\downarrow_{\Time}$ removes from $\Psi$ every event with time value less or equal to $\Time$. 
+\end{itemize}
+
+We explain the rules in Table~\ref{tab:controlrules}.
+%
+Rule \rulename{Function} defines invocations: the label specifies
+party $A$ performing the invocation of a function named {\tt f} with
+the actual parameters. The transition may occur provided (\emph{i})
+the contract is in the state \texttt{Q}, admitting invocations of {\tt
+  f} from $A$, (\emph{ii}) the contract is \emph{idle},
+\emph{i.e.}~the contract has no statement to execute (presence of
+$\zero$ in the left configuration), (\emph{iii}) the precondition $E$
+is satisfied, and no event can be triggered (premise
+$\nored{\SemEvent}{\Time}$). In particular, the final constraint
+expresses that events \emph{have precedence} on possible function
+invocations. For example, if a payment deadline is reached and, at the
+same time, the payment arrives, it will be refused in favour of the
+event managing the deadline.  We use two notations for party
+identifiers: {\A} and $A$. The former denotes the formal name used in
+the contract specification, whereas $A$ refers to the concrete party
+name instantiated and fixed when the agreement is concluded.
+
+Rule \rulename{State-Change} says that a contract changes state when
+the execution of the statement in the function body terminates. At
+this stage, the sequence of events $W$ is added to the multiset of
+pending events once their time expressions have been evaluated, in
+particular \texttt{now} is replaced by the current value of the clock.
+%
+Rule \rulename{Event-Match} specifies that event handlers may run
+provided there is no statement to perform and the time guard of the
+event has exactly the value of $\Time$.
+%
+Rule \rulename{Tick} defines the elapsing of time, which may happen
+when there is no statement to perform and no event can be triggered.
+
+In this paper we use the state transition models of {\Stipula}
+contracts, called the \emph{underlying automata}. The states of these
+automata are those of the {\Stipula} contract. The transitions
+correspond to clauses and are labelled either with the function name
+(the party name is always omitted, for simplicity's sake we assume
+that function names are pairwise different) or with a uniquely
+numbered event. By definition, these automata are \emph{finite models};
+% line number (\emph{e.g.}, \stipula{ev}$_{10}$ is the event at code
+% line 10).
+Figures~\ref{fig:license} and~\ref{fig:deposit-fsm} show the two
+underlying automata of the contracts \stipula{Licence} and
+\stipula{Deposit}.
+%
+These contracts are drawn from~\cite{iFM25} with minor modifications, which 
+are discussed below. 
+
+\begin{example}
+  Figure~\ref{fig:license} defines the \stipula{License} contract
+  regulating a licensing transaction between a \stipula{Licensor} and
+  a \stipula{Licensee}, with a 30 days trial period and the
+  possibility to purchase or decline the license. The field {\tt code}
+  stores the information for the trial period access, the asset {\tt
+    token} grants the licence.  If the \stipula{Licensee} does not
+  purchase the license before the trial period expires, the contract
+  terminates and the {\tt token} is automatically returned to the
+  \stipula{Licensee}.
+  % 
+  The \stipula{agreement} in Line~\ref{line:lic:agb} allows the
+  parties to agree on the license \stipula{cost}. Upon agreement, the
+  first state is \stipula{@Init} where
+  % 
+\begin{figure}[h]
+  % \centering
+  \quad\quad
+\begin{tabular}{@{}c@{\hspace{-.8cm}}c@{}}
+{\scriptsize
+\begin{lstlisting}[numbers=left,frame=none,xleftmargin=2.5em,mathescape=true,language=stipula,
+escapechar=§]
+stipula License {
+    assets balance, token
+    fields cost, code
+    agreement (Licensor, Licensee)(cost) { §\label{line:lic:agb}§
+        Licensor, Licensee : cost
+    } $\tostate$ @Init §\label{line:lic:age}§
+    @Init Licensor: offer(x)[n] {
+        n $\lolli$ token
+        x $\send$ code
+        now + 1 $\event$ @Prop { token $\lolli$ Licensor } $\tostate$ @End §\label{line:event_init}§
+    } $\tostate$ @Prop 
+    @Prop Licensee: activate()[b] (b == cost) {
+        b $\lolli$ balance
+        code $\send$ Licensee ;
+        now + 30 $\event$ @Trial {
+                balance $\lolli$ Licensee
+                token $\lolli$ Licensor
+                } $\tostate$ @End
+    } $\tostate$ @Trial
+    @Trial Licensee: buy()[] {
+        balance $\lolli$ Licensor
+        token $\lolli$ Licensee
+    } $\tostate$ @End
+}
+\end{lstlisting}}
+&
+\scalebox{0.80}{
+\begin{tikzpicture}[->, >=stealth', node distance=2.5cm, every state/.style={draw, minimum size=1.2cm},initial text=]
+  \node[state, initial] (init) {\stipula{Init}};
+  \node[state, right of=init] (first) {\stipula{Prop}};
+  \node[state, right of=first] (run) {\stipula{Trial}};
+  \node[state, below of=first] (end) {\stipula{End}};
+
+  \path (init) edge node[above] {\stipula{offer}} (first)
+        (first) edge node[above] {\stipula{activate}} (run)
+        (first) edge node[left] {\stipula{ev}$_{1}$} (end)
+        (run) edge node[left] {\stipula{buy}} (end)
+        (run.south) edge node[right] {\stipula{ev}$_{2}$} (end.east);
+\end{tikzpicture}
+}
+\end{tabular}
+%\vspace{-.3cm}
+\caption{The License contract in {\Stipula} and its underlying automaton.}
+\label{fig:license}
+\vspace{-.3cm}
+\end{figure}
+%
+the \stipula{Licensor} may invoke \stipula{offer}, transferring a
+\stipula{token} (representing the license) into escrow and a trial
+\stipula{code}.  A scheduled \stipula{event} is simultaneously
+registered after 1 day to reclaim the token if the \stipula{Licensee}
+fails to start the trial period.  The contract then moves to
+\stipula{Prop}.
+% 
+If no function is called in this state, then time is advanced,
+eventually triggering the event at line~\ref{line:event_init}.
+% 
+In \stipula{Prop}, the \stipula{Licensee} can activate the trial by
+paying the \stipula{cost} (observe that \stipula{b} is an asset of the
+\stipula{Licensee}), which is transferred to the contract's
+\stipula{balance}: the contract acts as a notary for assets that are
+not finally disposed.  Now the license code is revealed to the
+\stipula{Licensee} and another \stipula{event} is scheduled to handle
+the expiration of the trial period: if the license is not purchased
+before 30 days, the balance is refunded, the token returned to the
+\stipula{Licensor}.
+%
+The license purchase is done by the \stipula{buy} function, which
+finalises the transaction by transferring the \stipula{balance} to the
+\stipula{Licensor} and assigning the \stipula{token} permanently to
+the \stipula{Licensee}. 
+In the corresponding contract in~\cite{iFM25}, the start and end of the 
+trial period are defined during the agreement, whereas here, for simplicity, 
+they are hard-coded in the contract.
+\end{example}
+
+\begin{example}
+  Figure~\ref{code:deposit-stipula} defines the \stipula{Deposit}
+  contract that
+%
+\begin{figure}[t]
+\centering
+\begin{tabular}{c@{\hspace{-.6cm}}c}
+{\scriptsize
+\begin{lstlisting}[numbers=left,frame=none,xleftmargin=2.5em,mathescape=true,language=stipula,escapechar=§]
+stipula Deposit {
+    asset flour
+    field cost_flour
+    agreement (Client, Farm)(cost_flour) {
+        Client, Farm : cost_flour
+    } $\tostate$ @Start
+    @Start Farm : begin()[h]{
+        h $\lolli$ flour;
+        now + 365 $\event$ @Run { flour $\lolli$ Farm } $\tostate$ @End
+    } $\tostate$ @Run
+    @Run Farm : send()[k]{
+        k $\lolli$ flour
+    } $\tostate$ @Run
+    @Run Client : buy()[w](w/cost_flour <= flour){
+        (w/cost_flour) $\lolli$ flour, Client
+        w $\lolli$ Farm
+    } $\tostate$ @Run
+}
+\end{lstlisting}}
+& 
+\scalebox{0.8}{
+\begin{tikzpicture}[->, >=stealth', node distance=2.5cm, every state/.style={draw, minimum size=1.2cm}, initial text=]
+  \node[state, initial] (start) {\stipula{Start}};
+  \node[state, right of=start] (run) {\stipula{Run}};
+  \node[state, right of=run] (end) {\stipula{End}};
+
+  \path (start) edge node[above, sloped] {\stipula{begin}} (run)
+        (run) edge[loop above] node[above] {\stipula{buy}} (run)
+        (run) edge[loop below] node[below] {\stipula{send}} (run)
+        (run) edge node[above, sloped] {\stipula{ev}$_{1}$} (end);
+\end{tikzpicture}
+}
+\end{tabular}
+%\vspace{-.3cm}
+\caption{The \stipula{Deposit} contract in {\Stipula} and its underlying automaton}
+\label{code:deposit-stipula}
+\label{fig:deposit-fsm}
+\vspace{-.5cm}
+\end{figure}
+%
+models the interactions between a \stipula{Farm} and a
+\stipula{Client}.  The \stipula{Farm} deposits flour, while the
+\stipula{Client} purchases and withdraws the corresponding amount at
+an agreed price.  The contractual terms are enforced over a validity
+period of 365 days.  The clause \stipula{send} allows the
+\stipula{Farm} to deposit flour into the contract's stock; the
+operation
+% \stipula{h $\send$ Client} is informs the \stipula{Client} about the
+% deposited amount, while
+\stipula{h $\lolli$ flour} implements the deposit in the asset
+\stipula{flour}.  Actual delivery occurs only with \stipula{buy()[w]},
+where \stipula{(w/cost_flour) $\lolli$ flour, Client} transfers flour
+from the contract's stock to the \stipula{Client} (hence
+\stipula{w/cost_flour} must not be greater than \stipula{flour}) and
+\stipula{w $\lolli$ Farm} represents the payment to the
+\stipula{Farm}.
+% In this way, {\tt send} supplies the stock, whereas {\tt buy}
+% withdraws from it under payment.
+In~\cite{iFM25}, the \stipula{Deposit} contract does not allow \stipula{buy} and \stipula{send} 
+to start and end in the same state, as the underlying theory does not cover this case. 
+Consequently, a more convoluted contract was required. In contrast, the definition 
+of \stipula{Deposit} presented here is simpler, as it relies on a more expressive 
+theoretical framework.
+\end{example}
+
+\stipula{License} and \stipula{Deposit} represent paradigmatic
+interaction patterns that frequently arise in legal contracts and that
+are clearly reflected in their underlying automata. The behavioural
+structure of \stipula{License} is \emph{acyclic}: no state is
+revisited during execution.  In contrast, \stipula{Deposit} exhibits a
+\emph{cyclic} pattern, as it includes functions that may be invoked
+repeatedly, leading to repeated traversals of certain states.  It is
+important to observe that, while the semantics of {\Stipula} admits
+potentially infinite cyclic behaviour (for example, \stipula{Deposit}
+allows an unbounded number of interactions in a fixed time window of
+365 days), in practice only finitely many transactions can
+realistically occur. In Section~\ref{sec:cyclic-behavior}, we use this
+observation to obtain bounded encoding of cycles
+% and simpler loop invariants, which are used to implement cyclic behaviour
+in the translated contracts.
+
+\begin{definition}[Cyclic Contract, Separate Cycle]
+  \label{def:determinate}
+  A {\Stipula} contract is \emph{cyclic} if its underlying automaton
+  has a \emph{cycle}: a sequence
+  $\Q_1 \lred{\nu_1} \Q_{2} \lred{\nu_2} \cdots \lred{\nu_{\ell-1}}
+  \Q_\ell \lred{\nu_\ell} \Q_{1}$ where $\Q_1,\ldots,\Q_\ell$ are
+  pairwise different and $\nu_i$ are either function names or
+  events. A contract has \emph{separate cycles} if any two cycles
+  either have no state in common or share their initial state only.
+  % $\Q_1 \lred{\mu_1} \Q_{2} \lred{\mu_2} \cdots \lred{\mu_{\ell-1}} \Q_\ell 
+  % \lred{\mu_\ell} \Q_{1}$
+  % of pairwise different states $\Q_1,\ldots,\Q_n$ with transitions
+  % $\Q_i \lred{\mu_i} \Q_{i+1}$ and $\Q_n \lred{\mu_n} \Q_{1}$ where
+  % $\mu_i$ are either function names or events.  The contract has
+  % \emph{disjoint cycles} if different cycles have no state in common.
+  A contract is \emph{acyclic} if it has no cycle.
+\end{definition}
+
+The contract \stipula{License} is acyclic, while \stipula{Deposit} has
+separate cycles.  In what follows, we first consider acyclic contracts
+and then turn to separate cyclic ones. This progression allows us to
+introduce the complexities of the translation into {\JML}/{\Java} in a gradual
+manner.
+
+\subsection{Deductive Verification with the {\KeY} System}
+\label{subsect:key}
+
+The {\KeY} system \cite{DBLP:series/lncs/10001,KeYTutorial24} is a
+deductive verification framework for {\Java} that combines symbolic
+execution, invariant reasoning, and method contracts\footnote{Not to
+  be confused with {\Stipula} contracts. In this paper, both kinds of
+  contract are featured, but it should be obvious from the context
+  when we mean {\Stipula} contracts and when {\JML}/{\Java} method
+  contracts.} on top of a calculus for an expressive program logic.
+%
+The main use case of {\KeY} is formal verification of Java programs
+annotated with specifications written in {\JML}. 
+It provides an interactive user environment, where one can
+construct correctness proofs of {\Java} methods against their {\JML}
+contracts. Method contracts typically include preconditions
+(\jml{requires}), postconditions (\jml{ensures}), frame
+conditions (\jml{assignable}), class invariants, and auxiliary
+annotations such as loop invariants and assertions. Given a
+{\JML}-annotated {\Java} class, {\KeY} translates the specifications into
+logical proof obligations and attempts to discharge them using its
+symbolic execution engine.
+%
+The details of the verification process are irrelevant for the purpose
+of this paper: {\KeY} is used as a \emph{black box}, the input is a
+{\JML}-annotated Java file that results from translation of a
+{\Stipula} contract. In principle, \emph{any} deductive verification
+system with a sufficient coverage of \JML/\Java\ can be used, for
+example, Krakatoa~\cite{Krakatoa07} or OpenJML~\cite{Cok21}, although
+we did not try that.  In general, {\KeY} is used in interactive or
+auto-active mode, however, for all case studies discussed below, the
+verification is \emph{fully automatic}.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "newmain"
+%%% End:

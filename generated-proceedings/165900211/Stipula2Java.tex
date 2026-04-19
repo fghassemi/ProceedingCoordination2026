@@ -1,0 +1,184 @@
+%!TEX root = newmain.tex
+
+The definition of $\StipulaToJava{\A}{S}$ follows.
+
+\vspace{-.1cm}
+
+\begin{itemize}
+\item[--] $\StipulaToJava{\A}{ \zero} \eqdef \varepsilon$, where
+  $\varepsilon$ is the empty string.
+%\medskip
+\item[--]
+  $\StipulaToJava{\A}{E \, \send \, {\x} \; \; S} \eqdef \; \, \x \,
+  \mbox{\tt =} \, E \ttsemi \StipulaToJava{\A}{ S}$.
+%\medskip
+\item[--]
+  $\StipulaToJava{\A}{E \, \send \, {\B} \; \; S} \eqdef
+  \StipulaToJava{\A}{ S}$. The value of $E$ is irrelevant in our
+  examples. If the value of $E$ is relevant, we declare an \emph{ad
+    hoc} field, say \stipula{B_transmitted}, for storing the value.
+%\medskip
+\item[--] $\StipulaToJava{\A}{E \, \lolli \, \h, \h' \; \; S}$. There
+  are two cases: (\emph{i}) both $\h$ and $\h'$ are assets of the
+  contract or 
+  
+  (\emph{ii}) $\h$ is a formal parameter and $\h'$ is an
+  asset of the contract. The code for case (\emph{i}) and (\emph{ii})
+  is ({\tt tmp} is a fresh variable):
+  \begin{center}
+    {\small
+      \begin{tabular}{c@{\qquad\quad}c}
+        $
+        \begin{array}{l}
+          {\tt int \; tmp} \, \mbox{\tt =} \, E \ttsemi 
+          \\
+          \mbox{\jml{//@ $\;$ assert h-tmp >= 0}} \ttsemi 
+          \\
+          \h \, \mbox{\tt =} \, \h \mbox{\tt -} {\tt tmp} 
+          \ttsemi \h' \, \mbox{\tt =} \, \h' \mbox{\tt +} {\tt tmp} \ttsemi 
+          \\
+          \StipulaToJava{\A}{ S}
+        \end{array}
+        $
+        &
+          $
+          \begin{array}{l}
+            {\tt int \; tmp} \, \mbox{\tt =} \, E \ttsemi 
+            \\
+            \mbox{\jml{//@ $\;$ assert h-tmp >= 0  \&\& \A${\unds}$\h'-tmp >= 0}} \ttsemi 
+            \\
+            \h \, \mbox{\tt =} \, \h \mbox{\tt -} {\tt tmp} 
+            \ttsemi \A{\unds}\h' \, \mbox{\tt =} \, \A{\unds}\h' \mbox{\tt -} {\tt tmp} 
+            \ttsemi
+            \\
+            \h' \, \mbox{\tt =} \, \h' \mbox{\tt +} {\tt tmp} \ttsemi 
+            \\
+            \StipulaToJava{\A}{ S}
+          \end{array}
+          $
+        \\[.2cm]
+        Case \emph{(i)} & Case \emph{(ii)}
+      \end{tabular}}
+  \end{center}
+
+\noindent
+% In case {\tt tmp} is a fresh identifier storing the value of the
+% expression $E$.
+According to the \JML\ \jml{assert} semantics, verification can only
+succeed provided that \jml{h-tmp >= 0}, which is exactly what the
+{\Stipula} semantics requires. In addition, in case (\emph{ii}), the
+formal parameter {\h} represents (part of) the asset {\A}{\tt
+  \_}{\h}$'$ that the caller {\A} transfers to the contract upon
+invocation. Consequently, the decrease in {\tt h} must be reflected in
+the caller's asset rather than in the contract state. This semantic
+correspondence motivates the assignment {\tt A{\unds}h$'$ =
+  A{\unds}h$'$-tmp;} which correctly accounts for the transfer of
+the asset from the caller to the contract.
+
+\medskip
+
+\item[--] $\StipulaToJava{\A}{E \, \lolli \, \h, \B \; \; S}$.  Again,
+  there are two cases. Either (\emph{i}) {\h} is an asset or
+  (\emph{ii}) it is a formal parameter. The code of cases (\emph{i})
+  and (\emph{ii}) is:
+  %
+  \begin{center}
+    {\small
+      \begin{tabular}{c@{\qquad\quad}c}
+        $\begin{array}{l}
+           {\tt int \; tmp} \, \mbox{\tt =} \, E \ttsemi 
+           \\
+           \mbox{\jml{//@ $\;$ assert h-tmp >= 0}}  \ttsemi 
+           \\
+           \h \, \mbox{\tt =} \, \h \mbox{\tt -} {\tt tmp} \ttsemi 
+           \\
+           \B{\unds}\h \, \mbox{\tt =} \, \B{\unds}\h \mbox{\tt +} {\tt tmp} \ttsemi 
+           \\
+           \StipulaToJava{\A}{ S}
+         \end{array}$
+        &
+          $\begin{array}{l}
+             {\tt int \; tmp} \, \mbox{\tt =} \, E \ttsemi 
+             \\
+             \mbox{\jml{//@ $\;$ assert h-tmp >= 0 \&\& \A-tmp >= 0}}  \ttsemi 
+             \\
+             \h \, \mbox{\tt =} \, \h \mbox{\tt -} {\tt tmp} 
+             \ttsemi \A \, \mbox{\tt =} \, \A \mbox{\tt -} {\tt tmp} \ttsemi 
+             \\
+             \B \, \mbox{\tt =} \, \B \mbox{\tt +} {\tt tmp} \ttsemi 
+             \\
+             \StipulaToJava{\A}{ S}
+           \end{array}$
+        \\[.2cm]
+        Case \emph{(i)} & Case \emph{(ii)}
+      \end{tabular}}
+  \end{center}
+
+\noindent
+In case (\emph{ii}), we decrease and increase the assets {\A} and
+{\B}, respectively, where {\tt tmp} is a fresh variable. In case
+(\emph{i}), we assume that $\h$ is an asset, not a formal
+parameter. This allows us to determine what asset of {\tt B} must be
+increased by the move (the general case is dealt with \emph{ad hoc}
+annotations).
+
+\medskip
+
+\item $\StipulaToJava{\A}{\ifte{E}{S'}{S''} \; S} \eqdef \; \,$
+    {\small
+      $\begin{array}{l} {\tt if} \, \mbox{\tt (} \, E \, \mbox{\tt )
+         \{} \; \StipulaToJava{\A}{S'} \; \mbox{\tt \}}
+         \\
+         {\tt else} \; \mbox{\tt \{} \; \StipulaToJava{\A}{ S''} \;
+         \mbox{\tt \}}
+         \\
+         \StipulaToJava{\A}{ S}
+       \end{array}$
+     }
+     
+\medskip
+
+\noindent
+The semantics of the conditional is obvious: we simply use the
+corresponding {\Java} statement.
+\end{itemize} 
+
+Regarding the shortcuts $\h \lolli \h'$ and $\h \lolli \A$, we
+generate optimized {\Java} code, to avoid the declaration of the
+auxiliary variable {\tt tmp}:
+\[
+  \StipulaToJava{\A}{\h \lolli \h'} \eqdef \; {\small \jml{h' = h'+h ; h = 0 ;}}\ \mbox{\textcolor{commentColor}{{\small {\tt // \h \; and \h' assets}}}}
+\]
+\[
+  \StipulaToJava{\A}{\h \lolli \h'} \eqdef \;
+  {\small
+    \begin{array}{ll} 
+      \mbox{\jml{//@ $\;$ assert \A${\unds}$h'-h >= 0}} \ttsemi & 
+                                                                   \mbox{\textcolor{commentColor}{{\small {\tt // \h\ formal param., \h' asset}}}}
+      \\
+      \jml{h' = h'+h ;} & 
+      \\
+      \jml{A_h' = A_h'-h ;} & 
+      \\
+      \jml{h = 0 ;} &
+    \end{array}
+  }
+\]
+%and 
+\[
+\begin{array}{l@{\quad}l}
+{\rm and} & \StipulaToJava{\A}{\h \lolli \B} \eqdef \; \jml{B_h = B_h+h ; h = 0 ;}\ \mbox{\textcolor{commentColor}{{\small {\tt // \h \; asset}}}} 
+\\[.2cm]
+& \StipulaToJava{\A}{\h \lolli \B} \eqdef \; 
+\begin{array}{l}
+\mbox{\jml{//@ $\;$ assert \A-h >= 0}} \ttsemi\ \mbox{\textcolor{commentColor}{{\small {\tt // \h \; formal parameter}}}} 
+\\
+\jml{B = b+h ; h = 0 ;}
+\end{array}
+\end{array}
+\]
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "newmain"
+%%% End:

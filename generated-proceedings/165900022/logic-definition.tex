@@ -1,0 +1,32 @@
+
+We define HistMSO, the Monadic Second-Order (MSO) logic of histories and abstract executions as expected. MSO logic is the restriction of second-order logic where second-order quantifications are limited to quantifications over sets (of operations). Formally, the grammar of the MSO formulas $\phi$ over histories and abstract executions is the following, with $\varopa$ and $\varopb$ ranging over first order variables (interpreted as operations), and $A$ ranging over second order variables (interpreted as sets of operations),
+and $attr$ ranges over operation attributes.
+
+$$
+\begin{array}{ccl}
+    t & ::= & \varopa.stime \mid \varopa.rtime \\
+    f & ::= & \varopa.attr=\varopb.attr  \mid  t < t \mid \varopa.proc = p\\
+    g & ::= & \varopa.ival=\Phi \mid \varopa.oval=\Phi \mid \varopa.oval=\nabla\\
+    \phi & ::= & f \mid g \mid \phi\vee\phi \mid \neg \phi \mid \forall \varopa.\ \phi \mid \forall A.\ \phi \mid \varopa \in A \\
+            & \mid & \varopa \arpred \varopb \mid \varopa \vispred \varopb 
+\end{array}
+$$
+
+The formulas $\phi_1\wedge \phi_2$ (conjunction), $\phi_1\Rightarrow \phi_2$ (implication), $\exists \varopa.\ \phi$ (first order quantification), 
+guarded quantification $\forall \varopa \in X.\ \varphi$,
+and so on are defined as macros as expected.
+Formulas that do not contain $\vispred$ and $\arpred$ are interpreted over histories, while formulas that do contain these relation symbols are interpreted over abstract executions. The satisfaction relation 
+$(H,\ar,\vis),\upsilon \models \phi$ between an abstract execution $(H,\ar,\vis)$, a variable assignment $\upsilon$, and a formula $\phi$ is defined as usual, with the obvious interpretations for the $\arpred$ and $\vispred$ predicates.
+The set of free variables of a formula $\phi$ is defined as usual, and a formula is closed if the set of free variables is empty.
+
+
+\begin{remark}
+    The relations $\rb$ and $\ssrel$ introduced in Section~\ref{sec:graphs-finite-histories} can be defined in the logic. For instance, $\varopa\logrl{rb}\varopb \eqdef \varopa.rtime<\varopb.stime$.
+    The direct successor relations $\dsuc$, $\dsucp{p}$, $\succrl{p}{ar}$, etc introduced in the previous section can also be defined in the logic.
+    For instance, 
+    $$
+        \varopa\succrl{p}{\mathsf{rb}}\varopb \quad \eqdef \quad \varopb.proc=p \;\land\; \varopa \logrl{rb}\varopb \;\land\;
+            \neg\exists\varopc.\varopc\ssrel\varopb\land  \varopa\logrl{rb}\varopc  \land  \varopc\logrl{rb}\varopb
+    $$
+\end{remark}
+

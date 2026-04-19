@@ -1,0 +1,105 @@
+\usepackage{todonotes}
+\newcommand{\etiennetodo}[1]{\todo[color=blue!20,size=\small,inline]{Etienne: #1}}
+\newcommand{\isabelletodo}[1]{\todo[color=green!20,size=\small,inline]{Isabelle: #1}}
+
+\newcommand{\etal}{et al.\ }
+\newcommand{\ie}{i.e.,\ }
+\newcommand{\eg}{e.g.,\ }
+\newcommand{\cf}{cf.\ }
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{pifont} 
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{graphs,arrows.meta,decorations.pathreplacing}
+%\usegdlibrary{circular}
+%\usegdlibrary{grid}  
+\usetikzlibrary{positioning}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dirtytalk}
+\usepackage{nicematrix}
+
+\renewcommand\labelitemi{$\ast$} 
+
+\newcommand{\historyset}{\mathcal{H}^*(\mathbb{P}, \mathbb{T}, \mathbb{O}, \mathbb{V})}
+\newcommand{\infhistoryset}{\mathcal{H}^\omega(\mathbb{P}, \mathbb{T}, \mathbb{O}, \mathbb{V})}
+\newcommand{\contexthistory}{Let $\mathbb{P}$, $\mathbb{T} = \{read,write\}$, $\mathbb{O}$, and $\mathbb{V}$ be finite sets representing, respectively, processes, operation types, objects, and values. }
+\newcommand{\rb}{\xrightarrow{rb}}
+\newcommand{\ssrel}{\approx_{ss}}
+\newcommand{\opa}{a}
+\newcommand{\opb}{b}
+\newcommand{\opc}{c}
+\newcommand{\opd}{d}
+\newcommand{\ope}{e}
+\newcommand{\opf}{f}
+\newcommand{\opg}{g}
+\newcommand{\oph}{h}
+\newcommand{\opi}{i}
+\newcommand{\opj}{j}
+\newcommand{\opk}{k}
+\newcommand{\opl}{l}
+\newcommand{\opm}{m}
+\newcommand{\opn}{n}
+\newcommand{\opo}{o}
+\newcommand{\opp}{p}
+\newcommand{\opq}{q}
+\newcommand{\opr}{r}
+\newcommand{\ops}{s}
+\newcommand{\opt}{t}
+\newcommand{\opu}{u}
+\newcommand{\opv}{v}
+\newcommand{\opw}{w}
+\newcommand{\opx}{x}
+\newcommand{\opy}{y}
+\newcommand{\opz}{z}
+\newcommand{\dsucp}[1]{\succrl{#1}{rb}}
+\newcommand{\dsuc}{\dsucp{}}
+%$\twoheadrightarrow$
+\newcommand{\patharrow}{\!\mathrel{\rlap{\hskip 0.55em $\rightarrow$}\rightarrow}\;}
+\newcommand{\algoneset}{\mathcal{G}^*}
+\newcommand{\infalgoneset}{\mathcal{G}^\omega}
+\newcommand{\algone}{\textsl{Alg}}
+\newcommand{\foralls}{\forall\;}
+\newcommand{\ar}{\xrightarrow{ar}}
+\newcommand{\vis}{\xrightarrow{vis}}
+\newcommand{\visc}{\xrightarrow{visc}}
+\newcommand{\visrb}{\xrightarrow{visrb}}
+
+% \spnewtheorem{definition}{Definition}{\bfseries}{\rmfamily}
+
+
+\newcommand{\firstvis}[2]{\mathsf{firstVis}(#1,#2)}
+
+\tikzset{
+  withcaps/.style={
+    postaction={
+      decorate,
+      decoration={
+        markings,
+        mark=at position 0 with {\draw[-] (0pt,-5pt) -- (0pt,5pt);},
+        mark=at position 1 with {\draw[-] (0pt,-5pt) -- (0pt,5pt);}
+      }
+    }
+  }
+}
+
+\newcommand{\eqdef}{\stackrel{\text{def}}{=}}
+\newcommand{\varopa}{\mathsf{a}}
+\newcommand{\varopb}{\mathsf{b}}
+\newcommand{\varopc}{\mathsf{c}}
+\newcommand{\arpred}{\stackrel{\mathsf{ar}}{\longrightarrow}}
+\newcommand{\vispred}{\stackrel{\mathsf{vis}}{\longrightarrow}}
+\newcommand{\succrl}[2]{\mathrel{\xrightharpoonup{#2}}_{#1}}
+\newcommand{\logrl}[1]{\xrightarrow{\mathsf{#1}}}
+\newcommand{\sessionorder}{\xrightarrow{so}}
+\newcommand{\Enc}{\mathsf{Enc}}
+
+\newcommand{\Types}{\mathbb{T}}
+\newcommand{\Values}{\mathbb{V}}
+\newcommand{\Objects}{\mathbb{O}}
+\newcommand{\succs}{\mathsf{succs}}

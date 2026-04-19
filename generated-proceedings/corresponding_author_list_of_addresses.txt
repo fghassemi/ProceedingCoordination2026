@@ -1,0 +1,56 @@
+This file contains information about email addresses
+of the corresponding editors and authors of LNCS volume 16590.
+The file was generated automatically by EasyChair, see
+https://easychair.org. There is also an Excel file containing
+information about corresponding authors and authors who signed
+copyright forms.
+
+CORRESPONDING EDITOR(S)
+
+Name(s): Roberto Casadei
+Email address: roby.casadei@unibo.it
+
+CORRESPONDING AUTHOR EMAIL ADDRESSES
+
+The number in parentheses is the first page of the paper of
+these authors in the proceedings. Note that some papers have
+more than one corresponding author.
+------------------------------
+(1) Timed Scenario Expressions and Realisability
+Neda Saeedloei <neda.saeed@gmail.com>, Feliks Kluzniak <feliks.kluzniak@relational.ai>
+------------------------------
+(22) HistMSO: a Logic for Reasoning about Consistency Models with MONA
+Isabelle Coget <isabelle@coget.org>, Étienne Lozes <etienne.lozes@univ-cotedazur.fr>
+------------------------------
+(44) Motif Refinement for the Hierarchical Control of Structured CPSs
+Simon Bliudze <Simon.Bliudze@inria.fr>, Sophie Cerf <sophie.cerf@inria.fr>, Olga Kouchnarenko <olga.kouchnarenko@femto-st.fr>
+------------------------------
+(67) Aggregate Indoor Localisation
+Giorgio Audrito <giorgio.audrito@unito.it>, Gianluca Torta <gianluca.torta@unito.it>
+------------------------------
+(87) A Self-Stabilizing Min-Max Consensus via Path-loop Detection
+Angela Cortecchia <angela.cortecchia@unibo.it>, Danilo Pianini <danilo.pianini@unibo.it>, Mirko Viroli <mirko.viroli@unibo.it>
+------------------------------
+(110) ScalaTropy: Multiparty Coordination with Monadic Communication Primitives
+Nicolas Farabegoli <nicolas.farabegoli@unibo.it>
+------------------------------
+(131) Bach4Popper: Towards Federated Inductive Logic Programming using Coordination
+Yasmine Akaichi <yasmine.akaichi@unamur.be>, Manel Barkallah <manel.barkallah@unamur.be>, Jean-Marie Jacquet <jean-marie.jacquet@unamur.be>, Isabelle Linden <isabelle.linden@unamur.be>, Wim Vanhoof <wim.vanhoof@unamur.be>
+------------------------------
+(153) Runtime adaptation as a programming pattern in service composition
+Carlos Gustavo Lopez Pombo <cglopezpombo@unrn.edu.ar>, Pablo Montepagano <pmontepagano@dc.uba.ar>, Emilio Tuosto <emilio.tuosto@gssi.it>
+------------------------------
+(171) Phyelds: A Pythonic Framework for Aggregate Computing
+Gianluca Aguzzi <gianluca.aguzzi@unibo.it>, Davide Domini <davide.domini@unibo.it>, Nicolas Farabegoli <nicolas.farabegoli@unibo.it>, Mirko Viroli <mirko.viroli@unibo.it>
+------------------------------
+(190) Proof of Delivery: Mechanized Mailbox Types
+Edgard Schiebelbein <edgard.schiebelbein@cs.rptu.de>, Annette Bieniusa <bieniusa@rptu.de>, Simon Fowler <simon.fowler@glasgow.ac.uk>
+------------------------------
+(211) Deductive Verification of Legal Contracts
+Reiner Hähnle <haehnle@cs.tu-darmstadt.de>, Cosimo Laneve <cosimo.laneve@unibo.it>
+------------------------------
+(233) Simulation and Analysis of Indoor-Air-Quality Measuring Devices with YODA
+Riccardo Petracci <riccardo.petracci@unicam.it>, Nicola Del Giudice <nicola.delgiudice@unicam.it>
+------------------------------
+(255) High-Fidelity Simulation of Aggregate Computing Systems with Collektivity
+Martina Baiardi <m.baiardi@unibo.it>, Angela Cortecchia <angela.cortecchia@unibo.it>, Danilo Pianini <danilo.pianini@unibo.it>

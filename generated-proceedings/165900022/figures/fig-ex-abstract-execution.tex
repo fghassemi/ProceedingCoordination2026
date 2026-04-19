@@ -1,0 +1,27 @@
+\begin{tikzpicture}[x=2cm, y=1cm,every node/.style={font=\large}]
+
+%  
+	\node[anchor=east] at (-0.1, 0) {\small \textit{Proc. 1}};  % Adjust the x-coordinate as needed
+  \node[anchor=east] at (-0.1, -1) {\small \textit{Proc. 2}}; % Label for second set  
+
+  % First line of bars
+  \draw[withcaps] (0,0) -- (2,0) node[midway, above] {\tiny x.write(42)};
+  \draw[dashed] (2,0) -- (2.5,0);
+  \draw[withcaps] (2.5,0) -- (3,0) node[midway, above] {\tiny x.read()$\to$17};
+  \draw[dashed] (3,0) -- (3.5,0);
+  \draw[withcaps] (3.5,0) -- (4,0) node[above, pos=0.7] {\tiny x.read()$\to$42};
+  % Second line of bars 
+  \draw[dashed] (0,-1) -- (0.25,-1); 
+  \draw[withcaps] (0.25,-1) -- (0.6,-1) node[midway, below] {\tiny y.write(true)};
+  \draw[dashed] (0.6,-1) -- (1,-1);
+  \draw[withcaps](1,-1) -- (2.75,-1) node[midway, below] {\tiny  x.write(17)};
+  \draw[dashed] (2.75,-1) -- (3.75,-1);
+  \draw[withcaps](3.75,-1) -- (4,-1) node[midway, below] {\tiny x.read()$\to$42};
+
+  % Arrows for program order
+  \draw[->, thick] (1.5, -1) -- node[above, sloped] {\tiny $ar$} (1.6, 0); 
+  \draw[->, thick] (2.5, -1) -- node[above, sloped, pos=0.4] {\tiny $vis$} (2.6, 0); 
+  \draw[->, thick] (1.8, 0) -- node[above, sloped] {\tiny $vis$} (3.85, -1); 
+  \draw[thick] (1.7, 0) edge [->, bend left=30] node[above, sloped] {\tiny $vis$} (3.6, 0); 
+
+\end{tikzpicture}

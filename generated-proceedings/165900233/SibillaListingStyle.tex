@@ -1,0 +1,98 @@
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codeyellow}{rgb}{0.67,0.67,0.0}
+\definecolor{backcolour}{rgb}{0.96, 1.0, 0.98}
+\definecolor{white}{rgb}{1.0,1.0,1.0}
+\definecolor{codeblue}{rgb}{0,0,1.0}
+\definecolor{darkred}{rgb}{0.59,0,0}
+\definecolor{darkgreen}{rgb}{0,0.59,0}
+\definecolor{yellow}{rgb}{0.87,0.85,0}
+\definecolor{cyan}{rgb}{0,0.76,0.87}
+
+\def\smalltext{\begingroup\scriptsize}
+\def\endsmalltext{\endgroup}
+
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=[1]\color{magenta},
+    keywordstyle=[2]\color{codeblue},
+    keywordstyle=[3]\color{darkred},
+    keywordstyle=[4]\color{darkgreen},
+    keywordstyle=[5]\color{cyan},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    %numbers=left,
+    numbers = none,
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showlines=true,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\lstdefinelanguage{yoda}{
+    morekeywords=[1]{param,const, state, agent, features,  system, predicate, actions, behaviour, when, orwhen, otherwise, observations, bool, int, real, end, environment, sensing, <-, any, it, dynamic, element, configuration, for, sampled, distinct, time, from, do, endfor, measure, mean, let, and, endlet, in, if, else, endif},
+    keywords=[2]{goIdle,read,send,save,turnOff,moveFromHall,moveToHall,moveFromCorridor,moveToCorridor, stop },
+    keywords=[3]{status,batteryPerc,batteryCapacity,saving,registeredIAQ,savedCO2,minutes,movingTowards,sojournTime},
+    keywords=[4]{lowChargeLed,numOfRoom,roomCO2,roomPos},
+    keywords=[5]{numOfHuman,registeredCO2,isCrowded,currentRoom},
+    sensitive=false, % keywords are not case-sensitive
+    %morecomment=[l]{//}, % l is for line comment
+    morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+    morestring=[b]" % defines that strings are enclosed in double quotes
+} %
+
+\lstdefinelanguage{traceSibilla}{
+    morekeywords={x, y, z, direction, shape, colour, when, otherwise, blue, red, green, yellow, black, cyan, gray, magenta, white,  circle, square, triangle, hexagon, car, ant, bird},
+    sensitive=false, % keywords are not case-sensitive
+    morecomment=[l]{//}, % l is for line comment
+    morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+    %morestring=[b]" % defines that strings are enclosed in double quotes
+} %
+
+\lstdefinelanguage{shellSibilla}{
+    morekeywords={modules, module, load, env, environment, set, clear, reset, states, init, replica, deadline, dt, measures, add, all, remove, measure, remove, save, output, prefix, postfix, run, quit, simulate, trace, in},
+    sensitive=false, % keywords are not case-sensitive
+    morecomment=[l]{//}, % l is for line comment
+    morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+    %morestring=[b]" % defines that strings are enclosed in double quotes
+} %
+
+
+
+% Sibilla population odel keyword
+
+\lstdefinelanguage{populationLang}{
+    morekeywords={param,const, species, rule, |,  -[ , ]-> , system, predicate},
+    sensitive=false, % keywords are not case-sensitive
+    morecomment=[l]{//}, % l is for line comment
+    morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+    morestring=[b]" % defines that strings are enclosed in double quotes
+} %
+
+\lstdefinelanguage{LIOLang}{
+    morekeywords={param,const, species, rule, |,  -[ , ]-> , system, predicate, state, endstate, action},
+    sensitive=false, % keywords are not case-sensitive
+    morecomment=[l]{//}, % l is for line comment
+    morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+    morestring=[b]" % defines that strings are enclosed in double quotes
+} %
+
+\lstdefinelanguage{slam}{
+    morekeywords={param,const, state, agent, features,  system, predicate, actions, behaviour, when, orwhen, otherwise, observations, bool, int, real, end, environment, sensing, <-, any, it, dynamic, attributes, rnd, PI, views, exists, boolean, init, after, if, else, send, on, time, states, now, dt, cos, sin, U},
+    sensitive=false, % keywords are not case-sensitive
+    morecomment=[l]{//}, % l is for line comment
+    morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+    morestring=[b]" % defines that strings are enclosed in double quotes
+} %

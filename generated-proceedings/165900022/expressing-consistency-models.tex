@@ -1,0 +1,69 @@
+In this section we exercise the expressive power of HistMSO by formally defining several consistency models from Viotti and Vukolic classification~\cite{ViottiVukolic}. Our finding is that almost all of the 42 models formalized by Viotti and Vukolic (see~\cite{ViottiVukolic} Figure~1) can be expressed in our logic. The only exceptions\footnote{even those models could be approached by moving to a discrete time semantics} are the few models based on exact timing constraints: \textsl{Timed Visibility}~\cite{DBLP:conf/spaa/SinglaRH97}, \textsl{Timed Causality}, and \textsl{Timed Linearizability}. Due to space constraints, we only present a very short selection of consistency models here, showing by some examples how to reformulate in HistMSO the meta logic used by Viotti and Vukolic. The reader may consider looking first at Viotti and Vukolic
+formalisation of the consistency models in their meta logic, see page 41 of~\cite{ViottiVukolic}.
+
+\subsubsection{Return value consistency} ensures that all operations return the appropriate and correct values. In this work, this means that any read operation should output the most recent value written to the corresponding object by a visible operation. The following formula intuitively captures this behavior: it holds if all \textsl{writes} return the empty value $\Phi$, and if every \textsl{read} either accesses an object that has not been written to before, or retrieves the last (in the sense of arbitration) value visibly written to that object.
+
+Before expressing these with formulas, let us first recall the notion of context of an operation, introduced by Viotti and Vukolic. An operation $\opb$ is part of the context explaining a read operation $\opa$ if it is a write on the same object that is visible to $\opa$.
+
+$$
+\opb\in\mathsf{ctxt}(\opa) \quad \eqdef\quad \opb\vis \opa\wedge \opb.type=write\wedge \opb.obj=\opa.obj
+$$
+
+It becomes then easy to express return value consistency in HistMSO.
+
+$$
+    \begin{array}{rcl}
+        \textsc{RVal} & \eqdef & \forall \opa.\; W(a) \wedge R(a)
+        \\
+        W(a) & \eqdef & \opa.type = write \Rightarrow \opa.oval = \Phi 
+        \\ 
+        R(a) & \eqdef & \opa.type = read \Rightarrow \opa.oval=\mathsf{lastWrite}(\mathsf{ctxt}(\opa)) 
+        \\
+        v=\mathsf{lastWrite}(C) & \eqdef & \forall \opb.\; \big(\opb\in C\wedge \opb.ival\neq v\big)\; \Rightarrow\; \exists \opc \in C.\; \opb\ar\opc
+    \end{array}
+$$
+
+\subsubsection{Real time} guarantees that any two operations not concurrently executed are ordered by \textsl{arbitration} according to absolute time. In Viotti and Vukolic meta logic, this is expressed as $rb\subseteq ar$. In HistMSO, this becomes
+
+$\textsc{RealTime} \eqdef \forall a.\forall b. a\xrightarrow{rb}b \Rightarrow a\xrightarrow{ar}b $.
+
+
+\subsubsection{Linearizability} states that \say{each operation shall appear to be applied instantaneously at a certain point in time between its invocation and its response}~\cite{HerlihyW90}. Following Burckhardt~\cite{PrinciplesOfEventualConsistency}, Viotti and Vukolic formalize linearisability as the conjunct of return value consistency, real time, and a third notion, called single order:
+$
+ \textsc{Linearizability} \eqdef \textsc{SingleOrder}\land\textsc{RealTime}\land\textsc{RVal}.
+$
+Intuitively, single order tights toghether visibility and arbitration. In Viotti and Vukolic meta logic, this is expressed as
+$
+\exists H ' \subseteq \{ op \in H : op.oval= \nabla \} : vis = ar\setminus (H'\times H).
+$
+In HistMSO, this becomes
+$$
+\begin{array}{rcl}
+\textsc{SingleOrder} & \eqdef & \exists X.( \forall x.x\in X\Rightarrow x.oval=\nabla )\land\\ 
+&& \forall a.\forall b.(a\xrightarrow{vis}b \Leftrightarrow a\xrightarrow{ar}b\land\neg(a\in X))
+\end{array}
+$$  
+
+\subsubsection{Quiescent Consistency} requires that if all objects stop receiving
+updates (i.e., become quiescent), then the execution is equivalent to some sequential execution containing only complete operations. Although this definition resembles eventual consistency, it does not guarantee termination: a system that does not stop receiving updates will not reach quiescence, thus replicas convergence. Following Viotti and Vukolic\footnote{We slightly simplified their formula for presentation purposes. Their formula was $|H_{|wr}|<\infty \Rightarrow \exists C\in\mathcal C :\forall [f]\in H/{\approx_{ss}}:|\{op\in[f]:op.oval\neq\mathsf{lastWrite}(C)\}|<\infty
+$. In this formula, $C$ is a context and $[f]$ is the set of operations of some process. Due to the finiteness of the set of processes, it is equivalent to $|H_{|wr}|<\infty \Rightarrow \exists C\in\mathcal C:\, |\{op\in H \mid op.oval\neq \mathsf{lastWrite}(C)\}|<\infty
+$.}, we can express quiescent consistency in HistMSO based on set finiteness.
+
+
+$$
+\begin{array}{rcl}
+    \textsc{QuiescentConsistency} & \eqdef & \mathsf{Finite}(\{\opa\mid\opa.type=write\})\; \Rightarrow  \; \mathsf{FiniteInconsistency}
+    \\
+    \mathsf{FiniteInconsistency} & \eqdef &
+    \exists a.\ a.type=read \\ 
+    && \wedge \mathsf{Finite}\big(\{b\mid b.oval\neq\mathsf{lastWrite}(\mathsf{ctxt}(a))\}\big)
+\end{array}
+$$
+
+On arbitrary structures, set finiteness is not MSO definable. However, since $\omega$-histories are non-Zeno and involve a finite number of processes, a subset $O$ of an $\omega$-history $H$ is finite if and only if there is a time $t$ such that all operations of $O$ starts before $t$.
+$$
+\mathsf{Finite}(O)\eqdef (\neg\exists a\in O)\; \vee\; 
+\exists \opa\in O.\; \forall \opb\in O.\;\opb.stime\leq \opa.stime
+$$
+
+All together, we have that quiescent consistency is expressible in HistMSO.

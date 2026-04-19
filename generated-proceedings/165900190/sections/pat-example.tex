@@ -1,0 +1,348 @@
+\section{Type Derivation Example}
+\label{sec:type-checking-example}
+
+We show an example of how type checking works in Pat. 
+To this end, we model a small system with two processes where one process sends a \msg{Ping} message to the other process.
+As a response, a \msg{Pong} message is sent back.
+The messages have signature $\mathcal{S} = \{\msg{Ping} \mapsto \mbtout{\mbmsg{Pong}}, \msg{Pong} \mapsto \unittype \}$,
+i.e.\ the payload of \msg{Ping} contains a reference to a mailbox expecting a \msg{Pong} message, and the payload of \msg{Pong} is of the unit type.
+
+For better readability we use explicit names as variables in this example and further syntactic sugar.
+We write $t_1 \ ; \ t_2$  for $\keyword{let} \ x = t_1 \ \keyword{in} \ t_2$, where $x$ has type $\unittype$ and does not occur in $t_2$.
+For directly freeing a mailbox $V$, we write $\keyword{free} \ V$ as a shorthand for $\TGuard{V}{\mbone}{\GFree ()}$.
+
+\begin{minipage}{0.47\textwidth}
+\begin{pat}
+def $\textsf{client}$() : $\unittype$ {
+  $\keyword{let}$ $\mathit{server}$ = $\TNew$ in
+  spawn $\textsf{serverListen}$($server$);
+  let $\mathit{self}$ = $\TNew$ in
+  $\TSend{server}{Ping}{\mathit{self}}$;
+  guard $\mathit{self}$ : $\mbmsg{Pong}$ {
+    receive $\msg{Pong}$[$reply$] from $\mathit{self}$ |->
+      free $\mathit{self}$; ()
+  }
+}
+\end{pat}
+\end{minipage}\hfill
+\begin{minipage}{0.5\textwidth}
+\begin{pat}[firstnumber=11]
+def $\textsf{serverListen}$($\mathit{self} : \mbtin{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}$) : $\unittype$ {
+  guard $\mathit{self}$ : $\mbmsg{Ping} \mbchoice \mbone$ {
+      receive $\msg{Ping}$[$reply$] from $\mathit{self}$ |->
+        $\TSend{reply}{Pong}{\mathit{self}}$;
+        free $\mathit{self}$; ()
+      $\GFree{()}$
+  }
+}
+\end{pat}
+\end{minipage}
+\\
+
+The program consists of two functions: \textsf{client} and \textsf{serverListen}.
+Function \textsf{client} is the initial starting point, where a new mailbox name is bound to variable $\mathit{server}$.
+Then, a new process with \textsf{serverListen} is created, providing $\mathit{server}$ as argument.
+The function continues by again creating a new mailbox name, binding it to $\mathit{self}$, and sending a \msg{Ping} message to $\mathit{server}$ with $\mathit{self}$ as payload.
+Then, in the guard-expression, a receive guard is triggered when $\mathit{self}$ contains a \msg{Pong} message.
+The mailbox is freed and the unit value is returned.
+
+Function $\textsf{serverListen}$ requires an argument of type $\mbtin{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}$, indicating a mailbox containing a \msg{Ping} message or being empty.
+The function's body contains only a single guard-expression consisting of two guards.
+When a \msg{Ping} message with some payload $\mathit{reply}$ is received, a \msg{Pong} message is sent to $\mathit{reply}$.
+After that, $\mathit{self}$ is freed and the unit value is returned.
+The other guard is triggered when $\mathit{self}$ does not contain any messages; in this case, the mailbox is freed.
+
+Using the syntax we defined with de Bruijn indices and without syntactic sugar, both functions look as follows:
+
+\begin{minipage}{0.45\textwidth}
+\begin{pat}
+def $\textsf{client}$() : $\unittype$ {
+  $\TLet{\TNew}{}$
+  $\TLet{\TSpawn{\textsf{serverListen}(\Var{0})}}{}$
+  $\TLet{\TNew}{}$
+  $\TLet{\TSend{(\Var{2})}{Ping}{\Var{0}}}{}$
+  guard $\Var{1}$ : $\mbmsg{Pong}$ {
+    receive $\msg{Pong}$ |->
+      $\TGuard{\Var{1}}{\mbone}{\GFree{()}}$
+  }
+}
+\end{pat}
+\end{minipage}\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{pat}[firstnumber=11]
+def $\textsf{serverListen}$($\mathit{self} : \mbtin{\msg{Ping} \mbchoice \mbone ^ \ureturnable}$) : $\unittype$ {
+  guard $\Var{0}$ : $\mbmsg{Ping} \mbchoice \mbone$ {
+      receive $\msg{Ping}$ |->
+        $\TLet{\TSend{(\Var{0})}{Pong}{()}}$
+        $\TGuard{\Var{2}}{\mbone}{\GFree{()}}$
+      $\GFree{()}$
+  }
+}
+\end{pat}
+\end{minipage}
+\\
+
+Next, we present a type derivation of the \textsf{client} definition.
+Due to the amount of rules needed for this derivation, we focus on the subtrees with the essential reasoning steps and leave those out that mainly contain formal steps.
+To make environments more readable, the abbreviation $\bot^n$ is used for an environment consisting of $n$ $\bot$-entries.
+Additionally, $\emptyset$ symbols are omitted from environments.
+
+Since, in our mechanization of Pat, every function requires exactly one argument, we need to give $\mathsf{client}$ an argument.
+Thus, we define $\mathsf{client}$ to take an argument of type $\unittype$.
+The derivation therefore starts with an environment consisting of a single $\unittype$ entry.
+
+\begin{center}
+  \scalebox{0.72}{
+  \begin{prooftree}
+    \infer0[$\NEW$]{\WellTypedTerm{\bot}{\TNew}{\mbtin{\mbone ^ \ureturnable}}}
+    \infer1[$\SUB$]{\vspace{-2cm} \WellTypedTerm{\unittype}{\TNew}{\mbtin{\mbone ^ \ureturnable}}}
+    \infer0[$\VAR$]{\WellTypedTerm{\mbtin{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}, \bot}{\Var{0}}{\mbtin{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}}}
+    \infer1[$\SUB$]{\WellTypedTerm{\mbtin{(\mbmsg{Ping} \mbchoice \mbone) \mbcomp \mbone ^ \ureturnable}, \bot}{\Var{0}}{\mbtin{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}}}
+    \infer1[$\APP$]{\WellTypedTerm{\mbtin{(\mbmsg{Ping} \mbchoice \mbone) \mbcomp \mbone ^ \ureturnable}, \bot}{\textsf{serverListen}(\Var{0})}{\unittype}}
+    \infer1[$\SPAWN$]{
+      \WellTypedTerm{\mbtin{(\mbmsg{Ping} \mbchoice \mbone) \mbcomp \mbone ^ \usecondclass}, \bot}{
+        \TSpawn{\textsf{serverListen}(\Var{0})}
+      }
+      {\unittype}
+    }
+    \hypo{\mathbf{D_1}}
+    \infer2[$\LET$]{
+      \WellTypedTerm{\mbtin{\mbone ^ \ureturnable}, \bot}{
+      \begin{array}{l}
+        \TLet{\TSpawn{\textsf{serverListen}(\Var{0})}}{}\\
+        \TLet{\TNew}{}\dots
+      \end{array}
+      }
+      {\unittype}
+    }
+    \infer2[$\LET$]{
+      \WellTypedTerm{\unittype}{
+      \begin{array}{l}
+        \TLet{\TNew}{}\\
+        \TLet{\TSpawn{\textsf{serverListen}(\Var{0})}}{}\\
+        \TLet{\TNew}{}\\
+        \TLet{\TSend{(\Var{2})}{Ping}{\Var{0}}}{}\\
+        \keyword{guard} \ \Var{1} : \mbmsg{Pong} \{\\
+          \ \ \keyword{receive} \ \msg{Pong} \mapsto\\
+            \ \ \ \ \TGuard{\Var{1}}{\mbone}{\GFree{()}}\\
+        \}
+      \end{array}
+      }
+      {\unittype}
+    }
+  \end{prooftree}
+  }
+\end{center}
+
+For the first let-expression, the environment is split as $\envcomb{\unittype}{\bot}{\unittype}$, making $\unittype$ only available in the left subtree.
+Since this $\unittype$ entry is not needed, it is removed using environment subtyping.
+Then, the left subtree can be typed with $\mbtin{\mbone ^ \ureturnable}$ by the $\NEW$ rule.
+In the right subtree, $\mbtin{\mbone ^ \ureturnable}$ is added to the environment as the result type of the left term.
+For the right subtree, we again use the $\LET$ rule, where the right derivation is described by tree $\mathbf{D_1}$.
+Now the environment is split using the combination
+$\envcomb{\mbtin{(\mbmsg{Ping} \mbchoice \mbone) \mbcomp \mbone} ^ \usecondclass, \bot}{\mbtout{\mbmsg{Ping} \mbchoice \mbone} ^ \ureturnable, \bot}{\mbtin{\mbone ^ \ureturnable}, \bot}$.
+This specific type combination is used since $\mathsf{serverListen}$ requires an argument of type $\mbtin{\mbmsg{Ping} \mbchoice \mbone} ^ \ureturnable$,
+indicating a mailbox containing a \msg{Ping} message or being empty.
+The derivation for term $\TSpawn{\mathsf{serverListen}(\Var{0})}$ is straightforward by applying the appropriate rules.
+One additional subtyping step is made before the \VAR rule to transform type $\mbtin{(\mbmsg{Ping} \mbchoice \mbone) \mbcomp \mbone} ^ \ureturnable$
+into $\mbtin{\mbmsg{Ping} \mbchoice \mbone} ^ \ureturnable$.
+Since $\mbone$ is the neutral element for pattern composition, it can be dropped while keeping the pattern's semantics.
+The next tree describes the derivation at $\mathbf{D}_1$:
+
+\begin{center}
+  \scalebox{0.72}{
+  \begin{prooftree}
+    \infer0[$\NEW$]{\WellTypedTerm{\bot^3}{\TNew}{\mbtin{\mbone ^ \ureturnable}}}
+    \infer0[$\VAR$]{
+      \WellTypedTerm{\bot^2, \mbtout{\mbmsg{Ping} ^ \usecondclass}, \bot}
+      {\Var{2}}
+      {\mbtout{\mbmsg{Ping} ^ \usecondclass}}
+    }
+    \infer1[$\SUB$]{
+      \WellTypedTerm{\bot^2, \mbtout{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}, \bot}
+      {\Var{2}}
+      {\mbtout{\mbmsg{Ping} ^ \usecondclass}}
+    }
+    \infer0[$\VAR$]{
+      \WellTypedTerm{\mbtout{\mbmsg{Pong} ^ \usecondclass}, \bot^3}
+      {\Var{0}}
+      {\mbtout{\mbmsg{Pong} ^ \usecondclass}}
+    }
+    \infer1[$\SUB$]{
+      \WellTypedTerm{\mbtout{\mbmsg{Pong} ^ \usecondclass}, \unittype, \bot^2}
+      {\Var{0}}
+      {\mbtout{\mbmsg{Pong} ^ \usecondclass}}
+    }
+    \infer2[$\SEND$]{
+      \WellTypedTerm{
+          \mbtout{\mbmsg{Pong} ^ \usecondclass}, \unittype, \mbtout{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}, \bot
+      }
+      {\TSend{(\Var{2})}{Ping}{\Var{0}}}
+      {\unittype}
+    }
+    \hypo{\hspace{-2cm}\mathbf{D_2}}
+    \infer[separation=5.5em]2[$\LET$]{
+      \WellTypedTerm{\mbtin{\mbone ^ \ureturnable}, \unittype, \mbtout{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}, \bot}{
+      \begin{array}{l}
+        \TLet{\TSend{(\Var{2})}{Ping}{\Var{0}}}{}\\
+        \keyword{guard} \ \Var{1} : \mbmsg{Pong} \{\\
+          \ \ \keyword{receive} \ \msg{Pong} \mapsto\\
+            \ \ \ \ \TGuard{\Var{1}}{\mbone}{\GFree{()}}\\
+        \}
+      \end{array}
+      }
+      {\unittype}
+    }
+    \infer[separation=-5em]2[$\LET$]{
+      \WellTypedTerm{\unittype, \mbtout{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}, \bot}{
+      \begin{array}{l}
+        \TLet{\TNew}{}\\
+        \TLet{\TSend{(\Var{2})}{Ping}{\Var{0}}}{}\\
+        \keyword{guard} \ \Var{1} : \mbmsg{Pong} \{\\
+          \ \ \keyword{receive} \ \msg{Pong} \mapsto\\
+            \ \ \ \ \TGuard{\Var{1}}{\mbone}{\GFree{()}}\\
+        \}
+      \end{array}
+      }
+      {\unittype}
+    }
+  \end{prooftree}
+  }
+\end{center}
+
+The derivation starts by applying the \LET rule, where $\TNew$ from the left subterm of the let-expression is trivially typed using \NEW and the empty environment.
+For the right subterm, another \LET rule is used, creating one subtree for typing the send-term and one subtree for typing the guard.
+The guard is typed using another derivation $\mathbf{D_2}$.
+To type the sending of message $\msg{Ping}$ successfully, we require two mailbox types for variables $\Var{2}$ and $\Var{0}$.
+Since $\Var{2}$ is the receiving mailbox, it must be able to receive a $\msg{Ping}$ message, i.e.\ have type $\mbtout{\mbmsg{Ping}}^\usecondclass$.
+Because the current environment contains the similar type $\mbtout{\mbmsg{Ping} \mbchoice \mbone}^\ureturnable$, we are able to type $\Var{2}$ with the help of subtyping,
+since $\mbtout{\mbmsg{Ping} \mbchoice \mbone}^\ureturnable \subtype \mbtout{\mbmsg{Ping}}^\usecondclass$.
+For $\Var{0}$, the signature of $\msg{Ping}$ tells us that $\Var{0}$ has to have type $\mbtout{\mbmsg{Pong}^\usecondclass}$.
+Thus, the environment combination from the previous \LET rule is
+$\envcomb
+  {\mbtout{\mbmsg{Pong}}^\usecondclass, \unittype, \mbtout{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}, \bot}
+  {\mbtin{\mbmsg{Pong} \mbcomp \mbone}^\ureturnable, \bot^3}
+  {\mbtin{\mbone ^ \ureturnable}, \unittype, \mbtout{\mbmsg{Ping} \mbchoice \mbone ^ \ureturnable}, \bot}$.
+This introduces $\mbmsg{Pong}$ into the environment, letting us correctly type $\Var{0}$ with an intermediate \SUB step to get rid of the unnecessary $\unittype$.
+Tree $\mathbf{D_2}$ describes the typing derivation of the guard:
+
+\begin{center}
+  \scalebox{0.72}{
+  \begin{prooftree}
+    \infer0[$\VAR$]{
+      \WellTypedTerm{\bot, \mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable}, \bot^3}
+      {\Var{1}}
+      {\mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable}}
+    }
+    \infer0[$\VAR$]{
+      \WellTypedTerm{\bot, \mbtin{\mbone}^\ureturnable, \bot^5}
+      {\Var{1}}
+      {\mbtin{\mbone}^\ureturnable}
+    }
+    \infer1[$\SUB$]{
+      \WellTypedTerm{\unittype, \mbtin{\mbone}^\ureturnable, \bot^5}
+      {\Var{1}}
+      {\mbtin{\mbone}^\ureturnable}
+    }
+    \infer0[$\UNIT$]{
+      \WellTypedTerm{\bot^7}{()}{\unittype}
+    }
+    \infer1[$\FREE$]{
+      \WellTypedGuard{\bot^7}{\GFree{()}}{\unittype}{\mbone}
+    }
+    \infer1[$\SINGLE$]{
+      \WellTypedGuard{\bot^7}{\GFree{()}}{\unittype}{\mbone}
+    }
+    \infer2[$\GUARD$]{
+      \WellTypedGuards{\unittype, \mbtin{\mbone}^\ureturnable, \bot^5}
+      {
+        \begin{array}{l}
+        \TGuard{\Var{1}}{\mbone}{
+          \\
+          \ \ \GFree{()}\\
+        }
+        \end{array}
+      }
+      {\unittype}
+      {\mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable}}
+    }
+    \infer1[$\RECEIVE$]{
+      \WellTypedGuards{\bot^5}
+      {
+        \begin{array}{l}
+          \keyword{receive} \ \msg{Pong} \mapsto\\
+          \TGuard{\Var{1}}{\mbone}{
+            \\
+            \ \ \GFree{()}\\
+        }
+        \end{array}
+      }
+      {\unittype}
+      {\mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable}}
+    }
+    \infer1[$\SINGLE$]{
+      \WellTypedGuards{\bot^5}
+      {
+        \begin{array}{l}
+          \keyword{receive} \ \msg{Pong} \mapsto\\
+          \TGuard{\Var{1}}{\mbone}{
+            \\
+            \ \ \GFree{()}\\
+          }
+        \end{array}
+      }
+      {\unittype}
+      {\mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable}}
+    }
+    \infer[separation=-3ex]2[$\GUARD$]{
+      \WellTypedTerm{\bot, \mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable}, \bot^3}{
+      \begin{array}{l}
+        \keyword{guard} \ \Var{1} : \mbmsg{Pong} \{\\
+          \ \ \keyword{receive} \ \msg{Pong} \mapsto\\
+            \ \ \ \ \TGuard{\Var{1}}{\mbone}{\GFree{()}}\\
+        \}
+      \end{array}
+      }
+      {\unittype}
+    }
+    \infer1[$\SUB$]{
+      \WellTypedTerm{\unittype, \mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable}, \bot^3}{
+      \begin{array}{l}
+        \keyword{guard} \ \Var{1} : \mbmsg{Pong} \{\\
+          \ \ \keyword{receive} \ \msg{Pong} \mapsto\\
+            \ \ \ \ \TGuard{\Var{1}}{\mbone}{\GFree{()}}\\
+        \}
+      \end{array}
+      }
+      {\unittype}
+    }
+  \end{prooftree}
+  }
+\end{center}
+
+Before typing the guard, subtyping is used to remove the newly introduced, but unused $\unittype$ from the environment.
+Then, the \GUARD rule can be applied, where the guarded mailbox name $\Var{1}$ can be typed using the current environment.
+\GUARD requires some pattern $F$ in pattern normal form and a superpattern of $\mbmsg{Pong}$.
+Thus, we choose $F = \mbmsg{Pong} \mbcomp \mbone$, since $\mbmsg{Pong} \mbpinc \mbmsg{Pong} \mbcomp \mbone$, which is in PNF:
+
+\begin{center}
+  \begin{prooftree}
+    \infer0{\mbpres{\mbmsg{Pong}}{Pong}{\mbone}}
+    \infer0{\mbpres{\mbone}{Pong}{\mbzero}}
+    \infer2{\mbpres{\mbmsg{Pong} \mbcomp \mbone}{Pong}{\mbone}}
+    \infer0{\mbone \mbcomp \mbone \mbchoice \mbmsg{Pong} \mbcomp \mbzero \mbpeq \mbone \mbchoice \mbzero \mbpeq \mbone}
+    \infer2{\mbmsg{Pong} \mbcomp \mbone \pnf \mbmsg{Pong} \mbcomp \mbone}
+  \end{prooftree}
+\end{center}
+
+For typing the actual guard, we start with \SINGLE, as the guard sequence only consists of a single \keyword{receive} guard.
+The \RECEIVE rule adds two new types to the environment when typing the continuation term after receive message $\msg{Pong}$:
+type $\mbtin{\mbone}^\ureturnable$ and $\unittype$.
+The unit type $\unittype$ comes from the payload type associated with $\msg{Pong}$,
+while $\mbtin{\mbone}^\ureturnable$ is derived from the pattern \mbtin{\mbmsg{Pong} \mbcomp \mbone ^ \ureturnable} and describes the mailbox after receiving a $\msg{Pong}$ message.
+The last guard freeing the mailbox is typed trivially using the appropriate rules, with an additional subtyping step to remove the previously added $\unittype$ from the environment.
+
+This example illustrates how challenging it can be to find the correct typing derivation. The main difficulty lies in combining environments. While it is relatively straightforward to construct disjoint environment combinations, the general environment combinations required by the \LET rule are much harder to determine. One must choose environments that allow each subtree to be typed successfully while ensuring that their combination reconstructs the original environment. Another complication is that the typing rules are not deterministic. In this example, the \SUB rule could be applied at several different points in the derivation tree.
+For example, in $\mathbf{D_2}$ the first rule used is \SUB to get rid of $\unittype$ in the environment.
+An alternative is to first use \GUARD and after that \SUB in the left subtree when typing $\Var{1}$.
+

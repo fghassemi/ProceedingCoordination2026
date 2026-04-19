@@ -1,0 +1,127 @@
+\emph{Pat} \cite{fowlerSpecialDeliveryProgramming2023} is the first programming language to support mailbox types.
+In contrast to languages like Erlang or Elixir, where mailboxes are implicit,
+Pat supports first-class explicit mailboxes. 
+We can express the Future example in Pat as follows:
+
+\begin{minipage}{0.59\textwidth}
+\begin{pat}[firstnumber=1]
+def $\textsf{emptyFuture}$($\mathit{self} : \mathsf{EmptyFuture}$) : $\unittype$ {
+  guard $\mathit{self}$ : $\msg{Put} \mbcomp \mbstar{\msg{Get}}$ {
+      receive $\msg{Put}$[$x$] from $\mathit{self}$ |->
+      $\mathsf{fullFuture}(\mathit{self}, x)$
+  }
+}
+\end{pat}
+\begin{pat}[firstnumber=7]
+def $\textsf{fullFuture}$($\mathit{self} : \mathsf{FullFuture}, \mathit{value} : \mathsf{Int}$) : $\unittype$ {
+  guard $\mathit{self}$ : $\mbstar{\msg{Get}}$ {
+    free |-> ()
+    receive $\msg{Get}$[$\mathit{user}$] from $\mathit{self}$ |->
+        $\mathit{user}\mathsf{!}\msg{Reply}[value]$;
+      $\mathsf{fullFuture}(\mathit{self}, \mathit{value})$
+  }
+}
+\end{pat}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\begin{pat}[firstnumber=15]
+def $\textsf{client}$() : $\unittype$ {
+  $\keyword{let}$ $\var{future}$ = $\TNew$ in
+  spawn $\textsf{emptyFuture}$($\var{future}$);
+  let $\mathit{self}$ = $\TNew$ in
+  $\TSend{\var{future}}{Put}{5}$;
+  $\TSend{\var{future}}{Get}{\mathit{self}}$;
+  guard $\mathit{self}$ : $\msg{Reply}$ {
+      receive $\msg{Reply}$[$\mathit{result}$]
+    from $\mathit{self}$ |->
+      free $\mathit{self}$;
+      $\mathsf{print}(\mathsf{intToString}(\mathit{result}))$
+  }
+}
+\end{pat}
+\end{minipage}
+\vspace{.2cm}
+
+To support dynamic mailbox creation, new mailboxes are created using the
+$\keyword{new}$ keyword and bound to names using $\keyword{let}$-bindings.
+Pat programs can then send to mailboxes (e.g., $\TSend{\var{future}}{Put}{5}$
+sends a $\msg{Put}$ message with payload $5$ to mailbox \var{future}) and
+receive from mailboxes using the $\keyword{guard}$ keyword.
+A guard is always accompanied by a mailbox pattern, representing the mailbox's
+contents, and contains \emph{guard clauses} including $\keyword{receive}$ which
+receives a message from the mailbox and binds the payload and new mailbox name;
+and $\keyword{free}$ which is invoked when a mailbox will not receive any more
+messages and can be deallocated.
+
+%Since mailbox names are first-class, it is possible to send some mailbox name $x$ to a function that contained a mailbox name $x$ in its scope, but is already free in that context.
+%This would result in a \emph{use-after-free} error.
+% The authors identify three properties needed in every process to avoid these problems \cite{fowlerSpecialDeliveryProgramming2023}:
+% \begin{enumerate}
+%   \item No two distinct variables should represent the same underlying mailbox name.
+%   \item Once let-bound to a different name, a mailbox variable is considered out-of-scope.
+%   \item A mailbox name cannot be used after it has been used in a guard.
+% \end{enumerate}
+
+
+A mechanization of the operational semantics of Pat is outside of the scope of
+this paper, but we give an outline of the semantics here for context.
+Pat's semantics makes use of a \emph{frame stack}
+representation that simplifies specifying inductive invariants for the type
+preservation proof.
+There are two reduction relations: a deterministic
+$\beta$-reduction relation on functional terms (like $\keyword{let}$-bindings
+and function calls) that is entirely standard, and a nondeterministic reduction
+relation on a language of \emph{configurations} that closely resemble processes
+in the $\pi$-calculus. The communication and concurrency constructs reduce as
+follows:
+
+\begin{itemize}
+    \item Evaluating the $\TNew$ construct creates a fresh runtime mailbox name and returns
+        it to the calling thread.
+    \item Evaluating a message send $\TSend{a}{m}{\vala}$ returns the unit value
+        to the calling thread and creates an \emph{in-flight} message
+        $\sendconfig{a}{m}{\vala}$.
+    \item Evaluating $\TSpawn{\tma}$ returns the unit value to the calling
+        thread and evaluates $\tma$ in a new process.
+    \item The behaviour of a $\TGuard{a}{E}{\seq{\gd}}$ expression depends on
+        the messages that have been sent to mailbox $a$ along with the guards
+        contained in $\seq{\gd}$:
+        \begin{itemize}
+            \item If there are no messages sent to $a$; no references to $a$
+                in other threads; and $\seq{\gd}$ contains a $\GFree{\tma}$
+                guard, then mailbox name $a$ will be deleted and the thread will
+                run computation $\tma$.
+            \item If there is a message $\sendconfig{a}{m}{\vala}$ and
+                $\seq{\gd}$ contains a clause $\GReceive{m}{\tma}$, then
+                the thread will run computation $\tma$ with bindings for the
+                received value and updated mailbox name.
+    \end{itemize}
+\end{itemize}
+
+
+A major problem in Pat is \emph{mailbox name aliasing}, where multiple static
+names could be given to the same underlying mailbox name. This could be used to
+break type soundness.
+The Mailbox Calculus addresses this issue using a dependency graph, which can
+additionally rule out cyclic dependencies, but this approach does not scale to
+programming languages (see~\cite{fowlerSpecialDeliveryProgramming2023} for a detailed discussion).
+Instead, Pat uses \emph{quasi-linear typing}
+\cite{kobayashiQuasilinearTypes1999,ennalsLinearTypesPacket2004a}, where types
+are equipped with \emph{usage annotations}.  If a type is defined as
+\emph{returnable}, it is allowed to appear in the return type of an expression
+and be returned from an evaluation frame.
+Otherwise, if a type is defined as \emph{second-class},
+it can be used several times, but is never allowed to escape its scope.
+%
+A returnable occurrence of a mailbox name must be its last lexical usage.
+%
+Quasilinearity annotations, in combination with syntactic restrictions,
+eliminates aliasing issues and self-deadlocks.
+
+The authors of Pat present both a \emph{declarative} and an
+\emph{algorithmic} version of their type system.  The algorithmic version (which is needed because the
+declarative system makes use of environment subtyping and non-deterministic
+context splits) makes use of
+\emph{bidirectional typing} and \emph{constraint solving}, and is at the core of
+Pat's implementation.  This paper focuses on the declarative type
+system.

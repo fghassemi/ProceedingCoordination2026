@@ -1,0 +1,528 @@
+\newcommand{\state}{\texttt{Q}}
+\newcommand{\lolli}{\multimap}
+\newcommand{\send}{\rightarrow}
+\newcommand{\event}{\gg}
+\newcommand{\tostate}{\,\mbox{{\tt =\hspace{-2.5pt}>}}\,}
+\newcommand{\old}[1]{\ensuremath{\mathit{old}(#1)}}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%   STANDARD   %%%
+%%%%%%%%%%%%%%%%%%%%
+
+
+%\newtheorem{thm}{Theorem}
+%\newtheorem{exmp}{Example}
+%\newtheorem{conj}{Conjecture}
+%\newtheorem{crl}{Corollary}
+
+\newcommand{\eoe}{\hfill$\blacksquare$}
+\newcommand{\subst}[2]{\{^{#1}/_{#2}\}}
+\newcommand{\wrap}[1]{\{#1\}}
+%\newcommand{\semi}{\mathrel{\mbox{\tt ;}}}
+\newcommand{\semi}{\,,\,}
+\newcommand{\comma}{\mathrel{\mbox{\tt ,}}}
+
+\newcommand{\fv}[1]{{\it fv}(#1)}
+\newcommand{\lhs}[2]{{\tt lhs}(#1_{#2})}
+\newcommand{\rhs}[2]{{\tt rhs}(#1_{#2})}
+
+\renewcommand{\S}{\texttt{S}}
+
+\newcommand{\stringa}[1]{\mbox{\tt "} #1 \mbox{\tt "}}
+\newcommand{\bigfract}[2]{\frac{^{\textstyle #1}}{_{\textstyle #2}}}
+\newcommand{\rulename}[1]{{\small {\sc[#1]}}}
+%\newcommand{\rulenamex}[1]{\text{\upshape\scriptsize[\textsc{#1}]}}
+
+\newcommand{\rulenamex}[1]{\mbox{\tiny [{\sc #1}]}}
+
+\def \mathrule #1#2#3{	\begin{array}{l} 
+                       	\rulenamex{#1}
+                       	\\ 
+                      	 \bigfract{#2}{#3}	
+                       	\end{array}
+					 }
+
+\def \mathrulerun #1#2#3{{\footnotesize \begin{array}{l} 
+                       {\rulenamex{#1}}
+                       \\ 
+                       \bigfract{#2}{#3}
+                      \end{array}
+                      }}
+
+\def \mathax #1#2{\begin{array}{l} 
+                  \rulenamex{#1} 
+                  \\ 
+                  #2
+                  \end{array}
+                  }
+
+\newcommand{\dom}[1]{{\it dom}(#1)}
+\newcommand{\fields}[1]{{\it fields}(#1)}
+\newcommand{\methods}[1]{{\it meth}(#1)}
+\newcommand{\functions}[1]{{\it fun}(#1)}
+\newcommand{\fn}[1]{\mathit{fn}(#1)}
+\newcommand{\bn}[1]{\mathit{bn}(#1)}
+
+%\newcommand{\memenv}{2}{{{\large \flat}_{#1}}{#2}}
+\newcommand{\double}{{\tt real}}
+\newcommand{\multiset}[1]{\mathrel{\{\!|} #1 \mathrel{| \!\}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   LANGUAGE SPECIFIC   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\THELANGUAGE}{\textcolor{red}{our language}}
+\newcommand{\C}{\tt C} % {\mbox{{\tt C}}}
+\newcommand{\A}{{\tt A}}%{\mathsf{A}}
+\newcommand{\x}{{\tt x}}%{\mathsf{A}}
+\newcommand{\State}{\mathbb{Q}}
+\newcommand{\SemEvent}{\Psi}%{\overline{\texttt{W}}}
+\newcommand{\Time}{\mathbb{t}}
+\newcommand{\Events}[1]{\mathtt{Events}(#1)}
+\newcommand{\Cdyn}{\mathcal{C}}
+\newcommand{\simulates}[2]{\mathrel{\preceq_{#1,#2}}}
+\newcommand{\Aset}{\mathbb{A}}
+\newcommand{\Fset}{\mathbb{F}}
+
+\newcommand{\Q}{{\tt Q}}
+\newcommand{\Qwithat}{\mbox{{\tt @}}\Q}
+\newcommand{\withat}{\mbox{{\tt @}}}
+
+
+\newcommand{\pic}{pi calculus}
+\newcommand{\smallang}{\mbox{{\sf \emph{Stipula}}}}
+\newcommand{\Stipula}{\mbox{{\sf \emph{Stipula}}}}
+
+\newcommand{\JI}[1]{\lstinline[basicstyle=\ttfamily]{#1}}
+\newcommand{\bnfor}{\quad | \quad}
+
+\newcommand{\scong}{\equiv^+}
+\newcommand{\op}{~\Keyword{op}~}
+\newcommand{\ereturn}[1]{\Keyword{return}(#1)}
+\newcommand{\returns}[1]{\Keyword{returns}~(#1)}
+\newcommand{\ifte}[3]{\stipula{if}\,(#1)\,\{\,#2\,\}\,\stipula{else}\,\{\,#3\,\}}
+\newcommand{\choice}[2]{#1 \oplus #2}
+
+\newcommand{\iif}{\Keyword{if}~}
+\newcommand{\tthen}{~\Keyword{then}~}
+\newcommand{\eelse}{\Keyword{else}~}
+\newcommand{\new}{\Keyword{new}~}
+\newcommand{\this}{\Keyword{this}}
+\newcommand{\fail}{\mathsf{fail}}
+\newcommand{\retexp}{\mathbb{e}}
+\newcommand{\retv}{v}
+\newcommand{\main}{{\it main}}
+
+%\newcommand{\sol}{{\it SOL}}
+
+\newcommand{\Prg}{\mathcal{P}}
+\newcommand{\IPrg}{\mathcal{D}}
+\newcommand{\nt}[1]{{\it #1}}
+
+\newcommand{\clause}[3]{#1 {\cdot} #2 {\cdot} #3}
+\newcommand{\acomp}{\mathbb{A}}
+\newcommand{\addcomp}{\mathrel{\triangleleft}}
+\renewcommand{\H}{\varphi}
+\newcommand{\comp}{\!{\ttsemi}\!}
+\newcommand{\acompok}[2]{#1}
+\newcommand{\ev}{{\tt ev}}
+\newcommand{\states}[1]{\mathtt{states}(#1)}
+
+\newcommand{\V}{\mathsf{V}}
+\newcommand{\F}{\mathsf{F}}
+\newcommand{\T}{\mathsf{T}}
+\newcommand{\Stm}{\mathsf{S}}
+\newcommand{\rtStm}{\mathcal{S}}
+
+\newcommand{\B}{{\tt B}}
+
+\newcommand{\E}{\mbox{{\sf E}}}
+
+\newcommand{\program}{\mathcal{P}}
+
+\newcommand{\contract}{\mathbb{C}}
+\newcommand{\StipulaToJava}[2]{\mbox{\sc Stipula2Java}_{#1}(#2)}
+
+% TYPE SYSTEM
+\newcommand{\FId}{\mbox{\emph{FId}}}
+
+\newcommand{\ejudge}[4]{#1 \vdash #2 : #3, #4}
+\newcommand{\sjudge}[3]{#1 \vdash #2 : #3}
+\newcommand{\ajudge}[2]{#1 \vdash #2}
+\newcommand{\rtjudge}[2]{#1 \vdash #2}
+
+\newcommand{\pjudge}[2]{\vdash #1 : #2}
+
+\newcommand{\sjudgeplus}[5]{#1 \vdash^{#2}_{#3} #4 : #5}
+
+\newcommand{\sjudgeminus}[4]{#1 \vdash^{#2}_{#3} #4}
+
+\newcommand{\environments}[1]{\textit{envs}(#1)}
+\newcommand{\initstate}[2]{\textit{state}_{#1}({#2})}
+
+\newcommand{\bhtype}[1]{\textit{bhtype}(#1)}
+
+% SEMANTICS OF TYPES
+\newcommand{\btstate}[2]{#1 \Vdash #2}
+\newcommand{\btstatebis}[2]{#2}
+\newcommand{\btred}{\; \longrightarrow \;}
+
+
+\newcommand{\flatenv}[1]{\lfloor #1 \rfloor}
+\newcommand{\simplify}[1]{\mbox{\Large $\Lbag$} #1 \mbox{\Large $\Rbag$}}
+\newcommand{\encode}[1]{\ulcorner #1 \urcorner}
+\newcommand{\lastencode}[1]{\langle #1 \rangle}
+\newcommand{\fun}[1]{{\it fun}(#1)}
+
+\newcommand{\sol}{\mathbb{S}}
+\newcommand{\entails}[3]{#1 \vdash #2 \mbox{\tt :} #3}
+\newcommand{\id}{{\it id}}
+\newcommand{\Ids}{{\it Id}}
+
+\newcommand{\backtrack}[1]{{\it backtk}(#1)}
+\newcommand{\commit}[1]{{\it commit}(#1)}
+
+
+%%%% PROCESSI
+\newcommand{\prog}{\mathcal{D}}
+\newcommand{\barb}[2]{\downarrow_{#1}#2}
+
+
+\newcommand{\Context}{\mathcal{C}}
+\newcommand{\zero}{\mbox{\raisebox{-.6ex}{{\tt -\!\!\!-}}}}
+\newcommand{\unds}{\mbox{\raisebox{-.6ex}{{\tt \!-\!\!\!-\!}}}}
+\newcommand{\prefix}{\alpha}
+\newcommand{\nuexp}[2]{(\nu~#1)~#2}
+\newcommand{\probplus}[2]{{}_{#1}\oplus_{#2}}
+%\newcommand{\parop}{\mathrel{\texttt{\upshape|}}}
+\newcommand{\parop}{\mathrel{\|}}
+\newcommand{\inp}[2]{{\it #1} \mbox{{\tt ?}}({\it #2})}
+\newcommand{\out}[2]{{\it #1} \mbox{{\tt !}}{\it #2}}
+\newcommand{\ifthen}[2]{#1 \Rightarrow #2}
+
+\newcommand{\name}[1]{{\it #1}}
+\newcommand{\pname}[1]{{\tt #1}}
+\newcommand{\var}[1]{{\it var}(#1)}
+\newcommand{\fresh}{{\it fresh} \;}
+\newcommand{\concat}{\raisebox{-.7ex}{\large \mbox{\tt \^{ }}}}
+\newcommand{\head}[1]{\mathit{head}(#1)}
+\newcommand{\tail}[1]{\mathit{tail}(#1)}
+\newcommand{\append}{\concat}
+
+
+%%%%%%%%%%%%%%
+%%% STATES %%%
+%%%%%%%%%%%%%%
+
+%\newcommand{\State}[2]{#1 \Vdash #2}
+\newcommand{\Heap}{\mathcal{H}}
+\newcommand{\Processes}{\mathcal{P}}
+\newcommand{\tsm}[1]{\mathcal{#1}}
+
+\newcommand{\SyncPrimitive}[1]{\mathsf{\color{myred}#1}}
+\newcommand{\Keyword}[1]{\mathsf{\color{blue}#1}}
+
+\newcommand{\sync}[2]{\SyncPrimitive{sync}(#1)\{ ~ #2 ~ \}.~} 
+\newcommand{\syncn}[3]{\SyncPrimitive{sync}(#1)^{#2}\{ ~ #3 ~ \}}
+\newcommand{\wait}[1]{\SyncPrimitive{wait}(#1)} 
+\newcommand{\notify}[1]{\SyncPrimitive{notify}(#1)} 
+\newcommand{\notifyAll}[1]{\SyncPrimitive{notifyAll}(#1)} 
+
+\newcommand{\nuT}[1]{(\nu~#1)~}
+
+
+\newcommand{\acquire}[1]{\SyncPrimitive{acq}(#1)} 
+\newcommand{\release}[1]{\SyncPrimitive{rel}(#1)} 
+
+\newcommand{\sem}[1]{\llbracket#1\rrbracket}
+%\newcommand{\curvedsem}[1]{\Lbag #1 \Rbag}
+\newcommand{\curvedsem}[1]{\llparenthesis\, #1\, \rrparenthesis}
+
+\newcommand{\wwait}[1]{{\it wait} ~ #1} 
+\newcommand{\nnotify}[1]{{\it notify} ~ #1} 
+\newcommand{\ssync}[2]{{\it sync}(#1)\{ ~ #2 ~ \}} 
+
+\newcommand{\tsync}[3]{{\it sync}^{#1} \{ ~ #3 ~ \}^{#2}.~} 
+
+\newcommand{\tacquire}[1]{{\it acq}^{#1}}
+\newcommand{\tacquirex}[2]{{\it acq}^{#1}_{#2}} 
+
+\newcommand{\trelease}[1]{{\it rel}_{#1}}
+\newcommand{\twait}[1]{{\it wait}^{#1}}
+\newcommand{\twaitx}[2]{{\it wait}^{#1}_{#2}}
+
+\newcommand{\twaiting}[1]{{\it waiting}^{#1}}
+\newcommand{\twaitingx}[2]{{\it waiting}^{#1}_{#2}}
+
+\newcommand{\tnotify}[1]{{\it notify}^{#1}}
+\newcommand{\tnotifyAll}[1]{{\it notifyAll}^{#1}}
+
+\newcommand{\unmatched}[2]{{\it unmatch}_{#1}(#2)} 
+
+\newcommand{\U}{U}
+%\newcommand{\A}{A}
+
+\newcommand{\unLocked}{\mathit{Unlocked}}
+\newcommand{\WaitFree}[1]{\mathit{WaitFree}(#1)}
+\newcommand{\Waitfree}{XXXXX\mathit{WaitFree}}
+
+\newcommand{\Uzero}{\zero}
+\newcommand{\dash}{{\bullet}}
+%\newcommand{\dashplus}{{\bullet},}
+\newcommand{\dashplus}{}
+\newcommand{\iszero}{\mathbb{0}}
+\newcommand{\notzero}{\infty}
+\newcommand{\liqexp}{\mathbb{e}}
+\newcommand{\sjudgeLiq}[3]{#1 \vdash #2 : #3}
+\newcommand{\sjudgeLiqfun}[4]{#1 \vdash_{#2} #3 : #4}
+
+\newcommand{\separe}{~\talloblong~}
+\newcommand{\seq}[1]{\stackrel{#1}{\bullet}}
+\newcommand{\wseq}[1]{\stackrel{#1}{\circ}}
+\renewcommand{\SS}{\mathbb{P}}
+\newcommand{\tset}{XXXXXX}
+\newcommand{\wset}{{\cal W}} 
+\newcommand{\toplock}{\prec}
+\newcommand{\nottoplock}{\nprec}
+\newcommand{\nlocks}[2]{\#_{#1}(#2)}
+\newcommand{\win}{~\mbox{$\in$\!\raisebox{.2ex}{\scriptsize $\bullet$}~}}
+\newcommand{\notwin}{~\mbox{$\notin$\!\raisebox{.2ex}{\scriptsize $\bullet$}~}}
+
+%%%% TYPE SYSTEM
+\newcommand{\KeY}{Ke\kern-0.1emY}
+\newcommand{\SolidiKeY}{SolidiKe\kern-0.1emY}
+
+\newcommand{\Env}{\Upgamma}
+\newcommand{\EmptyEnv}{\emptyset}
+
+%\renewcommand{\&}{\mathbin\binampersand}
+
+\newcommand{\ntyperule}[3]{ 
+  \begin{array}{c} 
+    \textsc{\scriptsize ({#1})} \\ 
+    #2 \\ 
+    \hline
+    #3 
+  \end{array} }
+ 
+\newcommand{\nredrule}[2]{ 
+  \begin{array}{c} 
+    \textsc{\scriptsize ({#1})} \\ 
+    #2  
+  \end{array}} 
+
+\newcommand{\noAct}[1]{\mathit{noAct}(#1)}
+\newcommand{\rel}[1]{{\it rel}(#1)}
+%
+\newcommand{\Urule}[5]{#1 \vdash #2, #3, #4, #5}
+\newcommand{\nulam}[1]{(\nu#1)}
+\newcommand{\labels}[1]{{\it labels}(#1)}
+\newcommand{\slab}[1]{{\it slab}(#1)}
+
+\newcommand{\nullp}{{\it null}}
+\newcommand{\void}{{\it void}}
+\newcommand{\Prog}{\mathcal{D}}
+%\newcommand{\LAM}{{\cal L}}
+\newcommand{\lamsenza}{{\tt H}}
+
+
+\newcommand{\subt}{~\mbox{\raisebox{-.55pt}{{\tt <}}\hspace{-1.2pt}\raisebox{.22pt}{{\tt :}}}~}
+\renewcommand{\root}[1]{{\it root}(#1)}
+\newcommand{\typeof}[2]{{\it typeof}(#1,#2)}
+\newcommand{\typeoftwo}[1]{{\it typeof}(#1)}
+%\newcommand{\contractof}[1]{{\it typeof}(#1)}
+\newcommand{\contractof}[1]{#1}
+
+\newcommand{\removeann}[1]{#1^{\triangledown}}
+\newcommand{\reach}[2]{{\it reachable}(#1,#2)}
+
+\newcommand{\simply}[1]{\Lbag #1 \Rbag}
+
+\newcommand{\cname}{C}
+\newcommand{\contractname}{{\it cnames}}
+\newcommand{\R}{\mathtt{R}}
+\newcommand{\f}{\texttt{f}}
+\newcommand{\g}{\texttt{g}}
+\newcommand{\afield}{\texttt{h}}
+\newcommand{\bfield}{\texttt{x}}
+
+\newcommand{\Ibot}{I^{\bot}}
+
+\newcommand{\lred}[1]{\mathrel{\stackrel{#1}{\longrightarrow}}}
+\newcommand{\Lred}[1]{\mathrel{\stackrel{#1}{\Longrightarrow}}}
+\newcommand{\nolred}[1]{\mathrel{\stackrel{#1}{\nrightarrow}}}
+\newcommand{\nored}[2]{#1\comma #2 \mathrel{\nrightarrow}}
+\newcommand{\nonored}[2]{#1 \mathrel{\nrightarrow}}
+%% Labelled transitions
+\newcommand{\xred}[1]
+{ \setbox0=\hbox{$\, {}^{#1}\, $}
+  \setbox1=\hbox{$\longrightarrow$}
+  \loop\setbox1=\hbox{$-$\kern-0.3em\unhbox1}\ifdim\wd1<\wd0\repeat
+  \hbox{$\ \mathop{\box1}\limits^{#1} \ $}
+}
+
+
+\newcommand{\olred}[2]{\overset{#1}{\underset{#2}{\longrightarrow}}}
+%\newcommand{\nolred}[2]{\overset{#1}{\underset{#2}{\longarrownot\longrightarrow}}}
+\newcommand{\llred}[1]{\stackrel{#1}{\longmapsto}}
+\newcommand{\ollred}[2]{\overset{#1}{\underset{#2}\longmapsto}}
+\newcommand{\wredwith}[1]{\Longrightarrow_{#1}}
+\newcommand{\redwith}[1]{\longrightarrow_{#1}}
+\newcommand{\nredwith}[1]{\longarrownot\redwith{#1}}
+\newcommand{\red}{\longrightarrow}
+\newcommand{\wred}{\Longrightarrow}
+\newcommand{\nred}{\longarrownot\red}
+\newcommand{\lamred}{\rightarrow}
+
+\newcommand{\wt}[1]{\vect{#1}}
+\newcommand{\CP}{\mathtt{L}}
+
+
+\newcommand{\bag}{{\cal X}}
+\newcommand{\idx}{{\tt idx}}
+\newcommand{\calC}{{\cal C}}
+
+
+\newcommand{\names}[1]{{\it names}(#1)}
+\newcommand{\objects}[1]{{\it objects}(#1)}
+
+\newcommand{\lock}[1]{\textit{lock}_{#1}}
+%\newcommand{\first}{{\it first}}
+
+\renewcommand{\r}{{\tt r}}
+\newcommand{\w}{{\tt w}}
+\newcommand{\n}{{\tt n}}
+\newcommand{\rw}{{\tt rw}}
+\renewcommand{\l}{{\tt l}}
+\newcommand{\h}{{\tt h}}
+
+\newcommand{\rset}{{\cal R}}
+\newcommand{\kset}{K}
+
+\newcommand{\set}[1]{\{ #1 \}}
+
+\newcommand{\eqdef}{\stackrel{\textsf{\tiny def}}{=}}
+\newcommand{\flatrecty}{\phi}
+\newcommand{\recty}{\rho}
+%\newcommand{\rectyrw}{\tau\raisebox{2pt}{{\scriptsize {\tt h}}}}
+\newcommand{\rectyrw}{\vartheta}
+\newcommand{\tyval}{\chi}
+\newcommand{\isseq}{\ensuremath{\mathsf{seq}}}
+\newcommand{\true}{{\tt{true}}}
+\newcommand{\false}{{\tt{false}}}
+
+\newcommand{\aaload}{{\tt{aaload}}}
+\newcommand{\aastore}{{\tt{aastore}}}
+
+\newcommand{\frwl}{\f\raisebox{2pt}{{\scriptsize {\tt h}}}}
+
+\newcommand{\fr}{\f^{{\tt r}}}
+\newcommand{\fw}{\f^{{\tt w}}}
+\newcommand{\frw}{\f^{{\tt rw}}}
+\newcommand{\fl}{\f^{{\tt l}}}
+
+\newcommand{\destr}[1]{{\it flat}(#1)}
+\newcommand{\destrrec}[2]{{\it flat}_{#1}(#2)}
+
+\newcommand{\flattening}[1]{(#1)^\flat}
+%\newcommand{\constr}[1]{{\it unflat}(#1)}
+\newcommand{\constr}[1]{{\it mk\_tree}(#1)}
+\newcommand{\constrrec}[2]{{\it mk\_tree}_{#1}(#2)}
+
+\newcommand{\translate}[1]{\mbox{\sc translate}(#1)}
+\newcommand{\flatten}[1]{\mbox{\sc flatten}(#1)}
+\newcommand{\genscenario}[2]{\mbox{\sc gen}_{#1}(#2)}
+\newcommand{\genscenarioplus}[3]{\mbox{\sc gen}_{#1}^{#2}(#3)}
+\newcommand{\assetInv}[1]{\mbox{{\sc asset}{\tt \_}{\sc inv}}_{#1}}
+\newcommand{\events}[2]{\mbox{\sc events}_{#1}(#2)}
+\newcommand{\final}[1]{\mathsf{final}(#1)}
+\newcommand{\fclauses}[1]{\mathsf{fclauses}(#1)}
+\newcommand{\eclauses}[1]{\mathsf{eclauses}(#1)}
+\newcommand{\StrongPostCond}[1]{\mbox{{\sc strong}{\tt \_}{\sc postcond}}(#1)}
+\newcommand{\LhsVar}[2]{\mbox{\sc lhsvar}_{#1}(#2)}
+\newcommand{\Sem}[1]{\mbox{\sc sem}(#1)}
+\newcommand{\cQ}{{\tt cQ}}
+
+\newcommand{\updateDT}[2]{\mbox{\sc updatedt}(#2)}
+\newcommand{\ensureDT}{\mbox{\sc ensuredt}}
+
+\newcommand{\constrminus}[1]{{\it constr}^{\_}(#1)}
+
+\newcommand{\LAM}{\mathcal{L}}
+
+\newcommand{\conf}{\mathcal{C}}
+
+\newcommand{\iscompatible}[2]{\triangleright^{#1}_{#2}}
+\newcommand{\iscompatiblestrong}[2]{\raisebox{-2pt}{\mbox{\Large $\blacktriangleright$}}^{#1}_{#2}}
+
+
+\newcommand{\Java}{{\tt Java}}
+\newcommand{\JML}{{\tt JML}}
+\newcommand{\JVM}{{\tt JVM}}
+\newcommand{\JVML}{\mbox{{\tt JVML}}}
+\newcommand{\JaDA}{\texttt{JaDA}}
+
+
+\newcommand{\Obj}{\mbox{\sc Obj}}
+\newcommand{\Var}{{\it Var}}
+
+\newcommand{\run}{{\tt{run}}}
+
+%\newcommand{\T}{\mbox{\tt T}}
+
+\newcommand{\pubs}{{\tt PUBS}}
+\newcommand{\cofloco}{{\tt CoFloCo}}
+
+\newcommand{\D}{{\mathsf{D}}}
+\newcommand{\FD}{\mbox{\textit{FD}}}
+\newcommand{\MD}{\mbox{\textit{MD}}}
+\newcommand{\ML}{\mbox{\textit{ML}}}
+\newcommand{\CF}{\mbox{\textit{CF}}}
+\newcommand{\Int}{\mathsf{\color{myblue}int}}
+\newcommand{\tobject}[2]{#1,#2}
+\newcommand{\ty}{{\tt{T}}}
+\newcommand{\m}{{\tt{m}}}
+\newcommand{\vect}[1]{\overline{#1}}
+\newcommand{\mt}[1]{\texttt{m}^{#1}}
+\newcommand{\methodt}[2]{\texttt{#1}^{#2}}
+\newcommand{\tpair}[3]{(#2,#3)}
+%\newcommand{\tpair}[3]{(#2,#3)_{#1}}
+\newcommand{\aand}{\, \&\, }
+\newcommand{\bigand}{{\mathlarger{\mathlarger{\mathlarger{\mathlarger{\&}}}}} }
+\newcommand{\tpaird}[4]{({}_{#1:}#3, {}_{#2:}#4)}
+\newcommand{\ztop}[1]{\lceil #1 \rceil}
+\newcommand{\proj}[2]{\mathtt{proj}_{#1}(#2)}
+\newcommand{\mop}{\mathbin{\mathsf{op}}}
+\newcommand{\obligations}[1]{{\it ob}(#1)}
+\newcommand{\capabilityplus}[1]{{\it cap}_{+}(#1)}
+\newcommand{\first}[1]{{\it fst}(#1)}
+\newcommand{\last}[1]{{\it lst}(#1)}
+
+
+
+\newcommand{\unsync}[1]{{\tt unsync}(#1)}
+\newcommand{\effects}[1]{{\tt effects}(#1)}
+\newcommand{\joins}[1]{{\tt kill}(#1)}
+\newcommand{\joined}[1]{{\it joined}(#1)}
+
+\newcommand{\warning}[1]{\textcolor{red}{{\bf #1}}}
+
+\newcommand{\later}{\laterstage_{\cct}}
+\newcommand{\agree}{\approx}
+\newcommand{\laterstage}{\succcurlyeq}
+
+ \newcommand{\lam}{\ell}
+ \newcommand{\cct}{\mbox{\textsc{bct}}}
+
+ %\newcommand{\of}[2]{#1[#2]}
+ \newcommand{\of}[2]{{#1_{#2}}}
+ \newcommand{\ttsemi}{~\mbox{{\tt ;}}~}
+
+
+
+\newcommand{\marginnote}[2]{%
+  {\makebox[0pt]{\color{magenta}$^\bigstar$}}%
+  \marginpar{\parbox{2cm}{\flushright\tiny\sffamily\textbf{#1}: #2}}%
+}
+
+\newcommand{\Cosimo}[1]{\marginnote{C}{\color{blue}#1}}
+\newcommand{\Reiner}[1]{\marginnote{R}{\color{red}#1}}
+

@@ -1,0 +1,39 @@
+\begin{table}[t]
+\begin{center}
+{\small
+  \begin{tabular}{p{.43\textwidth}@{\quad\;}p{.52\textwidth}@{}}
+    \hline  
+    {\bf Restriction} & {\bf Motivation / How to Lift}\\
+    \hline
+    Fields, assets and variables are of type integer, see~Section~\ref{subsect:stipula}
+    &
+    Increase degree of automation; can be lifted by dedicated automated reasoners
+    \\[1ex]
+%    In time guards \stipula{now+t}, time values \stipula{t} are constants
+%    &
+%    Symbolic values in dispatch tables increase branching degree of symbolic execution: lifting subject to experiments
+%    \\[1ex]
+    Cycles in contracts are separate and event-free, see~Sections~\ref{subsect:stipula} and~\ref{sec:cyclic-behavior}
+    &
+    General cycles are rare in legal contracts and significantly complicate the translation, because they cannot be modeled by loops
+    \\[1ex]
+    Events generated in cycles get abstract clock value, see Section~~\ref{sec:cyclic-behavior}
+    &
+    Precise treatment requires dynamic and unbounded extension of dispatch table
+    \\[1ex]  
+    Cycle iterations are analysed under a single symbolic instantiation of the formal parameters, see
+    Section~\ref{sec:cyclic-behavior}
+    &
+    Requires more complex loop invariants that might be hard to find\\
+    \hline
+  \end{tabular}
+}
+\end{center}
+\caption{\label{tab:restrictions} Restrictions to {\Stipula} and motivations} 
+\vspace{-.5cm}
+\end{table}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "newmain"
+%%% End:

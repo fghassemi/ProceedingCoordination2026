@@ -1,0 +1,118 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{listingstyle}[2025/04/23 Scala 3 listings style with branding and type highlighting]
+
+\RequirePackage{xspace}
+\RequirePackage{mathpartir}
+\RequirePackage{hyperref}
+
+\newcommand{\lang}{\textsf{LociX}\xspace}
+
+\newcommand{\ptype}[1][]{\mathsf{p_{#1}}}
+\newcommand{\pfam}[1][]{\mathsf{P}_{#1}}
+\newcommand{\placedtype}[1][]{\mathsf{S}_{#1}}
+
+\newcommand{\type}[1][]{\mathsf{T_{#1}}}
+\newcommand{\tb}{\mathsf{B}}
+\newcommand{\tfun}[2]{#1 \rightarrow #2}
+\newcommand{\tcapfun}[3]{#1 \rightarrow_{#3} #2}
+\newcommand{\capset}[1]{\mathsf{#1}}
+\newcommand{\ton}[2]{\mathsf{#1\;on\;#2}}
+\newcommand{\tpeer}[1]{\mathsf{Peer\;#1}}
+
+\newcommand{\listtype}[1]{\mathsf{List\;#1}}
+\newcommand{\optiontype}[1]{\mathsf{Option\;#1}}
+\newcommand{\ttype}[1][]{\mathsf{U\;#1}}
+
+\newcommand{\unit}{\mathsf{unit}}
+\newcommand{\cons}[2]{\mathsf{cons\;#1\;#2}}
+\newcommand{\nil}[1]{\mathsf{nil:\;{#1}}}
+\newcommand{\some}[1]{\mathsf{some\;#1}}
+\newcommand{\none}[1]{\mathsf{none:\;{#1}}}
+
+\newcommand{\expr}[1][]{\mathsf{e_{#1}}}
+\newcommand{\placed}[1][]{\mathsf{p_{#1}}}
+\newcommand{\evalue}[1][]{\mathsf{v_{#1}}}
+\newcommand{\evar}[1][]{\mathsf{x_{#1}}}
+\newcommand{\eapp}[2]{\mathsf{#1\;#2}}
+\newcommand{\eabs}[3]{\mathsf{\lambda #1:#2.\;#3}}
+\newcommand{\ecabs}[3]{\mathsf{\lambda?#1:#2.\;#3}}
+\newcommand{\epeer}[2]{\mathsf{\pi_{#1}^{#2}}}
+\newcommand{\elabel}[3]{\mathsf{\ell_{#1}\;at\;\pi_{#2}^{#3}}}
+\newcommand{\ebroad}[2]{\mathsf{broad_{#1}\;#2}}
+\newcommand{\epeerof}[1]{\mathsf{peerof\;#1}}
+\newcommand{\ederef}[4]{\mathsf{#1\;deref\;\{#2\Rightarrow#3;\;\Rightarrow#4\}}}
+\newcommand{\ematch}[2]{\mathsf{#1\;match\;\{#2\}}}
+
+\newcommand{\flow}[1][]{\mathsf{Flow\;#1}}
+
+% Placement Types
+\newcommand{\eon}[2]{\mathsf{on\;#1\;#2}}
+\newcommand{\eflowon}[1]{\mathsf{flowOn\;#1\;\expr}}
+\newcommand{\take}[1]{\mathsf{take\;#1}}
+\newcommand{\plcap}{\mathsf{Pv}}
+\newcommand{\pfcap}{\mathsf{Pf}}
+
+% Mutlti-tier constructs
+\newcommand{\mtcap}{\mathsf{M}}
+\newcommand{\aslocal}[1][\expr]{\mathsf{asLocal\;#1}}
+\newcommand{\aslocalall}[1][\expr]{\mathsf{asLocalAll\;#1}}
+
+% Choreography constructs
+\newcommand{\chcap}{\mathsf{Ch}}
+\newcommand{\comm}[1][\expr]{\mathsf{comm\;\;#1}}
+
+% Collective constructs
+\newcommand{\clcap}{\mathsf{Cl}}
+\newcommand{\collective}[1][\expr]{\mathsf{collective\;#1}}
+\newcommand{\rep}{\mathsf{rep\;\expr[1]\;\expr[2]}}
+\newcommand{\erep}[2]{\mathsf{rep\;#1\;#2}}
+\newcommand{\nbr}[1][\expr]{\mathsf{nbr\;#1}}
+\newcommand{\enbr}[1]{\mathsf{nbr\;#1}}
+\newcommand{\branch}{\mathsf{branch\;\expr[cond]\;\expr[th]\;\expr[el]}}
+\newcommand{\ebranch}[3]{\mathsf{branch\;#1\;#2\;#3}}
+\newcommand{\vm}{\mathsf{Vm}}
+
+% Run
+\newcommand{\netcap}{\mathsf{N}}
+\newcommand{\peercap}[1]{\mathsf{Ps\;#1}}
+\newcommand{\capability}[1][]{\mathsf{C_{#1}}}
+\newcommand{\run}[3]{\mathsf{run_{#1}\;#2}\;#3}
+
+\newcommand{\map}[2]{\mathsf{Map\;#1\;#2}}
+
+\newcommand{\tie}[2]{\mathsf{#1\mapsto#2}}
+\newcommand{\tieSingle}[2]{\mathsf{#1\mapsto^1#2}}
+\newcommand{\tieMult}[2]{\mathsf{#1\mapsto^*#2}}
+\newcommand{\arch}{\mathcal{A}}
+\newcommand{\on}[2]{\mathsf{#1\;on\;#2}}
+\newcommand{\mobile}[1]{\mathsf{mobile\;#1}}
+
+\newcommand{\typing}[4][\Gamma]{\arch;#1 \vdash #2:#3\;with\;#4}
+
+% Typing rules
+\newcommand{\typingrule}[3]{\inferrule{#1}{#2}{\hspace{0.5em}[\textsc{#3}]}}
+\newcommand{\typingrulelabel}[3]{\inferrule{#1}{#2}{\rulelabel{#3}}}
+\newcommand{\simpletypingrule}[2]{\inferrule{#1}{#2}}
+
+\newcommand{\ectx}[1]{\mathsf{E[#1]}}
+\newcommand{\evallabel}[2]{\mathsf{\ell_{#1}\;at\;\pi^{#2}}}
+
+\newcommand{\connected}[2]{#1 \rightarrowtail #2}
+\newcommand{\eval}[5]{#1 \triangleright #2 \rightarrow^{#5} #3 \triangleright #4}
+\newcommand{\evalmul}[5]{#1 \triangleright #2 \twoheadrightarrow^{#5} #3 \triangleright #4}
+
+\newcommand{\sep}{\;\mid\;}
+\newcommand{\rulelabel}[1]{\tiny (#1)\label{rule:#1}}
+\newcommand{\ruleref}[1]{\hyperref[rule:#1]{\textsc{#1}}}
+
+
+\newcommand{\onp}[2]{\mathsf{on\;#1\;#2}}
+
+
+\newcommand{\wc}[1]{\;with\;\{#1\}}
+\newcommand{\CC}{\mathcal{C}}
+\newcommand{\tjudg}[3]{\Gamma \vdash #1 : #2 \wc{#3}}
+
+\newcommand{\peerconf}{\mathsf{\Omega}}
+
+\newcommand{\link}[2]{\mathsf{#1 \rightarrow #2}}

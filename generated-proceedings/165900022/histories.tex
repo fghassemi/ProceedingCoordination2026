@@ -1,0 +1,132 @@
+
+\begin{figure}[t]
+\begin{center}
+\resizebox{0.5\textwidth}{!}{
+\input{figures/fig-ex-history.tex}
+}
+\end{center}
+\caption{\small \slshape A history on two processes, with operations $\opa$, $\opb$, $\opc$, $\opd$, $\ope$ and $\opf$}
+\label{fig:ex-history}
+\end{figure}
+
+
+Tracking the sequence of computed actions in replicated data systems can be achieved through various methods. In this paper, we base our approach on the notion of histories defined in \cite{ViottiVukolic}. A history of a program execution is defined as a set of \textsl{operations} that represent all the actions performed during the computation. 
+
+\subsubsection{Histories} can be visualized as timelines, where each process is represented by a horizontal line aligned to a global clock (see Figure~\ref{fig:ex-history}). The execution of an operation is shown as a solid segment, while dashed segments indicate periods when the process is idle. These timelines are read from left to right. 
+ Each operation has the following attributes: the process running the operation, the invocation time, the return time, the type\footnote{following \cite{ViottiVukolic} terminology; however, it might be more accurate to think about it as the \emph{method name} of the replicated object; in this paper we consider that operations are of type either $read$ or $write$.} of operation, the object on which the operation takes effect, the input value of the operation and the output value of the operation. 
+Since our objective is to encode these histories as words over a finite alphabet, for analysis using MONA, we make the assumption that the non-temporal attributes belong to finite sets of possible values. Without this finiteness assumption, the encodings presented in this paper would only work with an infinite alphabet.
+
+Thereby we assume a set $\mathbb{P}$ of processes from which operations are launched, a set $\mathbb{T}$ of types of operations, and a set $\mathbb{O}$ of objects, which are the data to be modified or read by operations (objects can be registers or variables for instance). Also, we define the set of values as $\mathbb{V}\cup\{\nabla,\Phi\}$ where $\mathbb{V}$ is the set of values that can be read or written on objects. Symbol $\Phi$ represents a non-relevant or not needed value. For instance, we can claim that for a write operation, the input value is the value to be written, and the output value is $\Phi$; as a write operation does not necessarily need to return anything. Finally, $\nabla$ stands for the \say{output value} of an operation that never returns. Concretely, $\nabla$ represents the absence of a return value due to a never ending operation. 
+
+As explained above we assume $\mathbb{P},\mathbb{T},\mathbb{O},\mathbb{V}$ finite.
+
+Invocation and return times are defined in $\mathbb{R}_{>0}\cup \{+\infty\}$. We include $+\infty$ to represent operations that never return. Assigning $+\infty$ as a return time reflects that, beyond a certain point, the operation is considered to never terminate; invocation time however is always finite.
+These timestamps refer to an ideal and global notion of time that we use to reason
+about histories a posteriori, although it may not be accessible by processes during executions.
+
+We recall the attributes from \cite{ViottiVukolic} along with their respective domains. The set of operation attributes is 
+$$
+\mathsf{Attributes} = \{proc, stime, rtime, type, obj, ival, oval\}
+$$
+An operation $o$ is thus defined as a record containing these attributes, with values taken from the following domains 
+(throughout the paper, we use the notation $o.a$ to denote the value of a given attribute $a$ of an operation $o$):
+
+\begin{itemize}
+	\item $o.proc\in \mathbb{P}$ is the process on which the operation $o$ is executed
+	\item $o.stime\in \mathbb{R}^+$ is the invocation time of $o$
+	\item $o.rtime\in \mathbb{R}^+\cup \{+\infty\}$ is the return time of $o$, $+\infty$ if the operation never returns (we assume that for any operation $o$, it holds that $o.stime<o.rtime$)
+	\item $o.type\in \mathbb{T}$ is the type of operation $o$
+	\item $o.obj\in \mathbb{O}$ is the object on which the operation $o$ takes effect
+	\item $o.ival\in \mathbb{V}$ is the input value of $o$, $\Phi$ if the operation is a $read$
+	\item $o.oval\in \mathbb{V}$ is the output value of $o$, $\Phi$ if the operation is a write, and $\nabla$ if the operation does not return
+\end{itemize}
+
+Two operations $\opa$ and $\opb$ are said to be \emph{concurrent} if their execution times overlap, $i.e.$ if $\opa.stime\leq\opb.rtime$ and $\opb.stime\leq\opa.rtime$. Otherwise, the operations are \emph{sequential}. Note that if an operation never returns, it is concurrent with all operations that start after its invocation time. We assume in this paper that two concurrent operations cannot run on the same process.\footnote{This is important for the translation of histories to words over a \underline{finite} alphabet we present later. We could however relax this assumption by bounding the number of concurrent operations per process, which would serve modeling multi-threaded processes or operation/method calls inside an operation.}
+We say that $\opa$ \emph{returns-before} $\opb$,  denoted as $\opa\rb\opb$, if $\opa$ returns before $\opb$ starts, i.e  $\opa.rtime<\opb.stime$. 
+We say that $\opa$ is in the \emph{same session} as $\opb$, denoted as $\opa\ssrel\opb$, if $\opa$ and $\opb$ are running on the same process, i.e. $\opa.proc=\opb.proc$; we also say that $\opa$ and $\opb$ are in the \emph{session order}, $\opa\sessionorder\opb$, if $\opa\ssrel\opb$ and $\opa\rb\opb$.
+
+\begin{example}
+  In Figure~\ref{fig:ex-history}, operations $a$ and $d$ are concurrent, whereas operation $a$ returns before operation $f$; operations $a$ and $b$ are in the same session.
+\end{example}
+
+We say that two operations $\opa$ and $\opb$ are extremity-disjoint if $\opa.stime$, $\opa.rtime$, $\opb.stime$ and $\opb.rtime$ are pairwise distinct. 
+
+\begin{definition}[History]\label{def:history}
+  A history over $\mathbb{P}$, $\mathbb{T}$, $\mathbb{O}$, and $\mathbb{V}$ is a finite set $H$ of operations such that for every pair of distinct operations $\opa,\opb\in H$, (1) $\opa$ and $\opb$ are extremity-disjoint, and (2) if $\opa\ssrel \opb$, then $\opa$ and $\opb$ are sequential.
+\end{definition}
+
+A history is finite if it contains a finite number of operations.
+The set of finite histories over $\mathbb{P}$, $\mathbb{T}$, $\mathbb{O}$, and $\mathbb{V}$ is denoted by $\historyset$.
+%
+An $\omega$-history is an infinite countable set of operations with no \emph{Zeno behavior}\footnote{We could also relax this assumption and translate arbitrary infinite histories to transfinite words indexed by ordinals, see e.g~\cite{demri-nowak-05-transfinite-words}.}: for all time $t\in \mathbb{R}^+$, there are finitely many operations that start before time $t$.
+The set of $\omega$-histories over $\mathbb{P}$, $\mathbb{T}$, $\mathbb{O}$, and $\mathbb{V}$ is denoted by $\infhistoryset$.
+
+In Section~\ref{sec:graphs-finite-histories}, we will study the oriented graph $(H,\rb)$ of the operations of a history $H$. The $\rb$ relation will be "too redundant" for the purpose of bounding some complexity measure of the graph, there we will consider a more restrictive relation, which we call \textsl{direct succession}.
+
+\begin{definition}[Direct Successor]\label{def:successor}
+Let $H\in\historyset$ and $\mathrel{\xrightarrow{rel}}$ a binary relation over $H$. We say that an operation $\opb$ is the direct successor of $\opa$ on process $p$, written $\opa \succrl{p}{rel} \opb$, if $\opb$ is the first operation on process $p$ such that $\opa\mathrel{\xrightarrow{rel}} \opb$. 
+\end{definition}
+
+Note that the relation $\opa\dsucp{p}\opb$ holds information about the process of $\opb$ (namely, $p$), but does not reveal any information about the process on which $\opa$ is executed. Additionally, we say that $\opb$ is a direct successor of $\opa$, written $\opa\dsuc\opb$, if there exists a process $p$ such that $\opa \dsucp{p} \opb$.
+
+
+
+\subsubsection{Abstract executions} are an enrichment of histories with two relations over operations: arbitration and visibility. Observe that a history does not contain enough information about operations to assess its consistency. Indeed, if two operations are concurrently executed, there is no way of knowing which operation should be considered as "logically before" the other. Thus, histories are traditionaly enriched with two relations over operations: arbitration and visibility.\footnote{
+Quoting \cite{PrinciplesOfEventualConsistency}, page~46:
+\emph{Visibility tells us about the relative timing of update propagation and operations. It is an acyclic relation. If an operation $\opa$ is visible to $\opb$ (written $\opa\vis\opb$), it means that the effect of $\opa$ is visible to the client performing $\opb$. In a system where updates are communicated by messages, this may mean that the message about operation $\opa$ reached the client that performed operation $\opb$ before the operation $\opb$ was performed.
+ Arbitration is used to indicate how the system resolves update conflicts, $i.e.$ how it handles concurrent updates that do not commute. It is a total order on operations.  If an operation $\opa$ is arbitrated before $\opb$ (written $\opa\ar\opb$), it means that the system considers the operation $\opa$ to happen earlier than operation $\opb$.}
+}
+
+
+\begin{figure}[t]
+\begin{center}
+\input{figures/fig-ex-abstract-execution.tex}
+\end{center}
+\caption{\small \slshape An abstract execution over the history of Figure~\ref{fig:ex-history}, with arbitration and visibility relations}
+\label{fig:ex-abstract-execution}
+\end{figure}
+
+
+\begin{definition}[Abstract execution~\cite{ViottiVukolic}]\label{def:abstract-execution}
+  An abstract execution is given by a triple \mbox{$(H,\ar,\vis)$} where $H$ is a history, $\ar$ is an arbitration relation, and $\vis$ is a visibility relation such that:
+  \begin{itemize}
+    \item $\ar$ is a total order over $H$;
+    \item $\vis$ is an acyclic relation\footnote{with no look-ahead, see Definition~\ref{def:no-look-ahead} below} over $H$.    
+  \end{itemize}
+\end{definition}
+
+\begin{example}
+  In Figure~\ref{fig:ex-abstract-execution}, we illustrate an abstract execution over the history of Figure~\ref{fig:ex-history}. The arbitration relation $\ar$ is represented by arrows going from an operation to another one. We only depict an arrow $a\ar b$ if $a$ and $b$ are on different processes and if $b$ is the first operation after $a$ in the arbitration order on process $p = b.proc$ (we later write $\opa \succrl{p}{ar} \opb$ when this is the case). The visibility relation $\vis$ is represented similarly, as well as the direct succession relation $\opa\succrl{p}{vis}\opb$.
+\end{example}
+
+Note that Burckhardt's model of abstract executions is quite general, and does not make any assumption on the relations between $\ar$, $\vis$, and $\rb$ beyond the ones explicitly stated in Definitions~\ref{def:history} and~\ref{def:abstract-execution}. To conclude this section, we try to hint why abstract executions are defined in this way, and introduce a new property, absence of look-ahead, that seems to us rather reasonable to assume for all abstract executions.
+
+\begin{remark}\label{rem:arbitration-visibility}
+  Visibility does not imply arbitration. This property is sometimes enforced by some consistency models (for instance, by the $\mathsf{SingleOrder}$ property used to define linearizability, see below), but it is not the case for all consistency models. Arbitration, that corresponds to a global consensus on the order of operations, may deviate from visibility in some scenarios: for instance, with three processes and arbitration based on majority, if two processes perform \texttt{x.write(0)} and the third one performs \texttt{x.write(1)}, they may collectively arbitrate \texttt{x.write(1)} before the two \texttt{x.write(0)} in order to reflect majority voting and "drop" the \texttt{x.write(1)}, even if both \texttt{x.write(0)} were visible to the third process when he performed \texttt{x.write(1)}.
+\end{remark}
+
+\begin{remark}
+  Visibility does not imply returns-before. Indeed, an operation can be visible to another operation even if it has not yet returned. In Figure~\ref{fig:ex-abstract-execution}, for instance, \texttt{x.write(17)} on process 2 is visible to \texttt{x.read(17)} on process 1, even if \texttt{x.write(17)} has not yet returned when \texttt{x.read(17)} started. Intuitively, process 2 sent a message about \texttt{x.write(17)} to process 1 before \texttt{x.write(17)} finished, and this message reached process 1 before \texttt{x.read(17)} finished.
+\end{remark}
+
+\begin{remark}
+  At a process-local scale, visibility does not imply session order. This is weird if we stick to the intuition that visibility is related to message passing, because it would mean a process can receive a message from itself that it will send in the future. If we do not stick to the message passing intuition, we can think about visibility in a broader sense, and allow processes to rely on some look-ahead on the operations they will execute. 
+\end{remark}
+
+For simplicity, we later exclude this look-ahead behavior\footnote{we could probably cope with a finite look-ahead, but this would complicate the translation to MSO, and it is unclear how relevant it would be} and assume the following property (that expresses the absence of look-ahead at the process-local scale and further restricts visibility accross distinct processes, seen as a message passing relation, to allow receiving messages that are sent in the future).
+
+\begin{definition}[No look-ahead]\label{def:no-look-ahead}
+  We say that an abstract execution $(H,\ar,\vis)$ satisfies the no look-ahead property if for all operations $\opa$ and $\opb$, if $\opa\rb\opb$, then $\opb\not\vis\opa$.
+\end{definition}
+
+In the rest of the paper, we implicitly assume that this property is part of Definition~\ref{def:abstract-execution}.
+We conclude with two further remarks about the fact that $\ar$, $\vis$, and $\rb$ relations are independent of each other.
+
+\begin{remark}
+  Session order (and more generally, $\rb$) does not imply visibility. For instance, in Figure~\ref{fig:ex-abstract-execution}, on process 1, \texttt{x.write(42)} is not visible to \texttt{x.read(17)}.
+  This would however be enforced by consistency models such as $\mathsf{ReadYourWrites}$, that require that an operation is visible to all subsequent operations in the same session.
+\end{remark}
+
+\begin{remark}
+  Session order (and more generally, $\rb$) does not imply arbitration. This is the case for instance when a write operation is dropped by the system, arbitrating it before other writes, see discussion in Remark~\ref{rem:arbitration-visibility} above.
+\end{remark}

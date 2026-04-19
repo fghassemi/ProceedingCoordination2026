@@ -1,0 +1,1081 @@
+
+@article{tiwariInvisible2003,
+	title = {Invisible formal methods for embedded control systems},
+	volume = {91},
+	issn = {1558-2256},
+	url = {https://ieeexplore.ieee.org/document/1173184/?arnumber=1173184},
+	doi = {10.1109/JPROC.2002.805818},
+	abstract = {Embedded control systems typically comprise continuous control laws combined with discrete mode logic. These systems are modeled using a hybrid automaton formalism, which is obtained by combining the discrete transition system formalism with continuous dynamical systems. This paper develops automated analysis techniques for asserting correctness of hybrid system designs. Our approach is based on symbolic representation of the state space of the system using mathematical formulas in an appropriate logic. Such formulas are manipulated using symbolic theorem proving techniques. It is important that formal analysis should be unobtrusive and acceptable to engineering practice. We motivate a methodology called invisible formal methods that provides a graded sequence of formal analysis technologies ranging from extended typechecking, through approximation and abstraction, to model checking and theorem proving. As an instance of invisible formal methods, we describe techniques to check inductive invariants, or extended types, for hybrid systems and compute discrete finite state abstractions automatically to perform reachability set computation. The abstract system is sound with respect to the formal semantics of hybrid automata. We also discuss techniques for performing analysis on nonstandard semantics of hybrid automata. We also briefly discuss the problem of translating models in Simulink/Stateflow language, which is widely used in practice, into the modeling formalisms, like hybrid automata, for which analysis tools are being developed.},
+	pages = {29--39},
+	number = {1},
+	journaltitle = {Proceedings of the {IEEE}},
+	author = {Tiwari, A. and Shankar, N. and Rushby, J.},
+	urldate = {2024-07-15},
+	date = {2003-01},
+	year = 2003,
+	month = jan,
+	note = {Conference Name: Proceedings of the {IEEE}},
+	keywords = {Automata, Automatic control, Computer science, Control system synthesis, Control systems, Embedded software, Logic, Performance analysis, State-space methods, System analysis and design},
+	file = {IEEE Xplore Abstract Record:/home/scerf/Zotero/storage/6CQL7LYT/1173184.html:text/html;IEEE Xplore Full Text PDF:/home/scerf/Zotero/storage/4R4F9LTB/Tiwari et al. - 2003 - Invisible formal methods for embedded control syst.pdf:application/pdf}
+}
+
+@inproceedings{bakSandboxing2011,
+	title = {Sandboxing Controllers for Cyber-Physical Systems},
+	url = {https://ieeexplore.ieee.org/document/5945416/?arnumber=5945416},
+	doi = {10.1109/ICCPS.2011.25},
+	abstract = {Cyber-physical systems bridge the gap between cyber components, typically written in software, and the physical world. Software written with traditional development practices, however, likely contains bugs or unintended interactions among components, which can result in uncontrolled and possibly disastrous physical-world interactions. Complete verification of cyber-physical systems, however, is often impractical due to outsourced development of software, cost, software created without formal models, or excessively large or complex models where the verification process becomes intractable. Rather than mandating complete modeling and verification, we advocate sandboxing of unverified cyber-physical system controllers by augmenting the system with a verified safety wrapper that can take control of the plant in order to avoid violations of formal safety properties. The focus of this work is an automatic method, based on reach ability and time-bounded reach ability of hybrid systems, to generate verified sandboxes. The method is shown to be both more general than previous work, and allows the trade-off of increased computation time for improved reach ability accuracy. We also present an end-to-end toolkit which performs the low-level computation to generate the sandbox source code from Simulink/State flow models of a cyber-physical system.},
+	eventtitle = {2011 {IEEE}/{ACM} Second International Conference on Cyber-Physical Systems},
+	pages = {3--12},
+	booktitle = {2011 {IEEE}/{ACM} Int. Conf. on Cyber-Physical Systems},
+	author = {Bak, S. and Manamcheri, K. and Mitra, S. and Caccamo, M.},
+	urldate = {2024-07-15},
+	year = {2011},
+	month = apr,
+	keywords = {verification, Automata, abstraction, Computational modeling, control, cyber-physical systems, Delta modulation, hybrid systems, Safety, Software, Switches, Vehicles},
+	file = {IEEE Xplore Abstract Record:/home/scerf/Zotero/storage/DTNBXZBY/5945416.html:text/html;IEEE Xplore Full Text PDF:/home/scerf/Zotero/storage/JN7DPPXY/Bak et al. - 2011 - Sandboxing Controllers for Cyber-Physical Systems.pdf:application/pdf},
+}
+
+@inproceedings{duggiralaAbstraction2011,
+	title = {Abstraction Refinement for Stability},
+	url = {https://ieeexplore.ieee.org/document/5945418/?arnumber=5945418},
+	doi = {10.1109/ICCPS.2011.24},
+	abstract = {The paper presents a {CEGAR}-based procedure for verifying stability (region stabillity) of {CPS} modeled as hybrid automata. It relies a characterization of the blocking property of hybrid automata in terms of well-foundedness of a relation that combines the discrete transitions and continuous trajectories and a key assumption about the switching speed of the system in terms of average dwell time, but does not require the individual modes to be stable. This characterization enables the adaptation of program analysis techniques in the domain of hybrid systems. It is shown that the procedure is complete for rectangular initialized hybrid automata. Several illustrative examples are verified using a prototype tool that implements the methodology.},
+	eventtitle = {2011 {IEEE}/{ACM} Second International Conference on Cyber-Physical Systems},
+	pages = {22--31},
+	booktitle = {2011 {IEEE}/{ACM} Second International Conference on Cyber-Physical Systems},
+	author = {Duggirala, Parasara Sridhar and Mitra, Sayan},
+	urldate = {2024-07-15},
+	date = {2011-04},
+	year = 2011,
+	month = apr,
+	keywords = {Automata, Safety, Asymptotic stability, Cost accounting, Cyber-Physical Systems, Hybrid Systems, Lyapunov methods, Region Stability, Stability, Stability analysis, Termination, Trajectory, Well-Founded Relations},
+	file = {IEEE Xplore Abstract Record:/home/scerf/Zotero/storage/DHPAC9HD/5945418.html:text/html;IEEE Xplore Full Text PDF:/home/scerf/Zotero/storage/7I87QBBJ/Duggirala et Mitra - 2011 - Abstraction Refinement for Stability.pdf:application/pdf},
+}
+
+@inproceedings{balakrishnan-Refining-2009,
+	location = {New York, {NY}, {USA}},
+	title = {Refining the control structure of loops using static analysis},
+	isbn = {978-1-60558-627-4},
+	url = {https://doi.org/10.1145/1629335.1629343},
+	doi = {10.1145/1629335.1629343},
+	series = {{EMSOFT} '09},
+	abstract = {We present a simple yet useful technique for refining the control structure of loops that occur in imperative programs. Loops containing complex control flow are common in synchronous embedded controllers derived from modeling languages such as Lustre, Esterel, and Simulink/Stateflow. Our approach uses a set of labels to distinguish different control paths inside a given loop. The iterations of the loop are abstracted as a finite state automaton over these labels. Subsequently, we use static analysis techniques to identify infeasible iteration sequences and subtract such forbidden sequences from the initial language to obtain a refinement. In practice, the refinement of control flow sequences often simplifies the control flow patterns in the loop. We have applied the refinement technique to improve the precision of abstract interpretation in the presence of widening. Our experiments on a set of complex reactive loop benchmarks clearly show the utility of our refinement techniques. Abstraction interpretation with our refinement technique was able to verify all the properties for 10 out of the 13 benchmarks, while abstraction interpretation without refinement was able to verify only four. Other potentially useful applications include termination analysis and reverse engineering models from source code.},
+	pages = {49--58},
+	booktitle = {Proc. of the {ACM} Int. Conf. on Embedded software},
+	author = {Balakrishnan, G. and Sankaranarayanan, S. and Ivančić, F. and Gupta, A.},
+	urldate = {2024-07-15},
+	date = {2009-10-12},
+	year = 2009,
+	month = oct,
+	file = {Version soumise:/home/scerf/Zotero/storage/LWD7KUHV/Balakrishnan et al. - 2009 - Refining the control structure of loops using stat.pdf:application/pdf},
+}
+
+@article{dutta-learning-2018,
+	title = {Learning and Verification of Feedback Control Systems using Feedforward Neural Networks},
+	volume = {51},
+	issn = {2405-8963},
+	url = {https://www.sciencedirect.com/science/article/pii/S240589631831139X},
+	doi = {10.1016/j.ifacol.2018.08.026},
+	series = {6th {IFAC} Conference on Analysis and Design of Hybrid Systems {ADHS} 2018},
+	abstract = {We present an approach to learn and formally verify feedback laws for data-driven models of neural networks. Neural networks are emerging as powerful and general data-driven representations for functions. This has led to their increased use in data-driven plant models and the representation of feedback laws in control systems. However, it is hard to formally verify properties of such feedback control systems. The proposed learning approach uses a receding horizon formulation that samples from the initial states and disturbances to enforce properties such as reachability, safety and stability. Next, our verification approach uses an over-approximate reachability analysis over the system, supported by range analysis for feedforward neural networks. We report promising results obtained by applying our techniques on several challenging nonlinear dynamical systems.},
+	pages = {151--156},
+	number = {16},
+	journal = {{IFAC}-{PapersOnLine}},
+	author = {Dutta, S. and Jha, S. and Sankaranarayanan, S. and Tiwari, A.},
+	urldate = {2024-07-15},
+	date = {2018-01-01},
+	year = 2018,
+	month = jan,
+	keywords = {verification, formal synthesis, neural networks, Reachability, safety analysis},
+	file = {ScienceDirect Snapshot:/home/scerf/Zotero/storage/NU44CB2I/S240589631831139X.html:text/html},
+}
+
+@inproceedings{arechiga-using-2012,
+	title = {Using theorem provers to guarantee closed-loop system properties},
+	url = {https://ieeexplore.ieee.org/abstract/document/6315388},
+	doi = {10.1109/ACC.2012.6315388},
+	abstract = {This paper presents a new approach for leveraging the power of theorem provers for formal verification to provide sufficient conditions that can be checked on embedded control designs. Theorem provers are often most efficient when using generic models that abstract away many of the controller details, but with these abstract models very general conditions can be verified under which desirable properties such as safety can be guaranteed for the closed-loop system. We propose an approach in which these sufficient conditions are static conditions that can be checked for the specific controller design, without having to include the dynamics of the plant. We demonstrate this approach using the {KeYmaera} theorem prover for differential dynamic logic for two examples: an intelligent cruise controller and a cooperative intersection collision avoidance system ({CICAS}) for left-turn assist. In each case, safety of the closed-loop system proved using {KeYmaera} provides static sufficient conditions that are checked for the controller design.},
+	eventtitle = {2012 American Control Conference ({ACC})},
+	pages = {3573--3580},
+	booktitle = {2012 American Control Conference ({ACC})},
+	author = {Aréchiga, N. and Loos, S. M. and Platzer, A. and Krogh, B. H.},
+	urldate = {2024-07-15},
+	year = 2012,
+	mont = jun,
+	note = {{ISSN}: 2378-5861},
+	keywords = {Safety, Acceleration, Closed loop systems, Delay, Mathematical model, Vehicle dynamics},
+	file = {IEEE Xplore Abstract Record:/home/scerf/Zotero/storage/5Q2ITNZW/6315388.html:text/html;IEEE Xplore Full Text PDF:/home/scerf/Zotero/storage/XVMRGPYG/Aréchiga et al. - 2012 - Using theorem provers to guarantee closed-loop sys.pdf:application/pdf},
+}
+
+@article{sangiovanni-vincentelli-taming-2012,
+	title = {{Taming Dr. Frankenstein}: Contract-Based Design for Cyber-Physical Systems},
+	volume = {18},
+	issn = {0947-3580},
+	url = {https://www.sciencedirect.com/science/article/pii/S0947358012709433},
+	doi = {10.3166/ejc.18.217-238},
+	shorttitle = {Taming Dr. Frankenstein},
+	abstract = {Cyber-physical systems combine a cyber side (computing and networking) with a physical side (mechanical, electrical, and chemical processes). In many cases, the cyber component controls the physical side using sensors and actuators that observe the physical system and actuate the controls. Such systems present the biggest challenges as well as the biggest opportunities in several large industries, including electronics, energy, automotive, defense and aerospace, telecommunications, instrumentation, industrial automation. Engineers today do successfully design cyber-physical systems in a variety of industries. Unfortunately, the development of systems is costly, and development schedules are difficult to stick to. The complexity of cyber-physical systems, and particularly the increased performance that is offered from interconnecting what in the past have been separate systems, increases the design and verification challenges. As the complexity of these systems increases, our inability to rigorously model the interactions between the physical and the cyber sides creates serious vulnerabilities. Systems become unsafe, with disastrous inexplicable failures that could not have been predicted. Distributed control of multi-scale complex systems is largely an unsolved problem. A common view that is emerging in research programs in Europe and the {US} is “enabling contract-based design ({CBD}),” which formulates a broad and aggressive scope to address urgent needs in the systems industry. We present a design methodology and a few examples in controller design whereby contract-based design can be merged with platform-based design to formulate the design process as a meet-in-the-middle approach, where design requirements are implemented in a subsequent refinement process using as much as possible elements from a library of available components. Contracts are formalizations of the conditions for correctness of element integration (horizontal contracts), for lower level of abstraction to be consistent with the higher ones, and for abstractions of available components to be faithful representations of the actual parts (vertical contracts).},
+	pages = {217--238},
+	number = {3},
+	journal = {European Journal of Control},
+	author = {Sangiovanni-Vincentelli, A. and Damm, W. and Passerone, R.},
+	urldate = {2024-07-15},
+	date = {2012-01-01},
+	year = 2012,
+	month = jan,
+	keywords = {Contract, correctness, cyber-physical, design methodologies, platform-based}
+}
+
+@article{matni-quantitative-2024,
+	title = {A Quantitative Framework for Layered Multirate Control: Toward a Theory of Control Architecture},
+	volume = {44},
+	issn = {1941-000X},
+	url = {https://ieeexplore.ieee.org/abstract/document/10555178},
+	doi = {10.1109/MCS.2024.3382388},
+	shorttitle = {A Quantitative Framework for Layered Multirate Control},
+	abstract = {Complex engineered and natural control systems, such as those used in robotics, the power grid, human sensorimotor control, and the Internet, are characterized by needing to operate robustly and reliably across many spatiotemporal scales despite being implemented using highly constrained hardware and software. Remarkably, a universal design pattern centered around layered control architectures ({LCAs}) has emerged to address these challenges across vastly different domains. These {LCAs} are the central object of study of this article (see “Summary”).},
+	pages = {52--94},
+	number = {3},
+	journal = {{IEEE} Control Systems Magazine},
+	author = {Matni, N. and Ames, A. D. and Doyle, J. C.},
+	urldate = {2024-07-15},
+	date = {2024-06},
+	year = 2024,
+	month = jun,
+	keywords = {Aerospace control, Aircraft navigation, Complex systems, Computer architecture, Feedback control, Hardware, Power grids, Reliability engineering, Robot sensing systems, Robust control, Sensor systems, Spatiotemporal phenomena, Trajectory planning},
+	file = {IEEE Xplore Full Text PDF:/home/scerf/Zotero/storage/RVC93U8T/Matni et al. - 2024 - A Quantitative Framework for Layered Multirate Con.pdf:application/pdf},
+}
+
+@article{incer-layered-2024,
+	title = {Layered Control Systems Operating on Multiple Clocks},
+	volume = {8},
+	issn = {2475-1456},
+	url = {https://ieeexplore.ieee.org/abstract/document/10549986},
+	doi = {10.1109/LCSYS.2024.3410150},
+	abstract = {Autonomous systems typically leverage layered control architectures, created by interconnecting components that operate at multiple timescales, i.e., evolve under various clocks. To formalize this typically heuristic procedure, we introduce a new logic, Multiclock Logic ({MCL}), that can express the requirements of components from the point of view of their local clocks, promoting independent design and component reuse. We then use assume-guarantee contracts expressed in {MCL} to prove global stability properties of a system using the stability properties of its components. In particular, we consider the classic layered architecture consisting of model predictive control ({MPC}) layered on top of feedback linearization, and prove overall stability of the systems.},
+	pages = {1211--1216},
+	journal = {{IEEE} Control Systems Letters},
+	author = {Incer, I. and Csomay-Shanklin, N. and Ames, A. D. and Murray, R. M.},
+	urldate = {2024-07-15},
+	date = {2024},
+	year = 2024,
+	keywords = {Hierarchical control, hybrid systems, Clocks, Contracts, networked control systems, Reactive power, Semantics, Stability criteria, Synchronization, Syntactics},
+	file = {IEEE Xplore Abstract Record:/home/scerf/Zotero/storage/NDCLJZTN/10549986.html:text/html;IEEE Xplore Full Text PDF:/home/scerf/Zotero/storage/XVY9B3HX/Incer et al. - 2024 - Layered Control Systems Operating on Multiple Cloc.pdf:application/pdf},
+}
+
+@INPROCEEDINGS{4177366,
+  author={Girard, A. and Pappas, G. J.},
+  booktitle={Proc. of the IEEE Conference on Decision and Control}, 
+  title={Hierarchical Control using Approximate Simulation Relations}, 
+  year={2006},
+  volume={},
+  number={},
+  pages={264-269},
+  keywords={Control systems;Control design;Robot motion;Motion control;Robot control;Computational modeling;USA Councils;Safety;Nonlinear control systems;Nonlinear systems},
+  doi={10.1109/CDC.2006.377051}}
+
+
+@article{saoud-assume-guarantee-2021,
+	title = {Assume-guarantee contracts for continuous-time systems},
+	volume = {134},
+	issn = {0005-1098},
+	url = {https://www.sciencedirect.com/science/article/pii/S0005109821004337},
+	doi = {10.1016/j.automatica.2021.109910},
+	abstract = {Many techniques for verifying properties of continuous-time systems are limited to systems of moderate size. In this paper, we propose an approach based on assume-guarantee contracts and compositional reasoning for verifying properties of a broad class of continuous-time systems consisting of interconnected components. The notion of assume-guarantee contracts makes it possible to divide responsibilities among the system components: a contract specifies the property that a component must fulfill under some assumptions on the behavior of its environment (i.e. of the other components). We define weak and strong semantics of assume-guarantee contracts. We then establish a certain number of results for compositional reasoning, which allow us to show that a global assume-guarantee contract of the whole system is satisfied when all components satisfy their own contracts. We show that the weak satisfaction of the contract is sufficient to deal with interconnections described by a directed acyclic graph, while strong satisfaction is needed to reason about general interconnections containing cycles. Specific results for systems described by differential inclusions and invariance assume-guarantee contracts are then developed. Finally, we show how the proposed assume-guarantee framework can recast different versions of the small-gain theorem as a particular case. Throughout the paper, the main results are illustrated using simple examples.},
+	pages = {109910},
+	journal = {Automatica},
+	author = {Saoud, A. and Girard, A. and Fribourg, L.},
+	urldate = {2024-07-15},
+	date = {2021-12-01},
+	year = 2021,
+	month = dec,
+	keywords = {Assume-guarantee contracts, Component-based design, Prefix-closed properties, Small-gain theorem},
+	file = {ScienceDirect Snapshot:/home/scerf/Zotero/storage/QN7RV8KF/S0005109821004337.html:text/html;Version soumise:/home/scerf/Zotero/storage/GEZP5MQW/Saoud et al. - 2021 - Assume-guarantee contracts for continuous-time sys.pdf:application/pdf},
+}
+
+@article{prabhakar-simulations-2018,
+	title = {Simulations and bisimulations for analysis of stability with respect to inputs of hybrid systems},
+	volume = {28},
+	issn = {1573-7594},
+	url = {https://doi.org/10.1007/s10626-017-0262-9},
+	doi = {10.1007/s10626-017-0262-9},
+	abstract = {Simulation and bisimulation relations define pre-orders on processes which serve as the basis for approximation based verification techniques, and have been extended towards the design of continuous and hybrid systems with complex logic specifications. We study pre-orders between hybrid systems which preserve stability properties with respect to input. We show that these properties are not bisimulation invariant, and hence propose stronger notions which strengthen simulation and bisimulation relations with uniform continuity constraints. We show that uniform continuity is necessary on the relations corresponding to both the state-space and the input-space, and continuity itself does not suffice. Finally, we demonstrate the satisfiability of our definitions by casting the well-known Lyapunov function based techniques for stability analysis as constructing a simple one-dimensional system which is stable and uniformly continuously simulates the original system.},
+	pages = {349--374},
+	number = {3},
+	journal = {Discrete Event Dynamic Systems},
+	author = {Prabhakar, P. and Liu, J. and Murray, R. M.},
+	urldate = {2024-07-15},
+	date = {2018-09-01},
+	year = 2018,
+	month = sep,
+	langid = {english},
+	keywords = {Stability, Abstractions, Bisimulations, Hybrid systems, Incremental input-to-state stability, Input-to-state stability},
+	file = {Full Text PDF:/home/scerf/Zotero/storage/VKSZDC7V/Prabhakar et al. - 2018 - Simulations and bisimulations for analysis of stab.pdf:application/pdf},
+}
+
+@ARTICLE{Shevtsov18,
+  author={Shevtsov, S. and Berekmeri, M. and Weyns, D. and Maggio, M.},
+  journal={IEEE Transactions on Software Engineering}, 
+  title={Control-Theoretical Software Adaptation: A Systematic Literature Review}, 
+  year={2018},
+  volume={44},
+  number={8},
+  pages={784-810},
+  keywords={Software;Control theory;Adaptation models;Runtime;Bibliographies;Mathematical model;Knowledge based systems;Self-adaptive software;control theory;software adaptation},
+  doi={10.1109/TSE.2017.2704579}
+}
+
+@book{hellerstein2004feedback,
+  title={Feedback control of computing systems},
+  author={Hellerstein, J. L. and Diao, Y. and Parekh, S. and Tilbury, D. M.},
+  year={2004},
+  publisher={John Wiley \& Sons}
+}
+
+@inproceedings{filieri2015software,
+  title={Software engineering meets control theory},
+  author={Filieri, A. and others},
+  booktitle={Proc. IEEE/ACM Int. Symp. on Software Engineering for Adaptive and Self-Managing Systems},
+  pages={71--82},
+  year={2015},
+  organization={IEEE}
+}
+
+@article{scattolini2009architectures,
+  title={Architectures for distributed and hierarchical model predictive control--a review},
+  author={Scattolini, Riccardo},
+  journal={Journal of process control},
+  volume={19},
+  number={5},
+  pages={723--731},
+  year={2009},
+  publisher={Elsevier}
+}
+
+@book{doyle2013feedback,
+  title={Feedback control theory},
+  author={Doyle, J. C. and Francis, B. A. and Tannenbaum, A. R.},
+  year={2013},
+  publisher={Courier Corporation}
+}
+
+
+@article{astrom1995pid,
+  title={{PID} controllers: theory, design, and tuning},
+  author={Astrom, K. J.},
+  journal={The International Society of Measurement and Control},
+  year={1995}
+}
+
+@book{zhou1998essentials,
+  title={Essentials of robust control},
+  author={Zhou, K. and Doyle, J. C.},
+  volume={104},
+  year={1998},
+  publisher={Prentice Hall}
+}
+
+@book{vinnicombe2000uncertainty,
+  title={Uncertainty and Feedback, H Loop-shaping and the V-gap Metric},
+  author={Vinnicombe, G.},
+  year={2000},
+  publisher={World Scientific}
+}
+
+
+@article{aastrom2000model,
+  title={Model uncertainty and robust control},
+  author={{\AA}str{\"o}m, K. J.},
+  journal={Lecture Notes on Iterative Identification and Control Design},
+  pages={63--100},
+  year={2000},
+  publisher={Lund Institute of Technology}
+}
+
+@misc{https://doi.org/10.48550/arxiv.2203.02084,
+  doi = {10.48550/ARXIV.2203.02084},
+  
+  url = {https://arxiv.org/abs/2203.02084},
+  
+  author = {Song, Zihao and Kurtz, Vince and Welikala, Shirantha and Antsaklis, Panos J. and Lin, Hai},
+  
+  keywords = {Systems and Control (eess.SY), Robotics (cs.RO), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences},
+  
+  title = {Robust Approximate Simulation for Hierarchical Control of Piecewise Affine Systems under Bounded Disturbances},
+  
+  publisher = {arXiv},
+  
+  year = {2022},
+  
+  copyright = {Creative Commons Attribution 4.0 International}
+}
+
+
+@inproceedings{long2016hierarchical,
+  title={A hierarchical distributed MPC for HVAC systems},
+  author={Long, Yushen and Liu, Shuai and Xie, Lihua and Johansson, Karl Henrik},
+  booktitle={2016 American Control Conference (ACC)},
+  pages={2385--2390},
+  year={2016},
+  organization={IEEE}
+}
+
+@article{hetel2017recent,
+  title={Recent developments on the stability of systems with aperiodic sampling: An overview},
+  author={Hetel, Laurentiu and Fiter, Christophe and Omran, Hassan and Seuret, Alexandre and Fridman, Emilia and Richard, Jean-Pierre and Niculescu, Silviu Iulian},
+  journal={Automatica},
+  volume={76},
+  pages={309--335},
+  year={2017},
+  publisher={Elsevier}
+}
+
+@article{borges2007verified,
+  title={A verified hierarchical control architecture for co-ordinated multi-vehicle operations},
+  author={Borges de Sousa, Jo{\~a}o and Johansson, Karl H and Silva, Jorge and Speranzon, Alberto},
+  journal={International Journal of Adaptive Control and Signal Processing},
+  volume={21},
+  number={2-3},
+  pages={159--188},
+  year={2007},
+  publisher={Wiley Online Library}
+}
+
+@inproceedings{kleinMAH14,
+  author    = {C. Klein and
+               M. Maggio and
+               K.{-}E. {\AA}rz{\'{e}}n and
+               F. Hern{\'{a}}ndez{-}Rodriguez},
+  editor    = {P. Jalote and
+               L. C. Briand and
+               A. van der Hoek},
+  title     = {Brownout: {B}uilding more robust cloud applications},
+  booktitle = {Proc. Int. Conf. {ICSE}'14},
+  pages     = {700--711},
+  publisher = {{ACM}},
+  year      = {2014},
+  doi       = {10.1145/2568225.2568227}
+}
+
+@article{kergus2020learning,
+  title={Learning-based hierarchical control of water reservoir systems},
+  author={Kergus, Pauline and Formentin, Simone and Giuliani, Matteo and Castelletti, Andrea},
+  journal={arXiv preprint arXiv:2012.13224},
+  year={2020}
+}
+
+@article{guerrero2012advanced,
+  title={Advanced control architectures for intelligent microgrids—Part I: Decentralized and hierarchical control},
+  author={Guerrero, J. M. and Chandorkar, M. and Lee, T.-L. and Loh, P. C.},
+  journal={IEEE Transactions on Industrial Electronics},
+  volume={60},
+  number={4},
+  pages={1254--1262},
+  year={2012},
+  publisher={IEEE}
+}
+
+@inproceedings{ballouliBBS18,
+  author    = {R. El Ballouli and
+               S. Bensalem and
+               M. Bozga and
+               J. Sifakis},
+  editor    = {K. Bae and
+               P. Csaba {\"{O}}lveczky},
+  title     = {Programming Dynamic Reconfigurable Systems},
+  booktitle = {Proc. Int. Conf. {FACS} 2018},
+  series    = {LNCS},
+  volume    = {11222},
+  pages     = {118--136},
+  publisher = {Springer},
+  year      = {2018},
+  doi       = {10.1007/978-3-030-02146-7\_6}
+}
+
+@incollection{weyns19,
+  author    = {D. Weyns},
+  editor    = {S. Cha and
+               R. N. Taylor and
+               K. Chul Kang},
+  title     = {Software Engineering of Self-adaptive Systems},
+  booktitle = {Handbook of Software Engineering},
+  pages     = {399--443},
+  publisher = {Springer},
+  year      = {2019},
+  doi       = {10.1007/978-3-030-00262-6\_11}
+}
+
+@inproceedings{weynsIIA12,
+  author    = {D. Weyns and
+               M. Usman Iftikhar and
+               D. Gil de la Iglesia and
+               T. Ahmad},
+  editor    = {B. C. Desai and
+               E. Vassev and
+               S. P. Mudur},
+  title     = {A survey of formal methods in self-adaptive systems},
+  booktitle = {Proc. Int. Conf. {C3S2E} 2012},
+  pages     = {67--79},
+  publisher = {{ACM}},
+  year      = {2012},
+  doi       = {10.1145/2347583.2347592}
+}
+
+@inproceedings{caldasGPPWB21,
+  author    = {R. Caldas and
+               R. Ghzouli and
+               A. V. Papadopoulos and
+               P. Pelliccione and
+               D. Weyns and
+               T. Berger},
+  title     = {Towards Mapping Control Theory and Software Engineering Properties using Specification Patterns},
+  booktitle = {{IEEE} Int. Conf. {ACSOS} 2021, Companion Volume, 2021},
+  pages     = {281--286},
+  publisher = {{IEEE}},
+  year      = {2021},
+  doi       = {10.1109/ACSOS-C52956.2021.00067}
+}
+
+@inproceedings{quinWG21,
+  author    = {F. Quin and
+               D. Weyns and
+               O. Gheibi},
+  title     = {Decentralized Self-Adaptive Systems: {A} Mapping Study},
+  booktitle = {Proc. Int. Symp. SEAMS@ICSE 2021},
+  pages     = {18--29},
+  publisher = {{IEEE}},
+  year      = {2021},
+  doi       = {10.1109/SEAMS51251.2021.00014}
+}
+
+@article{buresCW21,
+  author    = {T. Bures and
+               R. Calinescu and
+               D. Weyns},
+  title     = {Special Issue on software engineering for trustworthy cyber-physical systems},
+  journal   = {J. Syst. Softw.},
+  volume    = {178},
+  pages     = {110972},
+  year      = {2021},
+  doi       = {10.1016/j.jss.2021.110972}
+}
+
+@inproceedings{RuttenMS13,
+  author    = {{\'{E}}. Rutten and
+               N. Marchand and
+               D. Simon},
+  editor    = {R. de Lemos and
+               D. Garlan and
+               C. Ghezzi and
+               H. Giese},
+  title     = {Feedback Control as {MAPE-K} Loop in Autonomic Computing},
+  booktitle = {Software Engineering for Self-Adaptive Systems {III.} Assurances},
+  series    = {LNCS},
+  volume    = {9640},
+  pages     = {349--373},
+  publisher = {Springer},
+  year      = {2013},
+  doi       = {10.1007/978-3-319-74183-3\_12}
+}
+
+@inproceedings{LemosGGGALSWBBB13,
+  author    = {R. de Lemos and others},
+  title     = {Software Engineering for Self-Adaptive Systems: Research Challenges in the Provision of Assurances},
+  booktitle = {Software Engineering for Self-Adaptive Systems {III.} Assurances}, 
+  series    = {LNCS},
+  volume    = {9640},
+  pages     = {3--30},
+  publisher = {Springer},
+  year      = {2013},
+  doi       = {10.1007/978-3-319-74183-3\_1}
+}
+
+
+
+@article{GueyePRT13,
+  author    = {S. Mak Kar{\'{e}} Gueye and
+               N. De Palma and
+               {\'{E}}. Rutten and
+               A. Tchana},
+  title     = {Coordinating multiple administration loops using discrete control},
+  journal   = {{ACM} {SIGOPS} Oper. Syst. Rev.},
+  volume    = {47},
+  number    = {3},
+  pages     = {18--25},
+  year      = {2013},
+  url       = {https://doi.org/10.1145/2553070.2553074},
+  doi       = {10.1145/2553070.2553074},
+  timestamp = {Tue, 14 Jul 2020 14:25:30 +0200},
+  biburl    = {https://dblp.org/rec/journals/sigops/GueyePRT13.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{BliudzeS08,
+  author    = {S. Bliudze and
+               J. Sifakis},
+  title     = {The Algebra of Connectors - Structuring Interaction in {BIP}},
+  journal   = {{IEEE} Trans. Computers},
+  volume    = {57},
+  number    = {10},
+  pages     = {1315--1330},
+  year      = {2008},
+  url       = {https://doi.org/10.1109/TC.2008.26},
+  doi       = {10.1109/TC.2008.26},
+  timestamp = {Sat, 20 May 2017 00:24:28 +0200},
+  biburl    = {https://dblp.org/rec/journals/tc/BliudzeS08.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{kephartC03,
+  author    = {J. O. Kephart and
+               D. M. Chess},
+  title     = {The Vision of Autonomic Computing},
+  journal   = {Computer},
+  volume    = {36},
+  number    = {1},
+  pages     = {41--50},
+  year      = {2003},
+  doi       = {10.1109/MC.2003.1160055}
+}
+
+@inproceedings{weynsSKLLOPT21,
+  author    = {D. Weyns and others},
+  title     = {Towards Better Adaptive Systems by Combining {MAPE}, Control Theory, and Machine Learning},
+  booktitle = {Proc. Int. Symp. SEAMS@ICSE 2021},
+  pages     = {217--223},
+  publisher = {{IEEE}},
+  year      = {2021},
+  doi       = {10.1109/SEAMS51251.2021.00036}
+}
+
+@article{Oquendo04,
+  author    = {F. Oquendo},
+  title     = {{pi-ADL}: an Architecture Description Language based on the higher-order
+               typed pi-calculus for specifying dynamic and mobile software architectures},
+  journal   = {{ACM} {SIGSOFT} Softw. Eng. Notes},
+  volume    = {29},
+  number    = {3},
+  pages     = {1--14},
+  year      = {2004},
+  url       = {https://doi.org/10.1145/986710.986728},
+  doi       = {10.1145/986710.986728},
+  timestamp = {Thu, 17 Sep 2020 12:05:34 +0200},
+  biburl    = {https://dblp.org/rec/journals/sigsoft/Oquendo04.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{C2-style4adaptn_1999,  
+  author={Oreizy, P. and Gorlick, M.M. and Taylor, R.N. and Heimhigner, D. and Johnson, G. and Medvidovic, N. and Quilici, A. and Rosenblum, D.S. and Wolf, A.L.}, journal={IEEE Intelligent Systems and their Applications},   
+  title={An architecture-based approach to self-adaptive software},   
+  year={1999},  
+  volume={14},  
+  number={3},  
+  pages={54-62},  
+  doi={10.1109/5254.769885}
+}
+
+@article{C2-style-1996,  
+  author={Taylor, R.N. and Medvidovic, N. and Anderson, K.M. and Whitehead, E.J. and Robbins, J.E. and Nies, K.A. and Oreizy, P. and Dubrow, D.L.},  
+  journal={IEEE Transactions on Software Engineering},   
+  title={A component- and message-based architectural style for {GUI} software},   
+  year={1996},  
+  volume={22},  
+  number={6},  
+  pages={390-406},  
+  doi={10.1109/32.508313}
+  }
+  
+@article{pinciroliB16,
+  author    = {Carlo Pinciroli and
+               Giovanni Beltrame},
+  title     = {Buzz: {A} Programming Language for Robot Swarms},
+  journal   = {{IEEE} Softw.},
+  volume    = {33},
+  number    = {4},
+  pages     = {97--100},
+  year      = {2016},
+  doi       = {10.1109/MS.2016.95}
+}
+
+@inproceedings{majumdarMPSZ21,
+  author    = {Rupak Majumdar and
+               Aman Shankar Mathur and
+               Marcus Pirron and
+               Laura Stegner and
+               Damien Zufferey},
+  editor    = {Esther Guerra and
+               Mari{\"{e}}lle Stoelinga},
+  title     = {Paracosm: {A} Test Framework for Autonomous Driving Simulations},
+  booktitle = {Proc. Int. Conf. {FASE} 2021},
+  series    = {LNCS},
+  volume    = {12649},
+  pages     = {172--195},
+  publisher = {Springer},
+  year      = {2021},
+  doi       = {10.1007/978-3-030-71500-7\_9}
+}
+
+@incollection{kouchnarenko2014adapting,
+  author={Kouchnarenko, O. and Weber, J.-F.},
+  title={Adapting Component-Based Systems at Runtime via Policies with Temporal Patterns},
+  booktitle={Proc. Int. Conf. {FACS}},
+  series={LNCS},
+  doi={10.1007/978-3-319-07602-7_15},
+  publisher={Springer},
+  pages={234-253},
+  volume={8348},
+  year={2014}
+}
+
+@inproceedings{kw15:ip,
+    year = {2015},
+    title = {Decentralised Evaluation of Temporal Patterns over Component-Based Systems at Runtime},
+    author = {Kouchnarenko, O. and Weber, J.-F.},
+    publisher = {Springer},
+    pages = {108 - 126},
+    address = {Italy},
+    booktitle = {Proc. Int. Conf. {FACS} 2014},
+    month = {sep},
+    series = {LNCS},
+    volume = {8997}
+}
+
+@inproceedings{chauvel2009composition,
+  title={Composition et expression qualitative de politiques d'adaptation pour les composants {Fractal}},
+  author={Chauvel, F. and Barais, O. and Plouzeau, N. and Borne, I. and J{\'e}z{\'e}quel, J.-M.},
+  booktitle={Actes des Journ{\'e}es nationales du GDR GPL 2009},
+  year={2009}
+}
+
+@article{fractal,
+ author = {Bruneton, E. and Coupaye, T. and Leclercq, M. and Qu{\'e}ma, V. and Stefani, J.-B.},
+ title = {The {Fractal} Component Model and Its Support in {J}ava: Experiences with Auto-adaptive and Reconfigurable Systems},
+ journal = {Softw. Pract. Exper.},
+ volume = {36},
+ number = {11-12},
+ month = sep,
+ year = {2006},
+ issn = {0038-0644},
+ pages = {1257--1284},
+ numpages = {28},
+ publisher = {John Wiley \& Sons, Inc.}
+}
+
+@inproceedings{garcia14,
+  title={Time-sensitive adaptation in {CPS} through run-time configuration generation and verification},
+  author={Garc{\'\i}a-Valls, M. and Perez-Palacin, D. and Mirandola, R.},
+  booktitle={Proc. IEEE Int. Conf. on Computer Software and Applications},
+  pages={332--337},
+  year={2014},
+  organization={IEEE}
+}
+
+@article{BasuBBCJNS11,
+  author    = {A. Basu and
+               S. Bensalem and
+               M. Bozga and
+               J. Combaz and
+               M. Jaber and
+               T.{-}H. Nguyen and
+               J. Sifakis},
+  title     = {Rigorous Component-Based System Design Using the {BIP} Framework},
+  journal   = {{IEEE} Softw.},
+  volume    = {28},
+  number    = {3},
+  pages     = {41--48},
+  year      = {2011},
+  doi       = {10.1109/MS.2011.27}
+}
+
+@inproceedings{BIP,
+ author = {Basu, A. and Bozga, M. and Sifakis, J.},
+ title = {Modeling Heterogeneous Real-time Components in {BIP}},
+ booktitle = {Proc. IEEE Int. Conf. {SEFM'06}},
+ year = {2006},
+ isbn = {0-7695-2678-0},
+ pages = {3--12},
+ numpages = {10},
+ publisher = {IEEE Computer Society}
+} 
+
+@article{SeinturierMRRSS12,
+  author    = {Lionel Seinturier and
+               Philippe Merle and
+               Romain Rouvoy and
+               Daniel Romero and
+               Valerio Schiavoni and
+               Jean{-}Bernard Stefani},
+  title     = {A component-based middleware platform for reconfigurable service-oriented
+               architectures},
+  journal   = {Softw. Pract. Exp.},
+  volume    = {42},
+  number    = {5},
+  pages     = {559--583},
+  year      = {2012},
+  url       = {https://doi.org/10.1002/spe.1077},
+  doi       = {10.1002/spe.1077},
+  timestamp = {Thu, 14 Oct 2021 09:43:24 +0200},
+  biburl    = {https://dblp.org/rec/journals/spe/SeinturierMRRSS12.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@InProceedings{bourgeoisEtAl2022,
+  author =	{Bourgeois, J. and others},
+  title =	{{Space Ants: Episode II - Coordinating Connected Catoms}},
+  booktitle =	{38th Int. Symp. SoCG 2022},
+  pages =	{65:1--65:6},
+  series =	{Leibniz Int. Proc. in Informatics (LIPIcs)},
+  ISBN =	{978-3-95977-227-3},
+  ISSN =	{1868-8969},
+  year =	{2022},
+  volume =	{224},
+  editor =	{Goaoc, X. and Kerber, M.},
+  doi =		{10.4230/LIPIcs.SoCG.2022.65}
+}
+
+@inproceedings{KirbyAG11,
+  author    = {Brian T. Kirby and
+               Michael P. Ashley{-}Rollman and
+               Seth Copen Goldstein},
+  editor    = {Desney S. Tan and
+               Saleema Amershi and
+               Bo Begole and
+               Wendy A. Kellogg and
+               Manas Tungare},
+  title     = {Blinky blocks: a physical ensemble programming platform},
+  booktitle = {Proc. Int. Conf. {CHI} 2011, Extended Abstracts Volume},
+  pages     = {1111--1116},
+  publisher = {{ACM}},
+  year      = {2011},
+  doi       = {10.1145/1979742.1979712}
+}
+
+@inproceedings{Lemos23,
+  author       = {R. de Lemos},
+  title        = {Software Self-adaptation and Industry: Blame {MAPE-K}},
+  booktitle    = {Proc. Int. Symp. {SEAMS} 2023},
+  pages        = {88--89},
+  publisher    = {{IEEE}},
+  year         = {2023},
+  doi          = {10.1109/SEAMS59076.2023.00021}
+}
+
+@article{CoullonHLR24,
+  author       = {H. Coullon and
+                  L. Henrio and
+                  F. Loulergue and
+                  S. Robillard},
+  title        = {Component-based Distributed Software Reconfiguration: A Verification-oriented Survey},
+  journal      = {{ACM} Comput. Surv.},
+  volume       = {56},
+  number       = {1},
+  pages        = {2:1--2:37},
+  year         = {2024},
+  doi          = {10.1145/3595376}
+}
+
+@inproceedings{LanoixK14,
+  author       = {A. Lanoix and
+                  O. Kouchnarenko},
+  editor       = {B. Buhnova and
+                  L. Happe and
+                  J. Kofron},
+  title        = {Component Substitution through Dynamic Reconfigurations},
+  booktitle    = {Proc. Int. Workshop {FESCA} 2014},
+  series       = {{EPTCS}},
+  volume       = {147},
+  pages        = {32--46},
+  year         = {2014},
+  doi          = {10.4204/EPTCS.147.3}
+}
+
+@inproceedings{BellegardeDJK01,
+  author       = {F. Bellegarde and
+                  C. Darlot and
+                  J. Julliand and
+                  O. Kouchnarenko},
+  editor       = {J. Nuno Oliveira and
+                  P. Zave},
+  title        = {Reformulation: {A} Way to Combine Dynamic Properties and {B} Refinement},
+  booktitle    = {Proc. Int. Symp. {FME} 2001},
+  series       = {LNCS},
+  volume       = {2021},
+  pages        = {2--19},
+  publisher    = {Springer},
+  year         = {2001},
+  doi          = {10.1007/3-540-45251-6\_2}
+}
+
+@inproceedings{LecomteDPM17,
+  author       = {T. Lecomte and
+                  D. D{\'{e}}harbe and
+                  {\'{E}}. Prun and
+                  E. Mottin},
+  editor       = {S. A. da Costa Cavalheiro and
+                  J.-L. Fiadeiro},
+  title        = {Applying a Formal Method in Industry: {A} 25-Year Trajectory},
+  booktitle    = {Proc. Int. Conf. {SBMF} 2017},
+  series       = {LNCS},
+  volume       = {10623},
+  pages        = {70--87},
+  publisher    = {Springer},
+  year         = {2017},
+  doi          = {10.1007/978-3-319-70848-5\_6}
+}
+
+@article{DupontASP21,
+  author       = {G. Dupont and
+                  Y. A{\"{\i}}t Ameur and
+                  N. Kumar Singh and
+                  M. Pantel},
+  title        = {{Event-B} Hybridation: {A} Proof and Refinement-based Framework for
+                  Modelling Hybrid Systems},
+  journal      = {{ACM} Trans. Embed. Comput. Syst.},
+  volume       = {20},
+  number       = {4},
+  pages        = {35:1--35:37},
+  year         = {2021},
+  doi          = {10.1145/3448270}
+}
+
+@inproceedings{BozgaEISW20,
+  author       = {M. Bozga and
+                  J. Esparza and
+                  R. Iosif and
+                  J. Sifakis and
+                  C. Welzel},
+  editor       = {A. Biere and
+                  D. Parker},
+  title        = {Structural Invariants for the Verification of Systems with Parameterized Architectures},
+  booktitle    = {Proc. Int. Conf. {TACAS} 2020, Part {I}},
+  series       = {LNCS},
+  volume       = {12078},
+  pages        = {228--246},
+  publisher    = {Springer},
+  year         = {2020},
+  doi          = {10.1007/978-3-030-45190-5\_13}
+}
+
+@inproceedings{DormoyKL12,
+  author       = {J. Dormoy and
+                  O. Kouchnarenko and
+                  A. Lanoix},
+  editor       = {D. Giannakopoulou and
+                  D. M{\'{e}}ry},
+  title        = {When Structural Refinement of Components Keeps Temporal Properties
+                  over Reconfigurations},
+  booktitle    = {Proc. Int. Symp. {FM} 2012},
+  series       = {LNCS},
+  volume       = {7436},
+  pages        = {171--186},
+  publisher    = {Springer},
+  year         = {2012},
+  doi          = {10.1007/978-3-642-32759-9\_16}
+}
+
+
+
+@article{BaudeCDDGHP09,
+  author       = {F. Baude and
+                  D. Caromel and
+                  C. Dalmasso and
+                  M. Danelutto and
+                  V. Getov and
+                  L. Henrio and
+                  C. P{\'{e}}rez},
+  title        = {{GCM:} a grid extension to Fractal for autonomous distributed components},
+  journal      = {Ann. des T{\'{e}}l{\'{e}}communications},
+  volume       = {64},
+  number       = {1-2},
+  pages        = {5--24},
+  year         = {2009},
+  doi          = {10.1007/S12243-008-0068-8}
+}
+
+
+
+@inproceedings{DingCL08,
+  author       = {Z. Ding and
+                  Z. Chen and
+                  J. Liu},
+  editor       = {G. Pu and
+                  V. Stolz},
+  title        = {A Rigorous Model of Service Component Architecture},
+  booktitle    = {Proc. Int. Workshop {TTSS} 2007},
+  series       = {ENTCS},
+  volume       = {207},
+  pages        = {33--48},
+  publisher    = {Elsevier},
+  year         = {2007},
+  doi          = {10.1016/J.ENTCS.2008.03.084}
+}
+
+
+@inproceedings{BuresHP06,
+  author       = {T. Bures and
+                  P. Hnetynka and
+                  F. Pl{\'{a}}sil},
+  title        = {{SOFA} 2.0: Balancing Advanced Features in a Hierarchical Component Model},
+  booktitle    = {Proc. Int. Conf. {(SERA} 2006)},
+  pages        = {40--48},
+  publisher    = {{IEEE} Computer Society},
+  year         = {2006},
+  doi          = {10.1109/SERA.2006.62}
+}
+
+@misc{Mehrabi22,
+  author       = {A. Mehrabi},
+  title        = {Mesures de consommation sur robots modulaires, {UTBM, Projet 27, France}},
+  year         = {2022},
+  publisher    = {{UTBM, Belfort, France}}
+}
+
+@article{BanachZSW14,
+  author       = {R. Banach and
+                  H. Zhu and
+                  W. Su and
+                  X. Wu},
+  title        = {ASM, controller synthesis, and complete refinement},
+  journal      = {Sci. Comput. Program.},
+  volume       = {94},
+  pages        = {109--129},
+  year         = {2014},
+  doi          = {10.1016/J.SCICO.2014.04.013}
+}
+
+@misc{Tournier18,
+  author       = {F. Tournier},
+  title        = {Dossier technique de blocs programmables, {Tech Power Electronics}},
+  year         = {2018},
+  publisher    = {{Tech Power Electronics}, France}
+}
+
+@misc{CPS17,
+  author       = {},
+  title        = {{National Institute of Standards and Technology (NIST, USA)}: Framework for Cyber-Physical Systems (Special Publication 1500-201)},
+  year         = {2017},
+  publisher    = {National Institute of Standards and Technology {NIST}, Special Publication 1500-201, USA}
+}
+
+@article{Hoang2016FoundationsFU,
+  title={Foundations for using linear temporal logic in {Event-B} refinement},
+  author={S. Hoang and S. A. Schneider and H. Treharne and D. M. Williams},
+  journal={Formal Aspects of Computing},
+  year={2016},
+  volume={28},
+  pages={909-935},
+  url={https://api.semanticscholar.org/CorpusID:18057922}
+}
+
+@techreport{plotkin81structural,
+    author = {G. D. Plotkin},
+    title = {A Structural Approach to Operational Semantics},
+    institution = {University of Aarhus},
+    number = {DAIMI FN-19},
+    year = 1981,
+}
+
+@inproceedings{BCK26-Motifs,
+  author =	 "Bliudze, S. and Cerf, S. and Kouchnarenko,
+                  O.",
+  editor =	 "Mezzina, C. A. and Schmitt, A.",
+  title =	 "A Hybrid Modelling Approach for Hierarchical Control
+                  of Structured {CPS}s",
+  booktitle =	 "Components Operationally: Reversibility and System
+                  Engineering: Essays Dedicated to Jean-Bernard
+                  Stefani on the Occasion of His 65th Birthday",
+  year =	 2026,
+  series =	 "LNCS",
+  volume =	 "16065",
+  publisher =	 "Springer Nature Switzerland",
+  pages =	 "175--196",
+  abstract =	 "Cyber-physical systems (CPSs) include engineered
+                  interacting networks of physical and computational
+                  components. As they are widely used in many
+                  application domains, guaranteeing their correct and
+                  proper behaviour is an essential and a challenging
+                  issue. This paper aims to contribute to a flexible
+                  design and development of structured CPSs, composed
+                  of similar elements, and capable of
+                  (self-)adaptation to satisfy evolving internal and
+                  external constraints, e.g., using control theory. To
+                  this end, we make use of their structure and of
+                  their behavioural characteristics for modelling by
+                  hierarchical motifs both systems' elements and
+                  controllers. The motivations and contributions are
+                  illustrated on a smart building example.",
+  isbn =	 "978-3-031-99717-4",
+  doi =		 "10.1007/978-3-031-99717-4_10",
+  url =		 "https://doi.org/10.1007/978-3-031-99717-4_10"
+}
+
+@inproceedings{Stefani14-GKells,
+  author       = {J.-B. Stefani},
+  title        = {Components as Location Graphs},
+  booktitle    = {Revised Selected Papers of the 11th International Symposium on Formal Aspects of Component Software ({FACS} 2014)},
+  series       = {LNCS},
+  volume       = {8997},
+  pages        = {3--23},
+  publisher    = {Springer},
+  year         = {2014},
+  url          = {https://doi.org/10.1007/978-3-319-15317-9\_1},
+  doi          = {10.1007/978-3-319-15317-9\_1},
+  timestamp    = {Tue, 14 May 2019 10:00:42 +0200},
+  biburl       = {https://dblp.org/rec/conf/facs2/Stefani14.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{GiustoS11-CAB,
+  author       = {C. Di Giusto and
+                  J.-B. Stefani},
+  title        = {Revisiting Glue Expressiveness in Component-Based Systems},
+  booktitle    = {Proc. of the 13th International Conference on Coordination Models and Languages
+                  ({COORDINATION} 2011)},
+  series       = {LNCS},
+  volume       = {6721},
+  pages        = {16--30},
+  publisher    = {Springer},
+  year         = {2011},
+  url          = {https://doi.org/10.1007/978-3-642-21464-6\_2},
+  doi          = {10.1007/978-3-642-21464-6\_2},
+  timestamp    = {Tue, 14 May 2019 10:00:42 +0200},
+  biburl       = {https://dblp.org/rec/conf/coordination/GiustoS11.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{hazyuk1,
+	title = {Optimal temperature control of intermittently heated buildings using Model Predictive Control: Part {I} – {Building} modeling},
+	volume = {51},
+	issn = {0360-1323},
+	url = {https://www.sciencedirect.com/science/article/pii/S0360132311003933},
+	doi = {10.1016/j.buildenv.2011.11.009},
+	shorttitle = {Optimal temperature control of intermittently heated buildings using Model Predictive Control},
+	abstract = {An important performance in building thermal control is to ensure thermal comfort with minimal energy consumption. Model Predictive Control ({MPC}) is considered to be one of the most suited solutions for this due to its ability to use occupancy schedule and weather forecasts for optimal temperature control. {MPC} relies on a dynamical model of the building, which is the main difficulty of applying it. Therefore, this paper treats the problems related to building modeling and model parameters identification. A robust model of the building is obtained in two stages: firstly physical knowledge is used to determine the structure of a low-order model, then least squares identification method is applied to find the numerical values of the model parameters. In order to perform the identification usually there are required input/output data records having variations which generally are not accepted in inhabited buildings because of imposed comfort conditions. Also inhabited buildings contain unmeasured disturbance sources which may degrade the identified model quality. Therefore this paper proposes to use detailed building models, implemented in dedicated simulation tools, to generate the required input/output data records instead of measuring them on real buildings. This allows us to apply desired input signals and to eliminate disturbance sources. Additionally, the paper presents a method to identify the nonlinearity existing in building thermal behavior, which permits to represent the building by separated linear and nonlinear blocks. This model representation, used along with the linearization method proposed in Part {II}, permits to design the temperature controller without resorting to the nonlinear system theory.},
+	pages = {379--387},
+	journal = {Building and Environment},
+	author = {Hazyuk, I. and Ghiaus, C. and Penhouet, D.},
+	urldate = {2025-03-14},
+	year = {2012},
+	keywords = {Building parameter estimation, Least squares identification method, Lumped capacity model, System identification},
+	file = {ScienceDirect Snapshot:/home/scerf/Zotero/storage/M6ZH9TAJ/S0360132311003933.html:text/html},
+}
+
+
+@inproceedings{BruniCGLV12-Adaptation,
+  author       = {R. Bruni and
+                  A. Corradini and
+                  F. Gadducci and
+                  A. Lluch{-}Lafuente and
+                  A. Vandin},
+  editor       = {J. de Lara and
+                  A. Zisman},
+  title        = {A Conceptual Framework for Adaptation},
+  booktitle    = {Fundamental Approaches to Software Engineering -                 15th Int. Conf. {FASE} 2012, Part of {ETAPS} 2012},
+  series       = {LNCS},
+  pages        = {240--254},
+  publisher    = {Springer},
+  year         = {2012},
+  volume       = {7212},
+  url          = {https://doi.org/10.1007/978-3-642-28872-2\_17},
+  doi          = {10.1007/978-3-642-28872-2\_17},
+}

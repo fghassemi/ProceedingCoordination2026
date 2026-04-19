@@ -1,0 +1,245 @@
+\section{Introduction}
+
+Programming concurrent and distributed systems is notoriously difficult.\\
+Communication-centric programming languages such as Erlang or Elixir, and
+frameworks like MPI, are based around \emph{message passing} concurrency, where
+processes send and receive messages to coordinate computation, rather than
+relying on shared memory.
+These actor languages have seen much industrial
+interest due to their suitability for distribution and compatibility with
+failure recovery idioms such as supervision hierarchies~\cite{Armstrong03}.
+However, these languages are also
+susceptible to issues like communication mismatches and deadlocks which pose
+significant problems at runtime, and are also difficult to detect and fix.
+
+% Behavioural type systems such as \emph{session types}
+% \cite{hondaTypesDyadicInteraction1993} encode structured interactions between
+% multiple participants, and have been extensively researched and applied to
+% real-world programming languages
+% \cite{fowlerErlangImplementationMultiparty2016}.
+% %
+% However, due to their roots in process calculi, session types are particularly
+% tailored to languages that make use of \emph{communication channels}.
+%
+%
+\emph{Mailbox types}
+\cite{deliguoroMailboxTypesUnordered2018,fowlerSpecialDeliveryProgramming2023}
+are a novel behavioural type system with a focus on mailboxes, as used in actor
+languages like Erlang and Elixir.
+Mailboxes are incoming message queues: multiple processes can \emph{write} to
+a mailbox, but only the process that owns a mailbox can read from it.
+
+%   While session types are also
+%   applicable in this communication model
+%   \cite{mostrousSessionTypingFeatherweight2011a,fowlerErlangImplementationMultiparty2016},
+%   mailbox types are specifically designed for them, enabling reasoning about the
+%   content of mailboxes.
+
+As an example of mailbox typing, consider the following Erlang implementation of
+a \emph{future variable}~\cite{fowlerSpecialDeliveryProgramming2023}, which is a
+write-once placeholder variable.
+
+\begin{minipage}{0.45\linewidth}
+\begin{lstlisting}[language=erlang]
+empty_future() ->
+	receive
+		{put, X} -> full_future(X)
+	end.
+full_future(X) ->
+	receive
+		{get, Pid} -> Pid ! {reply, X},
+			full_future(X);
+		{put, _} ->
+      erlang:error("Multiple writes")
+	end.
+\end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}{0.5\linewidth}
+\begin{lstlisting}[language=erlang, firstnumber=12]
+client() ->
+  Future = spawn(future, empty_future, []),
+  Future ! {put, 5},
+  Future ! {get, self()},
+  receive
+    {reply, Result} ->
+      io:fwrite("~w~n", [Result])
+  end.
+\end{lstlisting}
+\end{minipage}
+\\
+
+The process \textsf{empty\_future} waits to receive a \textsf{put} message
+containing the value to hold.
+This is a \emph{selective receive}: other messages may be present in the mailbox
+but they will not be retrieved. After the \textsf{put} message has been
+received, the process then calls \textsf{full\_future} with the provided value
+\textsf{X}.
+%
+In \textsf{full\_future} the process waits to
+receive \textsf{get} messages containing the process ID of the requesting
+actor, and responds by sending value \textsf{X} to
+the sender.
+%
+Since a future variable should only be set once, the process throws an error if
+more \textsf{put} messages are received. Even in small
+examples such as this, protocol violations such as unexpected messages,
+forgotten replies and self-deadlocks may occur. All of these problems can be
+addressed and statically detected using mailbox typing
+\cite{deliguoroMailboxTypesUnordered2018,fowlerSpecialDeliveryProgramming2023}.
+
+A mailbox type consists of a \emph{capability} and a \emph{pattern}.  The
+capability indicates whether the type describes messages that must be sent
+($\mathsf{!}$) or describe messages to be received from a mailbox ($\mathsf{?}$).
+A pattern is a commutative regular expression that describes the contents of a
+mailbox. For the above example, we can define the following mailbox types:
+
+\smallmath{
+  \mathsf{EmptyFuture} \triangleq \mbtin{(\msg{Put}[\mathsf{Int}] \mbcomp
+  \mbstarpayload{\msg{Get}}{\mbtout{\msg{Reply}[\mathsf{Int}]}})}
+  \qquad
+  \mathsf{FullFuture} \triangleq
+      \mbtin
+        {
+            \mbstarpayload
+                {\msg{Get}}
+                {\mbtout{\msg{Reply}[\mathsf{Int}]}}
+        }
+    }
+
+Type $\mathsf{EmptyFuture}$ describes a mailbox that may contain
+a single \msg{Put} message with payload of type $\mathsf{Int}$, and a
+potentially arbitrary amount of \msg{Get} messages.
+Each \msg{Get} message contains a mailbox reference that
+expects a \msg{Reply} message to be sent.
+%
+Type $\mathsf{FullFuture}$ is more restrictive in that it describes a mailbox
+only containing an arbitrary amount of \msg{Reply} messages.
+By using these types, the type system can statically require that exactly one
+\msg{Put} message is sent, and can ensure that every \msg{Get} request receives
+a \msg{Reply} message.
+
+Of course, a type system can only guarantee correctness if its own specification is correct.
+It is therefore crucial to rigorously prove the properties a type system gives.
+Verifying that these proofs are indeed correct can be challenging in itself.
+Errors or oversights can remain undetected, resulting in false promises about
+type checked programs. For example, a mechanization of multiparty session typing
+\cite{hondaMultipartyAsynchronousSession2016} uncovered errors nearly a decade
+later~\cite{tiroreMultipartyAsynchronousSession2025}.
+
+In this paper, we report on our mechanization of the semantics of mailbox types,
+and of the
+\emph{Pat}~\cite{fowlerSpecialDeliveryProgramming2023} programming language that
+incorporates mailbox types. 
+Although Pat includes extensive pen-and-paper proofs of correctness, the proofs
+have not been mechanized.
+In particular, we have mechanized numerous properties about mailbox types
+themselves, and have mechanized the static semantics of Pat.  During our
+mechanization, we discovered several oversights in the original definitions and
+proofs which have since been fixed.
+
+\begin{figure}[t]
+    \small
+  \centering
+  \begin{minipage}{0.48\textwidth}
+    \scalebox{0.7}{
+      \begin{tikzpicture}[
+        node distance=0.5cm and 0.5cm,
+        every node/.style={draw, rectangle, rounded corners, minimum width=2cm, minimum height=0.8cm, align=center},
+        dependency/.style={-Latex, thick}
+      ]
+
+      % Nodes
+      \node (Message) {Message};
+      \node[below=of Message] (MailboxPatterns) {Mailbox Patterns};
+      \node[below=of MailboxPatterns] (Types) {Types};
+      \node[below =of Types] (Environment) {Environment};
+      \node[below =of Environment] (Dblib) {Dblib};
+      \node[right=of MailboxPatterns] (Syntax) {Syntax};
+      \node[above=of Syntax] (Util) {Util};
+      \node[below=of Syntax] (TypingRules) {Typing Rules};
+      \node[below=of TypingRules] (Substitution) {Substitution};
+
+      % Direct Dependencies
+      \draw[dependency] (Message) -- (MailboxPatterns);
+      \draw[dependency] (MailboxPatterns) -- (Types);
+      \draw[dependency] (Types) -- (Environment);
+      \draw[dependency] (Types) -- (Syntax);
+      \draw[dependency] (Dblib) -- (Environment);
+      \draw[dependency] (Util) -- (Syntax);
+      \draw[dependency] (Environment) -- (TypingRules);
+      \draw[dependency] (Syntax) -- (TypingRules);
+      \draw[dependency] (TypingRules) -- (Substitution);
+
+      \end{tikzpicture}
+    }
+  \end{minipage}
+  \hspace{-1cm}
+  \begin{minipage}{0.48\textwidth}
+    \begin{center}
+      \begin{tabular}{|l | c | c | c|}
+        \hline
+        Module & LOC & Definitions & Lemmas\\
+        \hline\hline
+        Message & 177 & 7 & 9\\
+        Mailbox Patterns & 828 & 8 & 44\\
+        Types & 695 & 35 & 30\\
+        Environment & 3142 & 16 & 131\\
+        Util & 48 & 6 & 2\\
+        Syntax & 180 & 16 & 0\\
+        Typing Rules & 317 & 4 & 12\\
+        Substitution & 1325 & 2 & 28\\
+        \hline
+                & 6712 & 94 & 256\\
+        \hline
+      \end{tabular}
+    \end{center}
+  \end{minipage}
+  \caption{Dependency graph of the modules in the Rocq project. Transitive dependencies are omitted.}
+  \label{fig:rocq-modules}
+\end{figure}
+
+We use the Rocq~\cite{teamRocqProver2025} proof assistant for our mechanization.
+Figure \ref{fig:rocq-modules} summarizes the structure of our Rocq project and
+shows the lines of code, number of definitions and lemmas for each file. 
+Due to the necessity of \emph{type combination} and \emph{environment
+subtyping}, the \coqe{Environment} module contains, by far, the largest number
+of lemmas.
+
+Throughout this paper, definitions and lemmas that are accompanied
+with the \rocqlogo -symbol link to the corresponding code in the online
+documentation.
+The project can be found at \url{https://github.com/edgardSchi/mailbox-types-rocq}.
+
+\subsubsection{Methodology.}
+Our mechanization includes both the syntax and type system of Pat, and prove
+several properties of the language such as the substitution lemma.
+%
+We limit the scope of this paper to Pat's static semantics, which alone requires
+a significant mechanization effort; a full account of Pat's operational
+semantics and preservation theorem would require significant additional work and
+is left as a future direction.  We concentrate on properties that are needed for
+proving preservation, but also do not require a description of Pat's operational
+semantics.
+
+We use Rocq due to its maturity and active development: several successful
+mechanizations have been conducted in Rocq, such as \emph{CompCert}
+\cite{leroyFormalVerificationRealistic2009}, the first fully formally verified
+real-world compiler, and formalizations of session types
+\cite{tiroreMultipartyAsynchronousSession2025} and process calculi
+\cite{ambalHOPiCoq2021}, modelling communication between processes.
+
+\subsubsection{Contributions.}
+
+The main contributions of this paper are as follows:
+
+\begin{itemize}[leftmargin=*, labelsep=0.5em]
+  \item The first mechanization of the syntax and semantics of mailbox types (\S\ref{sec:sup-mailbox-types}).
+  \item A formalization of the static semantics of Pat, including definitions that are more
+    amenable to mechanization (\S\ref{sec:pat-programming-language}).
+  \item Proofs of metatheoretical properties of the static semantics, including
+      the nontrivial substitution lemma (\S\ref{sec:pat-programming-language}), requiring over 200 auxiliary lemmas.
+  \item We identify missing cases in the original definitions and places where
+      the original proofs could be improved, that have since been
+      fixed~(\S\ref{sec:sup-mailbox-types} and \S\ref{sec:pat-programming-language}).
+\end{itemize}

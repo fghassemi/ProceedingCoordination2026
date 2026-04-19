@@ -1,0 +1,167 @@
+\section{Experiments}
+\label{app-experiments}
+
+This section aims at providing the reader with details of the experiments reported in Section~\ref{sect-experiments}.
+
+Table~\ref{tab:fed-partitions} shows the different distributions of positive and negative examples across clients for each dataset. We use this partitioning across all federated experiments. 
+
+\begin{table}[ht]
+\centering
+
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{l|ccc|ccc|ccc}
+\toprule
+\textbf{Partition}
+& \multicolumn{3}{c|}{\textbf{Trains}}
+& \multicolumn{3}{c|}{\textbf{Zendo1}}
+& \multicolumn{3}{c}{\textbf{IGGP-RPS}} \\
+& POS & NEG & Total
+& POS & NEG & Total
+& POS & NEG & Total \\
+\midrule
+
+Part 1
+& 2 & 2 & 4
+& 7 & 7 & 14
+& 36 & 119 & 155 \\
+
+Part 2
+& 2 & 2 & 4
+& 7 & 7 & 14
+& 36 & 119 & 155 \\
+
+Part 3
+& 1 & 1 & 2
+& 6 & 6 & 12
+& 36 & 118 & 154 \\
+
+\bottomrule \\
+\end{tabular}
+\caption{Positive and negative examples per dataset partition}
+\label{tab:fed-partitions}
+\end{table}
+
+Algorithm~\ref{alg:gsrvpopper} details the algorithm used to conduct the correctness study.
+
+\begin{algorithm}[!t]
+  \caption{Srvpopper client for correctness tests}
+  \label{alg:gsrvpopper}
+  \small
+  \begin{lstlisting}[breaklines=true, breakatwhitespace=true]
+1  def gsrvpopper(N, E+, E-, B, D, C, 
+                       max_vars, max_literals, max_clauses):
+2  
+3      CC = C
+4      best_score = 0
+5      best_hyp = { }
+6      end_popper = false
+7      num_literals = 0
+8      r = 1
+9  
+10     while not end_popper and num_literals <= max_literals:
+11        c_solvable = true
+12        num_literals += 1
+13        while not end_popper and c_solvable:
+14           hyp = generate(D, CC, max_vars, num_literals, 
+                                                 max_clauses)
+15           if not hyp:
+16              c_solvable = false
+17           else:
+18              // Global computation
+19              conf_matrix = test(E+, E-, B, hyp)
+20              outcome_g = compute_outcome(conf_matrix)
+21              score_g = compute_score(conf_matrix)
+22             // Federated computation
+23              tell(hypsi(r,hyp))
+24              for i in range(1,N+1):
+25                 cm[i] = ask(cmtuple(r,i))
+26              outcome_fed = aggregate_outcome(cm)
+27              score_fed = aggregate_score(cm)
+28              // Results comparison
+29              if (outcome_g != outcome_fed) ||
+                     (score_g != score_fed):
+30                  print("Global calculus non consistent with 
+                             federated calculus!")
+31              if outcome == ('all', 'none'):
+32                 best_hyp = hyp
+33                 end_popper = true
+34                 tell(hypsi(r,nil_hyp))                
+35              else:
+36                 if best_score < score:
+37                    best_hyp = hyp
+38                    cc += learn_constraints(hyp, outcome)
+39            r = r+1
+40                    
+41     return best_hyp
+  \end{lstlisting}
+\end{algorithm}
+
+
+
+
+Algorithm~\ref{alg:tgsrvpopper} details the algorithm used to conduct the performance study.
+
+\begin{algorithm}[!t]
+  \caption{Srvpopper client for performance tests}
+  \label{alg:tgsrvpopper}
+  \small
+  \begin{lstlisting}[breaklines=true, breakatwhitespace=true]
+1  def tgsrvpopper(N, E+, E-, B, D, C, 
+                      max_vars, max_literals, max_clauses):
+  
+2      start_time = time.process_time()     
+3      CC = C
+4      best_score = 0
+5      best_hyp = { }
+6      end_popper = false
+7      num_literals = 0
+8      r = 1
+9      tCentralPopper = 0
+10     tFedPopper = 0
+11  
+12     while not end_popper and num_literals <= max_literals:
+13        c_solvable = true
+14        num_literals += 1
+15        while not end_popper and c_solvable:
+16           hyp = generate(D, CC, max_vars, 
+                                   num_literals, max_clauses)
+17           if not hyp:
+18              c_solvable = false
+19           else:
+20              // Global computation
+21              start_CentralTime = time.process_time()
+22              conf_matrix = test(E+, E-, B, hyp)
+23              outcome_g = compute_outcome(conf_matrix)
+24              score_g = compute_score(conf_matrix)
+25              end_CentralTime = time.process_time()
+26              tCentralPopper = tCentralPopper + 
+                        (end_CentralTime - start_CentralTime)
+27             // Federated computation
+28                start_FedTime = time.process_time()
+29              tell(hypsi(r,hyp))
+30              for i in range(1,N+1):
+31                 cm[i] = ask(cmtuple(r,i))
+32              outcome_fed = aggregate_outcome(cm)
+33              score_fed = aggregate_score(cm)
+34              end_FedTime = time.process_time()
+35              tFedPopper = tFedPopper + 
+                        (end_FedTime - start_FedTime)
+36              if outcome == ('all', 'none'):
+37                 best_hyp = hyp
+38                 end_popper = true
+39                 tell(hypsi(r,nil_hyp))                
+40              else:
+41                 if best_score < score:
+42                    best_hyp = hyp
+43                    cc += learn_constraints(hyp, outcome)
+44            r = r+1
+             
+45      end_time = time.process_time()
+46      global_time = end_time - start_time
+47      print("Time for Central Popper : %10d", 
+                            %(global_time - tFedPopper))
+48      print("Time for Fed Popper : %10d", 
+                            %(global_time - tCentralPopper))
+49      return best_hyp
+  \end{lstlisting}
+\end{algorithm}

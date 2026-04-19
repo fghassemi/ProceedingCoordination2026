@@ -1,0 +1,39 @@
+We aim to extend this property to infinite histories. As an algorithm cannot process an infinite history, we define the infinite execution graph set as follows.
+
+\begin{definition}[Infinite execution Graph Set] 
+For $m\in\mathbb{N}$, the infinite execution graph set is denoted by $\infalgoneset^m$. It is such that for all $G=(H,\rightarrow)\in\infalgoneset^m$, we have $H\in\infhistoryset$ with $|\mathbb{P}|\leq m$ and $\rightarrow$ is the relation inducing the smallest set of edges, such that for all $\opa,\opb\in H$:
+\vspace{-0.5em}
+\begin{itemize}
+    \item[$\ast$] $\opa\rightarrow\opb\Rightarrow\opa\dsuc\opb$ (edge implies direct succession)
+    \item[$\ast$] $\opa\dsuc\opb\Rightarrow\opa\patharrow\opb$ (direct succession implies path existence)
+    \item[$\ast$] $\opa\rb\opb\Leftrightarrow\opa\patharrow\opb$ (returns-before relation is equivalent path existence)
+\end{itemize}
+\end{definition}
+
+\begin{lemma}[Graph class inclusions]\label{lemma:inclus}
+    Let $m\in\mathbb{N}$, $G=(H,\rightarrow)\in\infalgoneset^m$, and $H$ the infinite enumerable set of operations $\{\opa_i\}_{i\in\mathbb{N}}$. Let the vertices of $G$ be ordered as $(\opa_1,\opa_2,...)$ according to the ordering function \textsl{ord} defined earlier. 
+    
+    Then, any subgraph of $G$ defined as 
+    \vspace{-0.5em}
+    \begin{center}
+        $G'=(\{\opa_1,...,\opa_{n+1}\},\rightarrow')$ with $\rightarrow':=\;\rightarrow\;\setminus\{(\opc,\_)\;|\;\opc\notin\{\opa_1,...,\opa_{n+1}\}\},\quad n\in\mathbb{N}$
+    \end{center}
+    \vspace{-0.5em}
+     is in $\algoneset^m$.
+\end{lemma}
+\begin{proof}
+    TODO
+\end{proof}
+
+\begin{theorem}
+    Let $G\in\infalgoneset^m,m\in\mathbb{N}$. Then $cutwidth(G)\leq 2m^2$
+\end{theorem}
+\begin{proof}
+    Proof by contradiction. Assume that $cutwidth(G)>2m^2$. 
+    
+    Since $\infalgoneset^m$ contains graphs with infinite enumerable vertices, we can order the vertices of $G$. Let the vertices of $G$ be ordered as $(\opa_1,\opa_2,...)$ according to the ordering function \textsl{ord} defined earlier. Assuming that $cutwidth(G)>2m^2$ implies that there is a cut that has more than $2m^2$ crossing edges. Suppose it is the cut between vertices $\opa_n$ and $\opa_{n+1}$ with $n\in\mathbb{N}$. Let $G'=(\{\opa_1,...,\opa_{n+1}\},\rightarrow')$ be the subgraph of $G$ with $\rightarrow':=\;\rightarrow\;\setminus\{(\opc,\_)\;|\;\opc\notin\{\opa_1,...,\opa_{n+1}\}\}$. By Lemma~\ref{lemma:inclus} $G'\in\algoneset^m$ and thus $cutwidth(G')\leq 2m^2$, which implies that in the graph $G$ between vertices $\opa_n$ and $\opa_{n+1}$ there is no more than $2m^2$ crossing edges. Here arises the contradiction.
+\end{proof}
+
+\begin{corollary}
+    The graph class $\infalgoneset^m,m\in\mathbb{N}$ has uniformly bounded tree-width.
+\end{corollary}

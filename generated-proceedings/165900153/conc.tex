@@ -1,0 +1,134 @@
+% !TEX root = ./main.tex
+In this paper we advocate a programming pattern for adaptations that
+possibly reconfigure the architecture of service-oriented
+applications.
+%
+Our pattern is supported by \SEArch, a platform featuring
+semantic-based dynamic discovery and binding of services.
+%
+We identified some reconfigurations policies on the adaptable TeaStore
+benchmark to demonstrate our approach; in particular, our policies fit
+with the scenarios in~\cite[Sections 3.2.3 and
+3.2.4]{bliudze:arXiv-2412.16060}.
+%
+This benchmark includes other scenarios that we did not consider here;
+however, we argue that our approach is general enough to express the
+other scenarios specified in~\cite{bliudze:arXiv-2412.16060} since the
+architectural reconfigurations they encompass depend only on exogenous
+control data.
+
+As recalled in \cref{sec:search}, \SEArch contracts are formalised
+in terms of extended CFSMs.
+%
+This allows us to specify contracts concerning application-level
+(non-)functional requirements.
+%
+For instance, the quality of the image hinted in our running example
+could be modelled as a quantitative attribute, say $Q$.
+%
+As mentioned in \cref{sec:progpat} we assume that control data are
+exogenous.
+%
+This implies that they cannot include application-level information;
+for instance, $Q$ cannot be used in the control loop to trigger an
+adaptation when the image provided is sub-optimal (in fact, our
+solution in \cref{sec:teapat} handles this in the application contract
+of \cref{fig:external-service-contract} and not in adaptation
+contracts).
+%
+Overcoming this limitation requires the introduction of mechanisms to
+specify the interactions among the monitor and the execution
+scenarios.
+%
+This can be readily supported in \SEArch since the monitor can be
+conceived as a service local to a node whose behaviour is specified by
+a suitable extended CFSM.
+%
+Even further, our platform could also support  monitors  as outsourced services
+that could be dynamically discovered and used by other services once
+suitable behavioural contracts are established for their usage.
+%
+These generalisations are in scope of future work.
+
+Our programming pattern hinges on the control loop presented in
+\cref{sec:progpat} that, liaising with a monitor that observes control
+data, decides if a run-time architectural reconfiguration is necessary
+and triggers the application-dependent activities provided by the
+developer.
+%
+One could simplify this architecture by embedding the  control loop
+in the monitor.
+% 
+We opted for a solution with two separated components because it
+yields more flexiblility and can be extended more easily.
+%
+For instance, the generalisation to endogenous control data can be
+attained more straightforwardly in our solution that in one where
+control loop and monitor are entangled.
+
+Our control loop can --at an abstract
+level-- be envisaged as \quo{combinator} that composes the
+application-dependent functions (the adaptation scenarios) necessary
+for reconfigurations.
+%
+In this paper, we adopted a rather simplistic mechanism for the
+composition of these functions.
+%
+Depending on the nature of the reconfigurations required by an
+application, it could be necessary to appeal to more sophisticated 
+composition mechanisms.
+%
+For instance, it could be necessary that the control loop passes
+some data when invoking the adaptation scenario.
+%
+This can be supported by our platform at the cost of
+more complex interactions between the control loop and execution
+scenarios.
+
+Finally, we recall that, for simplicity, the running adaptation
+scenario is abruptly terminated when a reconfiguration is triggered
+(line \ref{lst:finishing} in \cref{lst:control-loop}).
+%
+This may not be desirable; we plan to develop mechanisms for
+guaranteeing graceful termination in future work.
+
+\medskip
+
+\noindent\textbf{Acknowledgements.}
+We thank reviewers for their thorough reports and their suggestions that helped us to improve the paper.
+
+% The key idea driving the design and implementation of \SEArch was to
+% develop an execution architecture providing dynamic and transparent
+% reconfiguration of service-based software artefacts.
+% %
+% Under \SEArch, services are brokered by a dedicated component capable
+% of resolving compliance between requirements and provisions, by
+% statically analysing formal interoperability contracts.
+% %
+% Noteworthy, contracts are formal and, besides specifying the expected
+% communication protocol among participants, they can also declare
+% functional and non-functional constraints.
+% %
+% For simplicity, we considered here only contracts specifying the
+% communication protocols, but \SEArch can easily support adaptation
+% scenarios using (non-)functional contracts as well.
+
+% The possibility of describing each alternative execution as a
+% different communication channel provides the support for considering
+% alternative executions, hence adaptation scenarios, depending on the
+% control data monitored from the environment.
+% %
+% Therefore, supporting adaptability as the possibility of choosing the
+% best fitted implementation according to data monitored from the
+% execution environment; presented in this work as a programming
+% pattern.
+% %
+% Although not shown here, our programming patter can be used to
+% implement in \SEArch also the other adaptation scenarios described
+% in~\cite{bcglv12} once one has identified the relevant control data.
+
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "main"
+%%% End:

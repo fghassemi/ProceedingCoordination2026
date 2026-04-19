@@ -1,0 +1,150 @@
+\documentclass[runningheads]{llncs}
+
+\usepackage[firstpage]{draftwatermark}
+
+\usepackage[obeyspaces]{url}
+\urldef{\mailyakmba}\path|{yasmine.akaichi,manel.barkallah}@unamur.be|
+\urldef{\mailjmjwva}\path|{jean-marie.jacquet,wim.vanhoof}@unamur.be|
+\urldef{\mailili}\path|isabelle.linden@unamur.be|
+
+\usepackage{localdef}
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{verbatim}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\usepackage{multirow}
+\usepackage{listings}
+\lstset{basicstyle=\small,
+        morekeywords={eset,map,proc,eqn,scene}}
+
+\usepackage{tikz}
+%\usetikzlibrary{arrows,shapes,snakes,backgrounds}
+\usetikzlibrary{
+  arrows.meta,
+  shapes,
+  backgrounds,
+  decorations.pathmorphing,
+  decorations.pathreplacing
+}
+
+
+\usepackage{wrapfig}
+\setlength{\intextsep}{2pt}
+\setlength{\columnsep}{20pt}
+
+\newcommand{\mytodo}[1]{\fcolorbox{white}{green}{[TODO: #1]}}
+
+\begin{document}
+
+\SetWatermarkText{\hspace*{3.7in}\raisebox{8.55in}{\href{https://https://eapls.org/eapls/artifact-badges}{\mbox{\includegraphics[width=1.4cm]{badges/available.png}\includegraphics[width=1.4cm]{badges/reusable.png}}}}}  
+\SetWatermarkAngle{0}
+
+\title{Bach4Popper: Towards Federated Inductive Logic Programming using Coordination}
+\titlerunning{Bach4Popper}
+
+\author{Yasmine Akaichi\inst{1}\orcidID{0009-0005-5078-1583} \and \\
+        Manel Barkallah\inst{1}\orcidID{0000-0003-2608-5658} \and \\
+        Jean-Marie Jacquet\inst{1}\orcidID{0000-0001-9531-0519} \and \\
+        Isabelle Linden\inst{2}\orcidID{0000-0001-8034-1857} \and \\
+        Wim Vanhoof\inst{1}\orcidID{0000-0003-3769-6294}
+}
+
+\authorrunning{Y. Akaichi et al.}
+
+\institute{Nadi Research Institute,
+           Faculty of Computer Science, University of Namur\\
+           Rue Grandgagnage 21, 5000 Namur, Belgium \\
+           \mailyakmba \\
+           \mailjmjwva \\ \mbox{ }\\
+           \and
+           Nadi Research Institute,
+           EMCP Faculty, University of Namur \\
+           Rempart de la Vierge 8, 5000 Namur, Belgium \\
+           \mailili
+}
+
+\maketitle
+
+\begin{sloppypar}
+\begin{abstract}
+%
+% JMJ proposal
+%
+Although it is ubiquitous, machine learning still faces two major challenges: explainability and privacy. To address the first challenge, this paper focuses on Inductive Logic Programming (ILP), a framework for learning declarative, symbolic, and interpretable models from multi-relational data. However, existing ILP systems are fundamentally centralized, an assumption that conflicts with privacy requirements and with many real-world scenarios in which data are inherently distributed and cannot be shared. To overcome this limitation and address the second challenge, we introduce Bach4Popper, a federated ILP framework that combines Popper, an ILP learning system, with Bach, a coordination language developed by the authors. We show, both theoretically and empirically, that Bach4Popper is correct with respect to the corresponding centralized version of Popper. Experimental results further demonstrate that computational performance is preserved when moving from a centralized to a federated setting.
+% 
+% End JMJ proposal 
+%
+% OLD proposal by Yasmine
+%
+% Inductive Logic Programming (ILP) learns symbolic and interpretable models from multirelational data, but existing ILP systems are fundamentally centralized, assuming direct access to all training examples. This assumption conflicts with federated learning settings, where data is inherently distributed and cannot be shared.
+% We introduce Bach4Popper, a federated ILP framework that combines, Popper, the ILP learning system, with the Bach coordination language to orchestrate distributed symbolic learning. In Bach4Popper, hypothesis evaluation is delegated to multiple clients holding private data, while coordination primitives are used to structure the interaction between clients and a central server. Clients communicate only abstract evaluation outcomes through Bach; these outcomes are aggregated and used by the server to construct and refine logical constraints and hypotheses, without accessing any local data.
+%
+% By relying on coordination, Bach4Popper decouples symbolic reasoning from data locality, preserves the explainability guarantees of ILP, and naturally aligns with the decentralized assumptions of federated environments. This work demonstrates how coordination languages can serve as a principled foundation for distributed symbolic learning, opening new perspectives at the intersection of ILP, federated learning, and coordination-based system design.
+%
+% END Old proposal by Yasmine
+%
+% Previous drafts by Yasmine
+%Inductive Logic Programming(ILP) builds symbolic, interpretable model from multi-relational data, yet existing ILP systems remain fundamentally centralized, requiring direct access to all examples. This makes ILP incompatible with federated learning (FL), where data is distributed and cannot be shared. 
+%In this paper, we introduce Bach4Popper, a federated framework that distributes the Popper ILP system between a central server and multiple clients using the Bach coordination language. Popper's learning paradigm is distributed: Clients locally evaluate hypotheses on private data and return only abstract outcomes via Bach primitives, while the server uses these outcomes to construct constraints and generate and refine the global hypothesis without accessing any data. Bach4Popper preserves ILP's explainability, aligns with the decentralized nature of FL, and shows that symbolic learning can be achieved under federated constraints. 
+\keywords{Coordination \and Federated Learning \and Machine Learning \and Inductive Logic Programming.}
+\end{abstract}
+\end{sloppypar}
+
+
+% -------------------------------------------------------------- %
+
+% Introduction
+\input{introduction.tex}
+
+% Popper
+\input{popper-short.tex}
+
+% BLPy
+\input{blpy-short.tex}
+
+% Bach4Popper
+\input{bach4popper-short.tex}
+
+% Experiments
+\input{experiments-short}
+
+% % Comparison with related work
+\input{relatedwork.tex}
+
+% Conclusion
+\input{conclusion.tex}
+
+% Acknowledgment
+\input{ack.tex}
+
+
+% Applications
+% \input{applications.tex}
+
+
+% -----------------------------------------------------------%
+
+\bibliographystyle{splncs04}
+\bibliography{bib}
+
+% -----------------------------------------------------------%
+
+%\newpage
+%\appendix
+
+% Appendix : logic programming
+%\input{appendix-lp.tex}
+
+% Appendix : experiments
+%\input{appendix-experiments.tex}
+
+  
+\end{document}
+

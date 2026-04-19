@@ -1,0 +1,82 @@
+% \subsubsection{Mailbox Types}
+% \label{sec:mailbox-types-intro}
+
+Where session types reason about channels between processes \cite{hondaTypesDyadicInteraction1993,wadlerPropositionsSessions2014,kobayashiTypeSystemLockFree2002,huttelFoundationsSessionTypes2016}, \emph{mailbox types} \cite{deliguoroMailboxTypesUnordered2018} reason about mailboxes.
+% Mailboxes are mostly present in actor-based programming languages such as Erlang and Elixir.
+% There, a process is able to retrieve messages from its own mailbox and send messages to other mailboxes.
+% The main difference to channels is the order in which a process retrieves messages.
+% A process may delay processing a message before some other message arrives, and in general is not bound by the order of message arrivals.
+
+Similar to how the $\pi$-calculus \cite{milnerCalculusMobileProcesses1992} models process communication via channels, the \emph{mailbox calculus},
+introduced by de’Liguoro and Padovani as an extension of the asynchronous $\pi$-calculus \cite{amadioBisimulationsAsynchronousPcalculus1998},
+models process communication via message passing and mailboxes.
+Mailbox names are treated as first-class objects that can be sent to other mailboxes in messages.
+
+\emph{Mailbox types} are introduced as a way of reasoning about the content of mailboxes.
+In the context of the mailbox calculus, mailbox types eliminate protocol violations and deadlocks, e.g.\ by keeping track of the dependencies
+between mailbox names using a dependency graph and checking for acyclicity.
+
+% TODO: Keep example or remove it?
+% As an example of how terms in the mailbox calculus look like, the authors provide a definition for a \emph{future variable}, representing a delayed computation \cite{deliguoroMailboxTypesUnordered2018,fowlerSpecialDeliveryProgramming2023}.
+% % Figure \ref{fig:future-protocol} shows the general idea of the protocol, using two clients and one server process.
+% One process sends a $\msg{Put}$ message with some value $x$ to the server.
+% Then, other processes may retrieve this message by sending a $\msg{Get}$ message.
+% The server should only be receiving a single $\msg{Put}$ message at the beginning, while being able to respond to an arbitrary amount of $\msg{Get}$ messages afterwards.
+%
+% % \begin{figure}[t]
+% %   \centering
+% % \begin{sequencediagram}
+% %   \tikzstyle{dotted}=[line width=1pt]
+% %   \newinst{c1}{Client 1}
+% %   \newinst[1]{s}{Server}
+% %   \newinst[1]{c2}{Client 2}
+% %   \mess{c1}{$\msg{Put}[x]$}{s}
+% %   \postlevel
+% %   \mess{c1}{$\msg{Get}[C_1]$}{s}
+% %   \mess{s}{$\msg{Reply}[x]$}{c1}
+% %   \node[anchor=east] (t0) at (mess from) {};
+% %   \node[anchor=west] (t1) at (mess to) {};
+% %   \coordinate (leftC) at ($(t0)!0.5!(t1)$);
+% %   \node[yshift=-0.4cm] (leftDots) at (leftC) {$\vdots$};
+% %   \postlevel
+% %   \mess{c2}{$\msg{Get}[C_2]$}{s}
+% %   \mess{s}{$\msg{Reply}[x]$}{c2}
+% % \end{sequencediagram}
+% %   \caption{Protocol diagram of the future example}
+% %   \label{fig:future-protocol}
+% % \end{figure}
+% %
+% % The idea behind this protocol can be described in terms of the mailbox calculus, where $\mathit{self}$ is a mailbox name.
+%
+% \vspace{-0.4cm}
+% \small
+% \begin{align*}
+%   \mathsf{emptyFuture}(\mathit{self}) &\triangleq \mathit{self}\mathsf{?}\msg{Put}(x).\mathsf{fullFuture}[\mathit{self}, x]\\
+%   \mathsf{fullFuture}(\mathit{self}, x) &\triangleq \keyword{free } \mathit{self}.\keyword{done}\\
+%   &+ \mathit{self}\mathsf{?}\msg{Get}(sender).(sender\mathsf{!}\msg{Reply}[x] \parallel \mathsf{fullFuture}[\mathit{self}, x])\\
+%   &+ \mathit{self}\mathsf{?}\msg{Put}.\keyword{fail } \mathit{self}
+% \end{align*}
+% \begin{align*}
+%   &(\nu \mathit{future})(\mathsf{emptyFuture}(\mathit{future}) \parallel future\mathsf{!}\msg{Put}[5] \parallel\\
+%   &(\nu \mathit{\mathit{self}})(future\mathsf{!}\msg{Get}[\mathit{self}] \parallel (\mathit{self}\mathsf{?}\msg{Reply}(x).\keyword{free} \ \mathit{self}.\mathsf{print}(\mathsf{intToString}(x)))))
+% \end{align*}
+% \normalsize
+%
+% The process defined by $\mathsf{emptyFuture}$ will wait for message $\msg{Put}$ with payload $x$ to be present in mailbox $\mathit{self}$ and then continues as specified by $\mathsf{fullFuture}$.
+% For $\mathsf{fullFuture}$ there are three possible actions: free mailbox $\mathit{self}$ if it is contains no messages and be done, fail if it retrieves another $\msg{Put}$ message,
+% or retrieving a $\msg{Get}$ message, it will send a $\msg{Reply}$ message with $x$ to the sender and continues recursively.
+% This behaviour captures the notion of the value only being computed once, but retrieved arbitrarily often.
+% The last term creates a new mailbox name $\mathit{future}$ and calls $\mathsf{emptyFuture}$ with it as an argument.
+% In parallel, the message $\msg{Put}$ is sent to $\mathit{future}$, while also creating new mailbox name $\mathit{self}$.
+% After $\mathit{self}$ is created, a $\msg{Get}$ message is sent to $\mathit{future}$ with $\mathit{self}$ as mailbox to respond to.
+% Finally, when $\mathit{self}$ receives a $\msg{Reply}$ message, the process frees $\mathit{self}$, printing response $x$.
+
+% TODO: Keep example or remove it?
+% By defining the appropriate types, the above example of a future variable successfully type checks.
+% The type of $\mathsf{emptyFuture}$ can be defined as $\mbtin{(\msg{Put}[\mathsf{Int}] \mbcomp \mbstar{\msg{Get}}[\mbtout{\msg{Reply}[\mathsf{Int}]}])}$.
+% The mailbox can contain a $\msg{Put}$ message with an integer payload and 
+% an arbitrary amount of $\msg{Get}$ messages with a payload of a reference to a mailbox that expects a $\msg{Reply}$ message.
+% The type of $\mathsf{fullFuture}$ can be defined as $\mbtin{(\mbstar{\msg{Get}}[\mbtout{\msg{Reply}[\mathsf{Int}]}])}$, indicating that the mailbox
+% does not longer contain a $\msg{Put}$ message and only consists of zero or more $\msg{Get}$ messages.
+% Each of these $\msg{Get}$ messages is required to be paired with a response by sending a $\msg{Reply}$ message.
+

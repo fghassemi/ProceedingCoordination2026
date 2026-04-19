@@ -1,0 +1,178 @@
+%!TEX root = ./main.tex
+%
+The key role in our platform is played by \emph{service brokers} that
+are used by \emph{service providers} to register their services, and by 
+\emph{service clients} to dynamically \emph{discover} and \emph{bind} to 
+services satisfying their requirements.
+%
+These roles are typically advocated in SOAs; the originality of
+our platform however is the use of \emph{behavioural contracts} to
+support \emph{semantic-based} composition of services.
+%
+More precisely, the composition mechanism realised by service
+brokers of \SEArch relies on a notion of behavioural compliance of
+contracts which we briefly review here.
+
+To support SOC, our platform offers a mechanism for populating
+service repositories and composing service-based applications.
+%
+The registration of a service (see \cref{fig:service-registering-procedure}) 
+is conceptually simple: the service provider sends the contract and the 
+unique resource identifier of the provided service, to broker, through its 
+local \SEArch middleware.
+%
+\begin{figure}[t!]
+  % First subfigure (left)
+  \begin{subfigure}{\textwidth}
+  \centering
+  \includegraphics[width=0.65\textwidth]{registering}
+    \caption{\label{fig:service-registering-procedure} Service registration procedure}
+  \end{subfigure}
+  \\[2em]
+  \begin{subfigure}{\textwidth}
+  \centering
+  \includegraphics[width=0.85\textwidth]{brokering}
+    \caption{\label{fig:service-brokering-procedure} Service brokering procedure}
+  \end{subfigure}
+  \caption{ \label{fig:execution} Service management procedures in \SEArch}
+\end{figure}
+%\begin{figure}[t]
+%  \centering
+%  \tikzset{
+%	 ser/.style = {
+%		rectangle,
+%		draw=blue!50,
+%		opacity=.7,
+%		line width=.5pt,
+%		align=center,
+%		fill=white,
+%		minimum width = 2cm,
+%		minimum height = 1cm, 
+%		rounded corners=0.1cm,
+%		inner sep=10pt
+%	 },
+%	 mid/.style = {
+%		rectangle,
+%		draw,
+%		opacity=.7,
+%		line width=.5pt,
+%		align=center,
+%		fill=yellow!20,
+%		minimum size=4mm,
+%		inner sep=2pt
+%	 },
+%	 arr/.style = {
+%		->, >=latex, dashed
+%	 }
+%  }
+%  \begin{tikzpicture}
+%	 \node (client) [ser, label={above:Service Client}]{};
+%	 \node (cmid) [mid] at (client.center){Middleware};
+%	 \node at (cmid.east){\tiny$\bullet$};
+%	 %
+%	 \node (provider) [ser,label={above:Service Provider},right = 3cm of client]{};
+%	 \node (pmid) [mid] at (provider.center){Middleware};
+%	 \node at (pmid.east){\tiny$\bullet$};
+%	 \node at (pmid.west){\tiny$\bullet$};
+%	 %
+%	 \node (broker) [ser, label={right:Service Broker}, below right = of client, xshift = -3cm, minimum width=8cm]{};
+%	 \node (bmid) [rectangle, draw, label={below:Compliance}, yshift = .01cm] at ($(broker.center) + (-2.5cm,0)$){$\mathsf{Pr} \vdash \mathsf{R}$};
+%	 \node (repo) [rectangle, draw, label={below:Repository}, yshift = .01cm] at ($(broker.center) + (2cm,0)$){\tiny$\conf{\mathsf{R}_1,u_1}\cdots\conf{\mathsf{R}_n,u_n}$};
+%	 %
+%	 \path[draw] ($(pmid.east) + (1cm, 0)$) -- (pmid.east);
+%	 \path[draw] (pmid.west) -- (cmid.east);
+%	 \path[arr] ($(bmid.east) + (0,.1cm)$) edge node[above]{query $\mathsf{R}$} ($(repo.west) + (0,.1cm)$);
+%	 \path[arr] ($(repo.west) + (0,-.1cm)$) edge node[below]{$\conf{\mathsf{Pr},u}$} ($(bmid.east) + (0,-.1cm)$);
+%	 \path[arr] ($(broker.north west) + (.5cm,0)$) edge node[left]{$\conf{\mathsf{Pr},u}$} ($(cmid.south west) + (.5cm,0)$);
+%	 \path[arr] ($(cmid.south west) + (1cm,0)$) edge node[right]{$\mathsf{R}$} ($(broker.north west) + (1cm,0)$);
+%	 \path[arr] ($(broker.north east) + (-.5cm,0)$) edge node[right]{$\conf{\mathsf{Pr},u}$} ($(pmid.south east) + (-.5cm,0)$);
+%	 \path[arr] ($(pmid.south east) + (-1cm,0)$) edge node[left]{$\mathsf{R}$} ($(broker.north east) + (-1cm,0)$);
+%  \end{tikzpicture}
+%  \caption{Service execution procedure in \SEArch}
+%  \label{fig:execution}
+%\end{figure}
+%
+The execution process is significantly more
+complex since its underlying computational model are
+\emph{Asynchronous Relational Networks}~(ARNs)~\cite{fiadeiro:tcs-503}.
+%
+This theory envisages \emph{processes} and \emph{communication
+  channels} exposing \emph{ports} with behavioural contracts:
+processes' ports, called \emph{provides-points}, can be dynamically
+\quo{coalesed} with ports of communication channels, called
+\emph{requires-points}, provided that the behavioural contracts
+associated with merged ports are \quo{semantically compliant}.
+%
+The notion of compliance adopted is defined in terms of
+contracts formalised in terms of a bisimilarity relation
+between \emph{extended Communicating Finite State Machines} (extended
+CFSM for short)~\cite{lopezpombo:coordination25}, a variant of
+\emph{communicating finite-state machines}~\cite{brand:jacm-30_2}
+enabling the specification of functional and non-functional behaviour.
+%
+We now describe our execution process.
+
+When launched on a \SEArch node, a service registers the extended
+CFSMs of its exposed requirement contracts on the local
+\emph{middleware}, which will mediate the communication with other
+services.
+%
+Basically, the middleware, intercepts the communications a
+local service attempts over a communication channel, establishes a
+communication session for that channel (in case the session does not 
+yet exists), and triggers the dynamic reconfiguration sketched in
+\cref{fig:service-brokering-procedure} which we now describe:
+%
+\begin{enumerate}
+  \newcommand{\blt}[1]{\raisebox{3pt}{\tikz{\node[circle,fill=black,text=white,inner sep=1pt, scale=.9]{#1}}}}
+\item[\blt 1] the middleware sends the service broker the contract
+  $\{\mathsf{R_1}, \ldots, \mathsf{R_m}\}$ of the communication
+  channel, consisting of one extended CFSM for each participant
+  required by the service client;
+\item[\blt 2] for each extended CFSM $\mathsf{R_i}$ in the contract, the
+  service broker queries the service repository for candidates;
+\item[\blt 3] the service repository returns a set of candidates\footnote{%
+	 The query is resolved by filtering the extended CFSMs in the
+	 repository according to heuristics based on structure of
+	 $\mathsf{R_i}$.
+	 %
+  }
+  $\{\conf{\mathsf{P_{i, 1}}, \mathsf{u_{i, 1}}}, \ldots,
+  \conf{\mathsf{P_{i, k_i}}, \mathsf{u_{i, k_i}}}\}$ where, for all
+  $1 \leq j \leq k_i$, $\mathsf{P_{i, j}}$ is an extended CFSM and
+  $\mathsf{u_{i, j}}$ is the URI of the service;
+\item[\blt 4] the broker checks whether there is a provision contract $\conf{\mathsf{P_{i, j}}, \mathsf{u_{i, j}}}$, with $1 \leq j \leq k$,
+  compatible with the requirement contract $\mathsf{R_i}$, for all $1 \leq i \leq m$; this is
+  done by resorting to a bisimilarity check; once the service broker has
+  found services satisfying all the requirement contracts, it returns
+  the set of URIs $\{\mathsf{u_1}, \ldots, \mathsf{u_m}\}$ to the middleware;
+\item[\blt 5] finally, the middleware opens a communication with the
+  middleware of each service returned by the provider requiring the
+  execution of the corresponding service.
+\end{enumerate}
+%
+Once the composition is achieved, the middleware interacts with the
+middlewares of the partner services; and the execution process
+proceeds.
+%
+Notice that during the execution new requirements might crop up; for
+instance, because some brokered services need further
+services.\footnote{%
+  This implies that a service may have one or more required-points
+  associated to communication channels of its own.
+  %
+}
+% 
+This will initiate a new brokerage phase to discover the newly
+required services.
+
+The schematic view discussed before establishes several requisites
+over the implementation of the middleware and the service broker which
+are omitted as inessential here; interested readers are referred
+to~\cite{lopezpombo:coordination24} for details.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

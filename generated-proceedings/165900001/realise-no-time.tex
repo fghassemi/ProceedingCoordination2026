@@ -1,0 +1,584 @@
+Let $\mathcal{S}=\{\SeqS_1,\dots\SeqS_n\}$ be a set of normalised
+scenarios over $\Sigma_{\mathcal{S}}$, such that, for every $1\leq
+i\leq n$, $\SeqS_i=(\E_i,\emptyset)$, where $\E_i$
+%over $\Sigma_{\mathcal{S}}$, whose members
+contains all the events from $\Sigma_{\mathcal{S}}$. Moreover, let
+$\mathcal{S}$ be without gaps. We are interested
+in obtaining an expression that realises $\mathcal{S}$.
+%First, we show a simple example.
+%---------------
+\begin{figure}[t]
+\begin{center}
+\adjustbox{valign=b}
+ {\begin{minipage}{0.41\linewidth}
+ \begin{center}
+ %               \adjustbox{valign=b}
+%{\begin{minipage}{0.49\linewidth}
+  \begin{tikzpicture}
+    \tikzset{vertex/.style = {shape=circle,draw,minimum size=1em}}
+    \tikzset{vertex3/.style = {shape=circle,draw,minimum size=1.5em}}
+    \tikzset{vertex2/.style = {shape=rectangle,draw=none,minimum size=0.5em}}
+    \tikzset{edge/.style = {-,> = latex'}}
+
+    % vertices
+
+    \node[vertex2] (b) at  (0,0) {$\mathtt{start}$};
+
+    \node[vertex2] (x) at  (-1.5,-1.4) {$\mathtt{finish_1}$};
+\node[vertex2] (y) at  (0,-1.4) {$\mathtt{finish_2}$};
+\node[vertex2] (z) at  (1.5,-1.4) {$\mathtt{flag}$};
+ \draw[edge] (b) to (x);
+    \draw[edge] (b) to (y);
+    \draw[edge] (b) to (z);
+      \end{tikzpicture}
+     \caption{Maximal chains (Example \ref{ex-one-same-flag})}
+     \label{fig-chains-1}
+      \vspace{-3mm}
+     \end{center}
+    \end{minipage}}
+    \adjustbox{valign=b}
+        {\begin{minipage}{0.58\linewidth}
+         \begin{center}
+ %               \adjustbox{valign=b}
+%{\begin{minipage}{0.49\linewidth}
+ \adjustbox{valign=b}
+        {\begin{minipage}{0.49\linewidth}
+  \begin{tikzpicture}
+    \tikzset{vertex/.style = {shape=circle,draw,minimum size=1em}}
+    \tikzset{vertex3/.style = {shape=circle,draw,minimum size=1.5em}}
+    \tikzset{vertex2/.style = {shape=rectangle,draw=none,minimum size=0.5em}}
+    \tikzset{edge/.style = {-,> = latex'}}
+
+    % vertices
+
+    \node[vertex2] (b) at  (0.2,-0.2) {$\mathtt{start}$};
+
+    \node[vertex2] (x) at  (0.2,-1) {$\mathtt{finish_1}$};
+\node[vertex2] (y) at  (-1,-1.7) {$\mathtt{finish_2}$};
+\node[vertex2] (z) at  (1,-1.7) {$\mathtt{flag}$};
+ \draw[edge] (b) to (x);
+ %   \draw[edge] (b) to (y);
+    \draw[edge] (x) to (z);
+     \draw[edge] (x) to (y);
+      \end{tikzpicture}
+       \end{minipage}}
+        \adjustbox{valign=b}
+        {\begin{minipage}{0.49\linewidth}
+  \begin{tikzpicture}
+    \tikzset{vertex/.style = {shape=circle,draw,minimum size=1em}}
+    \tikzset{vertex3/.style = {shape=circle,draw,minimum size=1.5em}}
+    \tikzset{vertex2/.style = {shape=rectangle,draw=none,minimum size=0.5em}}
+    \tikzset{edge/.style = {-,> = latex'}}
+
+    % vertices
+
+    \node[vertex2] (b) at  (0.2,-0.2) {$\mathtt{start}$};
+
+    \node[vertex2] (x) at  (0.2,-1) {$\mathtt{finish_2}$};
+\node[vertex2] (y) at  (-1,-1.7) {$\mathtt{finish_1}$};
+\node[vertex2] (z) at  (1,-1.7) {$\mathtt{flag}$};
+ \draw[edge] (b) to (x);
+  %  \draw[edge] (b) to (y);
+    \draw[edge] (x) to (z);
+     \draw[edge] (x) to (y);
+      \end{tikzpicture}
+       \end{minipage}}
+     \caption{Maximal chains for $\ParS{\mathcal{S}_1}$,
+    $\ParS{\mathcal{S}_2}$(Example \ref{ex-one-same-flag})}
+     \label{fig-chains-2}
+     \vspace{-3mm}
+     \end{center}
+    \end{minipage}}
+  \end{center}
+  \end{figure}
+%-----------------------
+\vspace{-1em}
+\begin{example}
+\label{ex-one-same-flag}
+%Consider the set $\mathcal{S}=\{\SeqS_1,\SeqS_2,\SeqS_3,\SeqS_4\}$, of
+%scenarios, where
+Let $\mathcal{S}=\{\SeqS_1,\SeqS_2,\SeqS_3,\SeqS_4\}$, where
+%\noindent
+$\SeqS_1=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{finish_2}~ \mathtt{flag},\emptyset)$,
+$\SeqS_2=(\mathtt{start}~ \mathtt{finish_1}~  \mathtt{flag}~ \mathtt{finish_2},\emptyset)$,
+$\SeqS_3=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{finish_1}~ \mathtt{flag},\emptyset)$
+and
+$\SeqS_4=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{flag}~ \mathtt{finish_1},\emptyset)$.
+The set $\mathcal{S}$ cannot be realised by a single DTS, as will be explained
+below.
+Unlike in Example \ref{ex-one-flag},
+$\mathcal{S}$ cannot be divided according to
+sets of events: each member contains the same set of events.
+So we need another criterion for partitioning $\mathcal{S}$.
+\end{example}
+%-----------------
+\begin{definition}
+\label{def-match}
+Two (sequential) scenarios, $\SeqS$ and $p$, \emph{match} if
+$\ESeq{\SeqS}=\ESeq{p}$.
+%If $\SeqS$ and $p$ match then we write $match(\SeqS,p)$.
+\end{definition}
+%----------------
+\begin{definition}
+\label{def-DR-Proj}
+Let $\mathcal{S}$ be a finite set of scenarios and $\DR{\mathcal{S}}$ be
+its distance relation. The set of projections of $\DR{\mathcal{S}}$
+(see \Sec{sec-dts})
+is
+denoted by $\Proj{\mathcal{S}}$.
+\end{definition}
+%------------------
+\begin{definition}
+\label{def-order-closed}
+Let $\mathcal{S}$ be a finite set of scenarios.
+We say $\mathcal{S}$ is \emph{order-closed} iff
+every member of $\Proj{\mathcal{S}}$  matches one scenario in
+$\mathcal{S}$ and vice versa.
+\end{definition}
+\noindent
+Intuitively, if $\mathcal{S}$ is order-closed, then extending it with
+a scenario that has a new sequence of events will change
+$\ParS{\mathcal{S}}$.
+\begin{obs}
+\label{obs-order-closed-1}
+Let $\mathcal{S}$ be a finite set of scenarios.
+%such that all its members have only default constraints.
+If $|\mathcal{S}|=|\Proj{\mathcal{S}}|$, then
+$\mathcal{S}$ is order-closed.
+\end{obs}
+\noindent
+As mentioned at the beginning of \Sec{sec-realize}, $\mathcal{S}$ can
+be realised as a single DTS only if
+$\mathcal{S}=\Proj{\mathcal{S}}$. This leads to the following observation:
+\begin{obs}
+\label{obs-order-proj-2}
+Let $\mathcal{S}$ be a finite set of scenarios.
+If $\mathcal{S}$
+%A set of scenarios that
+is not order-closed, then it cannot be realised by a single DTS.
+\end{obs}
+\noindent
+In Example \ref{ex-one-same-flag}, $\ParS{\mathcal{S}}$
+is represented by the maximal chains $\mathtt{start}-\mathtt{finish_1}$,
+$\mathtt{start}-\mathtt{finish_2}$ and
+$\mathtt{start}-\mathtt{flag}$ (see \Fig{fig-chains-1}).
+The distance function of $\mathcal{S}$, $\DF{\mathcal{S}}$, has only
+default constraints.
+The set of projections of
+$\DR{\mathcal{S}}=(\ParS{\mathcal{S}},\DF{\mathcal{S}})$, includes
+four projections that match the
+scenarios in $\mathcal{S}$.
+Additionally, $\Proj{\mathcal{S}}$ includes two
+projections whose sequences of events are
+$\mathtt{start}~ \mathtt{flag}~ \mathtt{finish_1}~ \mathtt{finish_2}$
+and
+$\mathtt{start}~ \mathtt{flag}~ \mathtt{finish_2}~ \mathtt{finish_1}$.
+So, by \Def{def-order-closed},
+%$\mathcal{S} \neq\Proj{\mathcal{S}}$, therefore
+$\mathcal{S}$ is not order-closed.
+%\begin{obs}
+%\label{obs-order-proj-1}
+%Let $\mathcal{S}$ be an order-closed set of scenarios, such that all
+%its members have only default constraints. Then,
+%$\mathcal{S}=\Proj{\mathcal{S}}$.
+%\end{obs}
+%\noindent
+
+In general, $\ParS{\mathcal{S}}$ captures the ordering relations that are
+identical between all the members of $\mathcal{S}$.
+If $\mathcal{S}$ is not order-closed, there are certain subtle
+similarities between some of the members, similarities that cannot be
+explained by $\ParS{\mathcal{S}}$.
+For instance, in
+Example \ref{ex-one-same-flag}, $\ParS{\mathcal{S}}$ does not
+reflect the fact that $\mathtt{flag}$ does not occur immediately after
+$\mathtt{start}$ in any member of $\mathcal{S}$: $\mathtt{flag}$ is
+preceded by $\mathtt{finish_1}$, $\mathtt{finish_2}$, or both in all
+the members of $\mathcal{S}$.
+
+Intuitively, if $\mathcal{S}$ is not order-closed,
+%its underlying partial order,
+$\ParS{\mathcal{S}}$ is \emph{too permissive}. So
+$\ParS{\mathcal{S}}$ would have to be made stricter, somehow, to
+reflect \emph{all} the ordering relations that exist between the
+members of $\mathcal{S}$. But this cannot be
+achieved without partitioning $\mathcal{S}$.
+Our goal is to divide $\mathcal{S}$ in such a way that each
+partition is order-closed. To achieve this we investigate the
+relations between events of $\Sigma_{\mathcal{S}}$ that are not
+related by $\ParS{\mathcal{S}}$.
+%--------------------
+\begin{definition}
+\label{def-OBD}
+Let $\mathcal{S}$ be a finite set of scenarios over
+$\Sigma_{\mathcal{S}}$, such that $\mathcal{S}$ is not order-closed.
+Let $e,e'\in\Sigma_{\mathcal{S}}$, such that
+$(e,e')\not\in\ParS{\mathcal{S}}$.
+The \emph{order-based division} (\emph{OBD} for short)
+%The \emph{division}
+of $\mathcal{S}$ with respect to $(e,e')$,
+denoted by $\OBD{\mathcal{S}}(e,e')$, is
+the unordered pair $(\mathcal{S}_1,\mathcal{S}_2)$, where
+$\mathcal{S}_1=$\Set{\SeqS_1\in\mathcal{S}}{e\ParS{\SeqS_1}e'} and
+$\mathcal{S}_2=$\Set{\SeqS_2\in\mathcal{S}}{e'\ParS{\SeqS_2}e}.
+%We say $(\mathcal{S}_1,\mathcal{S}_2)$ is an \emph{order-based
+%division} (\emph{OBD} for short) of $\mathcal{S}$.
+%\vspace{-0.2em}
+\end{definition}
+\noindent
+Observe that all scenarios in $\mathcal{S}$ contain $e$ and $e'$, but
+not all in the same order.
+Clearly, an OBD $(\mathcal{S}_1,\mathcal{S}_2)$ is a partitioning,
+i.e., $\mathcal{S}_1\neq\emptyset$, $\mathcal{S}_2\neq\emptyset$ and
+$\mathcal{S}_1\cup\mathcal{S}_2=\mathcal{S}$.
+%---------------
+%Notice that
+%$\mathcal{S}_1\cup\mathcal{S}_2=\mathcal{S}$,
+%$\mathcal{S}_1\neq\emptyset$ and $\mathcal{S}_2\neq\emptyset$:
+%all scenarios contain $e$ and $e'$, but not all in the same order.
+%\vspace{-0.2em}
+\begin{obs}
+\label{obs-not-order-closed}
+Let $\mathcal{S}$ be a finite set of scenarios, such that
+$\mathcal{S}$ is not order-closed and $|\mathcal{S}|>1$.
+Then
+there is at least one OBD.
+\end{obs}
+%-------------
+\noindent
+In Example \ref{ex-one-same-flag}
+$\mathtt{finish_1}\not\ParS{\mathcal{S}}\mathtt{finish_2}$ and
+$\OBD{\mathcal{S}}(\mathtt{finish_1},\mathtt{finish_2})=(\mathcal{S}_{1},\mathcal{S}_2)$, where $\mathcal{S}_{1}=\{\SeqS_1,\SeqS_2\}$ and
+$\mathcal{S}_2=\{\SeqS_3,\SeqS_4\}$.
+Notice that $\mathtt{finish_1}$
+occurs before $\mathtt{flag}$ in all members of $\mathcal{S}_{1}$,
+while in all members of $\mathcal{S}_{2}$
+$\mathtt{finish_2}$ occurs before $\mathtt{flag}$.
+So
+
+\noindent
+%$\ParS{\mathcal{S}}$ with the \emph{additional} ordering relationships:
+$\ParS{\mathcal{S}_{1}}=\ParS{\mathcal{S}}\cup\{(\mathtt{finish_1},\mathtt{finish_2}),
+(\mathtt{finish_1},\mathtt{flag})\}$ and
+
+\noindent
+$\ParS{\mathcal{S}_{2}}=\ParS{\mathcal{S}}\cup\{(\mathtt{finish_2},
+\mathtt{finish_1}),(\mathtt{finish_2},\mathtt{flag})\}$.
+
+\Fig{fig-chains-2} shows the maximal chains representing
+$\ParS{\mathcal{S}_{1}}$ and $\ParS{\mathcal{S}_2}$.
+Observe that both $\mathcal{S}_{1}$ and $\mathcal{S}_{2}$ are
+order-closed. Indeed, ${\mathcal{S}}_{1}$ can be realised by
+the DTS $\xi_1||\xi_2$, where
+$\xi_1=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{flag},\emptyset)$
+and
+$\xi_2=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{finish_2},\emptyset)$.
+Similarly, $\mathcal{S}_2$ is realised by %expression
+the DTS $\xi_3||\xi_4$, where
+$\xi_3=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{flag},\emptyset)$
+and
+$\xi_4=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{finish_1},\emptyset)$.
+So
+$\mathcal{S}$ is realised by $(\xi_1||\xi_2)\BAR(\xi_3||\xi_4)$.
+%expression $E|E'=(E_1||E_2)|(E_3||E_4)$.
+%-----------------------
+
+In this example there are two other ways to divide $\mathcal{S}$:
+
+\noindent
+$\OBD{\mathcal{S}}(\mathtt{finish_1},\mathtt{flag})=(\{\SeqS_1,\SeqS_2,\SeqS_4\},\{\SeqS_3\})$,
+from which we obtain the expression $(\xi_5||\xi_6)\BAR\SeqS_3$,
+where
+$\xi_5=(\mathtt{start}~ \mathtt{finish_1}~ \mathtt{flag},\emptyset)$
+and
+$\xi_6=(\mathtt{start}~ \mathtt{finish_2},\emptyset)$.
+
+\noindent
+$\OBD{\mathcal{S}}(\mathtt{finish_2},\mathtt{flag})=(\{\SeqS_1,\SeqS_3,\SeqS_4\},\{\SeqS_2\})$,
+which results in $(\xi_7||\xi_8)\BAR\SeqS_2$,
+where
+$\xi_7=(\mathtt{start}~ \mathtt{finish_2}~ \mathtt{flag},\emptyset)$
+and
+$\xi_8=(\mathtt{start}~ \mathtt{finish_1},\emptyset)$.
+%However,
+But
+such solutions do not align with our goal: our algorithm (see
+\Sec{sec-algo})
+will produce the first solution.
+%result from divisions with singleton partitions, such as these two
+%expressions.
+%---------------
+%In general, ${\mathcal{S}}$ can be partitioned in more than
+%one way, so we need some criteria to compare all the possible
+%divisions.
+%-------------
+\begin{definition}
+\label{o-ranking}
+The \emph{o-ranking} of $(\mathcal{S}_1,\mathcal{S}_2)$,  a division
+of $\mathcal{S}$, is
+$o_1*\frac{|\mathcal{S}_1|}{|\mathcal{S}|}+o_2*\frac{|\mathcal{S}_2|}{|\mathcal{S}|}$,
+where $o_i$ ($i\in\{1,2\}$) is
+0 if $\mathcal{S}_i$ is order-closed, and 1 otherwise.
+%the number of partitions of $D$ that are not order-closed.
+\end{definition}
+%---------------
+\noindent
+This ranking will be used to choose between several possible
+divisions: lower o-ranking should give more satisfactory results.
+The intuition is that an order-closed partition is
+likely to require less additional partitioning.
+Moreover, the larger the order-closed partition, the better.
+%(notice that singleton partitions are order-closed).
+%If two divisions have only one order-closed
+%partition, we should favour the one whose order-closed partition is larger.
+
+Observe that in Example \ref{ex-one-same-flag} all the OBDs have equal
+o-ranking.
+%both partitions of each of the three OBDs are order-closed.
+So in order to choose the best
+division we must find another criterion that looks more deeply into
+the partitions of OBDs.
+
+The following definition is an adaptation of \emph{Kendall tau
+distance}\cite{Kendall1938}.
+%\vspace{-0.1em}
+\begin{definition}
+\label{def-K-distance}
+Let $\SeqS_1$ and $\SeqS_2$ be two normalised scenarios
+of equal length over the same set of events.
+The \emph{K-distance} of $\SeqS_1$ and $\SeqS_2$, denoted by
+$\K{\SeqS_1}{\SeqS_2}$, is
+$|\Set{(e,e')}{e\PR{\SeqS_1}e'\wedge e'\PR{\SeqS_2}e}|$.
+\end{definition}
+\noindent
+The larger the K-distance, the more dissimilar are the sequences of
+events.
+%of two scenarios.
+%\vspace{-0.2em}
+\begin{definition}
+\label{def-K-set-ranking}
+Let $\mathcal{S}$ be a finite set of scenarios.
+The \emph{K-ranking} of ${\mathcal{S}}$, denoted by $\RK{\mathcal{S}}$,
+is the average of all pairwise K-distances between the members of
+$\mathcal{S}$.
+\end{definition}
+\noindent
+Since $\K{\SeqS_1}{\SeqS_2}=\K{\SeqS_2}{\SeqS_1}$,
+the average is taken over the number of unordered pairs in
+${\mathcal{S}}$, i.e.,
+%there are
+$\frac{|{\mathcal{S}}|*(|{\mathcal{S}}|-1)}{2}$.
+%unordered pairs in ${\mathcal{S}}$.
+%the average is taken over the number of unordered pairs. There are
+%$\frac{|{\mathcal{S}}|*(|{\mathcal{S}}|-1)}{2}$ such pairs in ${\mathcal{S}}$.
+ %----------------
+ %\vspace{-0.2em}
+\begin{definition}
+\label{def-K-ranking}
+Let $\mathcal{S}$ be a finite set of scenarios and
+$D=(\mathcal{S}_1,\mathcal{S}_2)$ be an OBD of
+$\mathcal{S}$. The \emph{K-ranking} of $D$, denoted by
+$\RK{D}$, is given by
+$\RK{\mathcal{S}_1}*\frac{|\mathcal{S}_1|}{|\mathcal{S}|}+
+\RK{\mathcal{S}_2}*\frac{|\mathcal{S}_2|}{|\mathcal{S}|}$.
+\end{definition}
+\noindent
+It turns out that the K-rankings of divisions provide us with
+the crucial information that we need in order to choose the best
+division when there are multiple divisions that all agree
+with each other on their o-ranking.
+%-----------------------
+%%%%%%%%%%%%% three_in_one %%%%%%%%%
+\begin{table}[t]
+\begin{center}
+\begin{tabular}{| c | c | c | c | c | c|}
+\hline
+pair & OBD & order-closed &o-rank & K-rank & expression\\
+%pairs & divisions & informative? & K-rankings & expressions\\
+\hline
+$(a,d)$ &
+\begin{tabular}{c}
+$\{\SeqS_1,\SeqS_3,\SeqS_4,\SeqS_5,\SeqS_6\}$\\
+ $\{\SeqS_2\}$
+\end{tabular} &
+ \begin{tabular}{c}
+%$(b,c)$\\
+No\\
+Yes
+\end{tabular} & 0.83 & $1.5$  &
+\begin{tabular}{c}
+$(\xi_1||\xi_2)\BAR(\xi_3||\xi_4)\BAR\SeqS_2$ \\
+ $\xi_1=(abc,\emptyset),\xi_2=(ad,\emptyset)$\\
+ $\xi_3=(acb,\emptyset),\xi_4=(acd,\emptyset)$
+\end{tabular}
+\\
+%-----------------------
+\hline
+ $(b,c)$ & \begin{tabular}{c}
+ $\{\SeqS_1,\SeqS_2,\SeqS_5,\SeqS_6\}$\\
+ $\{\SeqS_3,\SeqS_4\}$
+\end{tabular} &
+ \begin{tabular}{c}
+% $(a,d),(c,d)$\\
+Yes\\
+Yes
+\end{tabular} &0 &1.44  &
+\begin{tabular}{c}
+$(\xi_1||\xi_2)\BAR(\xi_3||\xi_4)$ \\
+ $\xi_1=(abc,\emptyset),\xi_2=(d,\emptyset)$\\
+ $\xi_3=(acb,\emptyset),\xi_4=(acd,\emptyset)$
+\end{tabular}
+\\
+%----------------------
+\hline
+$(b,d)$ & \begin{tabular}{c}
+$\{\SeqS_1,\SeqS_2,\SeqS_3\}$ \\
+$\{\SeqS_4,\SeqS_5,\SeqS_6\}$
+\end{tabular} &
+ \begin{tabular}{c}
+% $(c,d)$ \\
+No\\
+Yes
+\end{tabular} &0.5 &1.67 &
+\begin{tabular}{c}
+$(\xi_1||\xi_2)\BAR\SeqS_3\BAR(\xi_3||\xi_4)$ \\
+ $\xi_1=(abc,\emptyset),\xi_2=(dbc,\emptyset)$\\
+ $\xi_3=(abd,\emptyset),\xi_4=(ac,\emptyset)$
+\end{tabular}
+\\
+%-------------------
+\hline
+$(c,d)$ & \begin{tabular}{c}
+$\{\SeqS_1,\SeqS_2,\SeqS_6\}$\\
+$\{\SeqS_3,\SeqS_4,\SeqS_5\}$
+\end{tabular} &
+ \begin{tabular}{c}
+% $(b,c),(d,b)$\\
+%  No
+Yes\\
+Yes
+\end{tabular} &0 &1.34 &
+\begin{tabular}{c}
+$(\xi_1||\xi_2)\BAR(\xi_3||\xi_4)$ \\
+ $\xi_1=(abc,\emptyset),\xi_2=(dc,\emptyset)$\\
+ $\xi_3=(ab,\emptyset),\xi_4=(acd,\emptyset)$
+\end{tabular}\\
+\hline
+\end{tabular}
+\caption{Divisions, their o-rankings, K-rankings and resulting expressions
+ (Example \ref{ex-paper-table})}
+\label{example-distance}
+\vspace{-4mm}
+\end{center}
+\end{table}
+%----------------------------
+%\vspace{-0.2em}
+\begin{example}
+\label{ex-paper-table}
+%Consider the set
+Let $\mathcal{S}=\{\SeqS_1,\SeqS_2,\SeqS_3,\SeqS_4,\SeqS_5,\SeqS_6\}$,
+%of (sequential) scenarios,
+where
+$\SeqS_1=(adbc,\emptyset)$,
+$\SeqS_2=(dabc,\emptyset)$,
+$\SeqS_3=(acdb,\emptyset)$,
+$\SeqS_4=(acbd,\emptyset)$,
+$\SeqS_5=(abcd,\emptyset)$ and
+$\SeqS_6=(abdc,\emptyset)$.
+The set $\mathcal{S}$ is not order-closed, so it cannot be realised by
+a single DTS.
+%The underlying partial order in
+The relation $\ParS{\mathcal{S}}$
+is represented by the maximal chains $a-b$, $a-c$ and $a-d$.
+%, while $d$ is unrelated to all the other events.
+There are four pairs of events that are unrelated by
+$\ParS{\mathcal{S}}$: $(a,d)$, $(b,c)$,
+$(b,d)$ and $(c,d)$. The divisions with respect to these pairs are shown in
+the second column of Table \ref{example-distance}, the third
+column shows whether each partition of a division is order-closed or
+not, while the fourth column shows the o-rankings. Observe that $\OBD{\mathcal{S}}(b,c)$ and
+$\OBD{\mathcal{S}}(c,d)$ have equal and lowest o-rankings. So we compute their K-rankings.
+%For example, consider the division
+% $\OBD{\mathcal{S}}(c,d)=(\{\SeqS_1,\SeqS_2,\SeqS_6\},\{\SeqS_3,\SeqS_4,\SeqS_5\},)$ in the last row of the table.
+
+\noindent
+For $\OBD{\mathcal{S}}(c,d)$,
+%\noindent
+$\RK{\{\SeqS_1,\SeqS_2,\SeqS_6\}}=\frac{\K{\SeqS_1}{\SeqS_2}+\K{\SeqS_1}{\SeqS_6}+\K{\SeqS_2}{\SeqS_6}}{3}\approx
+1.33$.
+Similarly, $\RK{\{\SeqS_3,\SeqS_4,\SeqS_5\}}\approx
+1.33$.
+So
+%the K-ranking of the OBD is
+$\RK{\OBD{\mathcal{S}}(c,d)}=1.33*\frac{3}{6}+1.33*\frac{3}{6}\approx 1.34$.
+Similarly, $\RK{\OBD{\mathcal{S}}(b,c)}\approx 1.44$.
+%The K-ranking of $\OBD{\mathcal{S}}(b,c)\approx 1.44$.
+So we choose $\OBD{\mathcal{S}}(c,d)$ that has a lower K-ranking.
+The resulting expression is shown in the last row,
+last column of the table:
+%. The interpretation is that
+$\{\SeqS_1,\SeqS_2,\SeqS_6\}$ is realised by $\xi_1||\xi_2$,
+while $\{\SeqS_3,\SeqS_4,\SeqS_5\}$ is realised by $\xi_3||\xi_4$.
+
+The K-rankings of the other two divisions are shown in
+the fifth column, while the last column shows the corresponding
+expressions.
+%All these expressions are equivalent.
+Notice that those partitions of $\OBD{\mathcal{S}}(a,d)$ and
+$\OBD{\mathcal{S}}(b,d)$
+that are not order-closed must be further partitioned.
+Observe that $\OBD{\mathcal{S}}(b,c)$ would have also resulted in
+an expression with two alternatives. In general, divisions with
+lowest K-rankings produce more satisfactory results, unless their
+o-rankings differ.
+\end{example}
+\noindent
+In our algorithm (see \Sec{sec-algo}) we
+choose a division with the lowest o-ranking.
+We break a tie by choosing a division with the lowest K-ranking.
+%We show how to break a tie in \Sec{sec-full}.
+In order to further break a tie we introduce a new ranking, called l-ranking,
+that takes into account whether the distance functions of the
+partitions of a division include gaps or not, and how balanced the
+partitions are with respect to their sizes.
+For a division $D$, its l-ranking is computed by
+$100*g+b$, where $g$ is the number of partitions of $D$
+that include gaps, and $b$
+is the difference between the sizes of the two partitions of $D$.
+%Order-closedness is a more indicative factor than
+The aim is to give higher priority to divisions whose partitions are
+without gaps. Parameter $b$
+can be used to discard trivial partitions, in favour of non-trivial
+ones. (We assume $| S | < 100$.)
+
+
+%We break a tie by choosing a division whose partitions are
+%order-closed. A division with two order-closed partitions has
+%priority over one that has only one order-closed partition, and that
+%has priority over one that has no order-closed partitions.
+%If order-closedness of partitions cannot break a tie, we randomly
+%choose a division, while avoiding partitions with gaps if possible.
+%-------------------
+%\begin{definition}
+%\label{def-informative}
+%Let $\mathcal{S}$ be a finite set of scenarios over
+%$\Sigma_{\mathcal{S}}$ and
+%$(\mathcal{S}_1,\mathcal{S}_2)$ be the OBD
+%of $\mathcal{S}$ with respecto to $(e,e')$.
+%We say the division is \emph{informative} if
+%$\ParS{\mathcal{S}_1}\setminus(\ParS{\mathcal{S}}\cup\{(e,e')\})\neq\emptyset
+%~\vee \ParS{\mathcal{S}_2}\setminus(\ParS{\mathcal{S}}\cup\{(e',e)\})\neq\emptyset$.
+%\end{definition}
+%--------------------
+%\noindent
+%In Example \ref{ex-one-same-flag} Since
+%$(\mathtt{finish_1},\mathtt{flag})\in\ParS{\mathcal{S}_{1}}
+%\setminus\ParS{\mathcal{S}}\cup\{(\mathtt{finish_1},\mathtt{finish_2})\}$
+%and
+%$(\mathtt{finish_2},\mathtt{flag})$\\$\in\ParS{\mathcal{S}_{2}}
+%\setminus\ParS{\mathcal{S}}\cup\{(\mathtt{finish_2},\mathtt{finish_1})\}$,
+%the division is informative.
+
+%In Example \ref{ex-paper-table}
+%All the divisions are informative: the new ordering
+%relations are shown in the third column.

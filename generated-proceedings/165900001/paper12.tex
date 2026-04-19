@@ -1,0 +1,714 @@
+%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is the LaTeX source for the instructions to authors using
+% the LaTeX document class 'llncs.cls' for contributions to
+% the Lecture Notes in Computer Sciences series.
+% http://www.springer.com/lncs       Springer Heidelberg 2006/05/04
+%
+% It may be used as a template for your own input - copy it
+% to a new file with a new name and use it as the basis
+% for your article.
+%
+% NB: the document class 'llncs' has its own and detailed documentation, see
+% ftp://ftp.springer.de/data/pubftp/pub/tex/latex/llncs/latex2e/llncsdoc.pdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[runningheads,a4paper]{llncs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[nodisplayskipstretch]{setspace}
+
+%\setlength{\floatsep}{5pt}
+\setlength{\textfloatsep}{14pt}
+
+%\usepackage[
+%  subtle
+%  %moderate
+%]{savetrees}
+%------
+
+%\usepackage{times}
+
+%\linespread{0.97}
+
+
+
+%\addtolength{\textfloatsep}{-0.4cm}
+
+%\addtolength{\intextsep}{-0.3cm}
+
+%----
+
+%\setlength{\textfloatsep}{5pt} % Space between text and top/bottom floats
+%\setlength{\floatsep}{5pt}     % Space between two consecutive floats
+
+%\setlength{\intextsep}{5pt}    % Space above and below an in-text float
+
+%\setlength{\textfloatsep}{7pt}
+
+%\addtolength{\floatsep}{-0.5em}
+
+% ROMOVE THIS IF YOU HAVE EXTRA SPACE.
+\usepackage[font=small,skip=3pt]{caption}
+
+%\captionsetup[figure]{skip=-2pt}
+
+%\usepackage{titling}
+%\setlength{\droptitle}{-3cm}
+
+%\usepackage{dutchcal}
+
+%\usepackage{dutchcal}
+
+%\usepackage{pzccal}
+
+%\usepackage[cal=boondox]{mathalfa}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\usepackage[shortlabels]{enumitem}
+
+\usepackage{subfiles}
+
+\usepackage{tabularx}
+
+\usepackage{adjustbox}
+
+\usepackage{asymptote}
+
+\usepackage{rotating}
+%\usepackage{caption}
+\usepackage[T1]{fontenc}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bm}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+\usepackage{bussproofs}
+\usepackage{supertabular}
+\usepackage{longtable}
+\usepackage{url}
+\usepackage{afterpage}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{decorations.pathmorphing}
+\afterpage{\clearpage}
+%\newtheorem{definition}{Definition}
+%\newtheorem{proof}{Proof}
+%\newproof{proof}{Proof}
+%\newtheorem{mydef}{Definition}
+%\newtheorem{myexample}{Example}
+%\newtheorem{mytheorem}{Theorem}
+%\newtheorem{mycorollary}{Corollary}
+%\newtheorem{myobservation}{Observation}
+%\newtheorem{mylemma}{Lemma}
+\newtheorem{conj}{Conjecture}
+%\newtheorem{inv}{Invariant}
+
+\newtheorem{obs}{Observation}
+%\newtheorem{proofoutline}{Proof outline}
+%\newtheorem{myproof}{Proof of Proposition}
+%\newtheorem{myproposition}{Proposition}
+%\newtheorem{mylemma}{Lemma}
+%\newtheorem{lemmaproof}{Proof of Lemma}
+%\newtheorem{conjecture}{Conjecture}
+
+%proof\_latex\_notheorem = [``proof'']
+
+%\usepackage{amsthm}
+
+%\usepackage{ntheorem}
+
+\usepackage[lined,ruled,vlined,commentsnumbered]{algorithm2e}
+
+%\usepackage{enumitem}
+
+\usepackage{pbox}
+
+\usepackage{stmaryrd}
+
+\usepackage{varwidth}
+\usepackage{booktabs}
+
+\usepackage[mathscr]{euscript}
+
+\usepackage{cancel}
+
+\newcommand*{\Set}[2]{\ensuremath{\{#1\;|\;#2\}}}
+\newcommand*{\Var}[1]{\ensuremath{\mathit{#1}}}
+\newcommand*{\VarB}[1]{\ensuremath{\bm{\mathit{#1}}}}
+\newcommand*{\VarCal}[1]{\ensuremath{\mathit{{\cal #1}}}}  % ditto in cal type
+
+% Semantics of
+\newcommand*{\Sem}[1]{\ensuremath{\llbracket #1 \rrbracket}}
+
+% References to section, figure etc.
+\newcommand*{\Sec}[1]{Sec.~\ref{#1}}
+\newcommand*{\Fig}[2][]{Fig.~\ref{#2}{#1}}
+\newcommand*{\Page}[1]{p.~\pageref{#1}}
+\newcommand*{\Def}[1]{Definition~\ref{#1}}
+\newcommand*{\Obs}[1]{Observation~\ref{#1}}
+\newcommand*{\Alg}[1]{Algorithm~\ref{#1}}
+\newcommand*{\Theorem}[1]{Theorem~\ref{#1}}
+\newcommand*{\Lem}[1]{Lemma~\ref{#1}}
+\newcommand*{\Conjecture}[1]{Conjecture~\ref{#1}}
+\newcommand*{\Pt}[1]{pt.~\ref{#1}}
+\newcommand*{\Ex}[1]{Example~\ref{#1}}
+
+\newcommand*{\ESeq}[1]{\ensuremath{\Var{eseq}(#1)}}
+\newcommand*{\TSeq}[1]{\ensuremath{\Var{tseq}(#1)}}
+
+% Elements of a scenario
+\newcommand*{\E}{\ensuremath{\mathcal{E}}}
+\newcommand*{\C}{\ensuremath{\mathcal{C}}}
+
+\newcommand*{\Clocks}{\ensuremath{\mathcal{C}}}   % The set of new clocks
+\newcommand*{\U}{\ensuremath{\mathcal{U}}}
+
+
+% t_ij, without and with behaviour
+\newcommand*{\T}[2]{\ensuremath{t_{#1#2}}}
+\newcommand*{\TB}[3]{\ensuremath{\T{#1}{#2}^{#3}}}
+% tau_ij, symbolic and concrete
+\newcommand*{\TT}[2]{\ensuremath{\tau_{#1,#2}}}
+\newcommand*{\TTC}[2]{\ensuremath{\tau_{#1,#2}}}
+
+% m_ij and M_ij, without and with scenario
+\newcommand*{\Min}[2]{\ensuremath{m_{#1 #2}}}
+\newcommand*{\MinB}[2]{\ensuremath{\bm{m}_{#1 #2}}}
+\newcommand*{\Max}[2]{\ensuremath{M_{#1 #2}}}
+\newcommand*{\MaxB}[2]{\ensuremath{\bm{M}_{#1 #2}}}
+\newcommand*{\MinS}[3]{\ensuremath{\Min{#1}{#2}^{#3}}}
+\newcommand*{\MinSB}[3]{\ensuremath{\MinB{#1}{#2}^{#3}}}
+\newcommand*{\MaxS}[3]{\ensuremath{\Max{#1}{#2}^{#3}}}
+\newcommand*{\MaxSB}[3]{\ensuremath{\MaxB{#1}{#2}^{#3}}}
+% The interval in entry #2 #1 of a stable distance table for scenario #1
+\newcommand*{\I}[3]{\ensuremath{\Var{I}^{#1}_{#2 #3}}}
+\newcommand*{\IB}[3]{\ensuremath{\VarB{I}^{#1}_{#2 #3}}}
+\newcommand*{\II}[2]{\ensuremath{\Var{I}_{#1 #2}}}
+\newcommand*{\IIB}[2]{\ensuremath{\VarB{I}_{#1 #2}}}
+
+% The min and max in a distance table
+\newcommand*{\MinDT}[2]{\ensuremath{\underline{m}_{#1#2}}}
+\newcommand*{\MaxDT}[2]{\ensuremath{\overline{M}_{#1#2}}}
+
+% A distance table, without and with scenario
+\newcommand*{\DTable}{\ensuremath{\mathcal{D}}}
+\newcommand*{\DTableB}{\ensuremath{\bm{D}}}
+\newcommand*{\DTableS}[1]{\ensuremath{\DTable^{#1}}}
+\newcommand*{\DTableSB}[1]{\ensuremath{\DTableB^{#1}}}
+% Ditto, with indices
+\newcommand*{\DTS}[3]{\ensuremath{\DTableS{#1}[#2,#3]}}
+% DTableS, stable version
+\newcommand*{\DTableStable}[1]{\ensuremath{\DTableS{#1}_s}}
+\newcommand*{\DTableStableB}[1]{\ensuremath{\DTableSB{#1}_s}}
+% Ditto, with indices
+\newcommand*{\DTSS}[3]{\ensuremath{\DTableStable{#1}[#2,#3]}}
+\newcommand*{\DTset}[1]{\ensuremath{\DTableSB{#1}_{sync}}}
+\newcommand*{\DTableSync}[1]{\ensuremath{\DTableS{#1}_{sync}}}
+\newcommand*{\Dset}[1]{\ensuremath{\DTableSB{#1}_s}}
+
+% Low and High elements of a pair in a distance table
+\newcommand*{\Low}[2]{\ensuremath{l_{#1#2}}}
+\newcommand*{\High}[2]{\ensuremath{h_{#1#2}}}
+
+\newcommand*{\LowS}[3]{\ensuremath{l^{#3}_{#1#2}}}
+\newcommand*{\HighS}[3]{\ensuremath{h^{#3}_{#1#2}}}
+
+\newcommand*{\Table}[1]{\ensuremath{{\cal T}_{#1}}}
+
+%\newcommand*{\Merge}{\ensuremath{\overset{z}{\cup}}}
+\newcommand*{\Merge}{\ensuremath{\Cup}}
+
+\newcommand*{\Z}{\ensuremath{\cal Z}}
+\newcommand*{\BZ}{\ensuremath{\Behaviour{B}^z}}
+
+\newcommand*{\Eq}[1]{\ensuremath{\VarCal{EQ}({#1})}}
+%\newcommand*{\EqTA}[1]{\ensuremath{\mathit{Eq}({#1})}}
+\newcommand*{\EqTA}{\ensuremath{\VarCal{EQT\!A}}}
+\newcommand*{\Zpair}{\textit{z\_pair}}
+\newcommand*{\J}{\ensuremath{\VarCal{J}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%% N E D A %%%%%%%%%%%%%%%%%%%
+
+\newcommand*{\GPath}{\ensuremath{\text{g-path}}}
+\newcommand*{\Ftree}{\textit{f\_tree}}
+\newcommand*{\Ftrees}{\textit{f\_trees}}
+
+
+\newcommand*{\Modes}{\ensuremath{\mathcal{M}^{\mu_0}_{\mu_F}}}
+
+\newcommand*{\Mi}{\ensuremath{\mu^{i}}}
+\newcommand*{\Mf}{\ensuremath{\mu^{f}}}
+
+\newcommand*{\MiS}[1]{\ensuremath{\mu^{i}_{#1}}}
+\newcommand*{\MfS}[1]{\ensuremath{\mu^{f}_{#1}}}
+
+\newcommand*{\Initial}[1]{\ensuremath{\Var{imode}(#1)}}
+\newcommand*{\Final}[1]{\ensuremath{\Var{fmode}(#1)}}
+
+\newcommand*{\Comp}[1]{\ensuremath{\mathit{Comp}({#1})}}
+
+\newcommand*{\Composed}[1]{\ensuremath{\mathit{Composed}({#1})}}
+
+\newcommand*{\Cons}[1]{\ensuremath{\mathit{Cons}({#1})}}
+
+\newcommand*{\STA}[1]{\ensuremath{\VarCal{T\!A}(#1)}}
+
+\newcommand*{\ATA}{\ensuremath{\VarCal{T\!A}}}
+
+
+\newcommand*{\STOC}[1]{\ensuremath{\VarCal{A}^{#1}}}
+
+\newcommand*{\SOC}[1]{\ensuremath{\VarCal{A}^{#1}_{a}}}
+
+\newcommand*{\M}{\ensuremath{\mathcal{M}}}
+
+\newcommand*{\Lab}{\ensuremath{\mathcal{L}}}
+\newcommand*{\LL}{\ensuremath{\mathcal{L}_l}}
+\newcommand*{\LM}{\ensuremath{\mathcal{L}_\M}}
+\newcommand*{\None}{\ensuremath{\mathit{none}}}
+
+\newcommand*{\Tree}[1]{\ensuremath{\mathcal{T}^{#1}}}
+
+%\newcommand*{\Graph}[1]{\ensuremath{\mathcal{G}^{#1}}}
+
+%\newcommand*{\Pruned}{\ensuremath{\mathcal{T}^{\Xi}_{p}}}
+
+\newcommand*{\PrunedTree}[1]{\ensuremath{\mathcal{T}^{#1}_{p}}}
+
+\newcommand*{\ConsTree}[1]{\ensuremath{\mathcal{T}^{#1}_{c}}}
+
+\newcommand*{\OptTree}[1]{\ensuremath{\mathcal{T}^{#1}_{o}}}
+
+\newcommand*{\DisTree}[1]{\ensuremath{\mathcal{T}^{#1}_{d}}}
+
+\newcommand*{\AllocTree}[1]{\ensuremath{\mathcal{T}^{#1}_{a}}}
+
+\newcommand*{\Lang}[1]{\ensuremath{L(#1)}}
+
+%\newcommand*{\MapV}{\ensuremath{M_V}}
+
+\newcommand*{\MapV}{\ensuremath{\mathit{VM}}}
+
+\newcommand*{\MapVprime}{\ensuremath{M'_V}}
+
+\newcommand*{\LabV}{\ensuremath{B_V}}
+
+\newcommand*{\LabR}{\ensuremath{B_R}}
+
+\newcommand*{\STP}{\ensuremath{\mathcal{S}(\mathcal{T}^{\Xi})}}
+
+\newcommand*{\STC}{\ensuremath{\mathcal{S}(\mathcal{T}^{\Xi}_c)}}
+
+\newcommand*{\CP}[1]{\ensuremath{\VarCal{S}(\mathcal{T}^{\Xi}_{#1})}}
+
+
+
+% For transitions
+\newcommand*{\Source}[1]{\ensuremath{\Var{source}(#1)}}
+\newcommand*{\Target}[1]{\ensuremath{\Var{target}(#1)}}
+
+\newcommand*{\Label}[1]{\ensuremath{\Var{label}(#1)}}
+\newcommand*{\Event}[1]{\ensuremath{\Var{event}(#1)}}
+\newcommand*{\Events}[1]{\ensuremath{\Var{events}(#1)}}
+\newcommand*{\Constraints}[1]{\ensuremath{\Var{constraints}(#1)}}
+
+% For paths
+\newcommand*{\Or}[1]{\ensuremath{\Var{origin}(#1)}}
+\newcommand*{\End}[1]{\ensuremath{\Var{end}(#1)}}
+
+% For nodes
+\newcommand*{\Out}[1]{\ensuremath{\Var{out}(#1)}}
+\newcommand*{\In}[1]{\ensuremath{\Var{in}(#1)}}
+
+%\newcommand*{\Assign}[1]{\ensuremath{\Var{assign}}}
+
+%\newcommand*{\Alloc}{\Var{alloc}}
+
+\newcommand*{\Alloc}[1]{\ensuremath{\Var{alloc}_{#1}}}
+
+\newcommand*{\Cost}{\Var{cost}}
+
+\newcommand*{\Ext}[1]{\ensuremath{\Var{ext}(#1)}}
+
+\newcommand*{\CostTree}{\Var{cost\_tree}}
+
+\newcommand*{\AllocPath}[1]{\ensuremath{\Var{alloc}_{#1}}}
+
+\newcommand*{\CostPath}{\ensuremath{\Var{cost\_path}}}
+
+\newcommand*{\ComputeCost}{\ensuremath{\Var{compute\_cost}}}
+
+\newcommand*{\NestedIn}{\Var{nested\_in}}
+
+\newcommand*{\VLeaves}{\Var{visitedLL}}
+
+\newcommand*{\VAnc}{\Var{inCycles}}
+
+
+\newcommand*{\Assoc}{\Var{assoc}}
+\newcommand*{\TempAssoc}{\Var{newAssoc}}
+\newcommand*{\Pool}{\Var{pool}}
+\newcommand*{\TempPool}{\Var{newPool}}
+
+\newcommand*{\NLA}{\Var{NLA}}
+
+\newcommand*{\CR}{\Var{CR}}
+
+\newcommand*{\Forks}{\Var{forks}}
+
+\newcommand*{\RNeeded}{\Var{really\_needed}}
+
+\newcommand*{\OldNeeded}{\Var{old\_\Needed}}
+
+\newcommand*{\LabN}{\ensuremath{\mathit{\Lab_{n}}}}
+
+\newcommand*{\Ranges}{\Var{ranges}}
+
+\newcommand*{\ConfRanges}{\Var{conf\_ranges}}
+
+\newcommand*{\PathClocks}{path\_clocks}
+
+\newcommand*{\Active}{\Var{Active}}
+
+\newcommand*{\Alive}{\Var{alive}}
+
+\newcommand*{\LastRef}{\Var{last\_ref}}
+
+\newcommand*{\Weight}{\Var{weight}}
+
+%\newcommand*{\Disj}[1]{\ensuremath{\mathcal{P}^{#1}_{d}}}
+
+\newcommand*{\Paths}[1]{\ensuremath{\mathcal{P}({#1})}}
+
+\newcommand*{\Disj}[1]{\ensuremath{\mathcal{P}_{d}({#1})}}
+
+
+\newcommand*{\Used}{\Var{used}}
+\newcommand*{\Born}{\Var{born}}
+
+\newcommand*{\ActTarget}{\Var{act\_target}}
+
+\newcommand*{\Needed}{\Var{needed}}
+
+\newcommand*{\RealCost}{\Var{real\_cost}}
+
+\newcommand*{\OptimalCost}{\Var{opt\_cost}}
+
+\newcommand*{\Range}{\Var{range}}
+
+\newcommand*{\Tr}{\Var{transitions}}
+
+\newcommand*{\Conflict}{\Var{conflict}}
+
+\newcommand*{\InRanges}{\Var{In\_Ranges}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand*{\ClockRef}{\Var{clock\_ref}}
+
+\newcommand*{\AbsSynt}{\Var{AbsSynt}}
+\newcommand*{\Abstract}[1]{\ensuremath{\AbsSynt(#1)}}
+\newcommand*{\Abs}{\Var{Abs}}
+
+%\newcommand*{\STA}[1]{\ensuremath{\VarCal{T\!A}(#1)}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand*{\Cprime}{\ensuremath{\mathcal{C}^\prime}}
+
+\newcommand*{\DImplies}{\ensuremath{\leadsto}}
+\newcommand*{\Implies}{\ensuremath{\DImplies^+}}
+
+\newcommand*{\Dcyclic}{\ensuremath{\leftrightarrow}}
+
+\newcommand*{\Cyclic}{\ensuremath{\overset{+}{\Dcyclic}}}
+
+\newcommand*{\DImp}[1]{\ensuremath{\DImplies #1}}
+
+%\newcommand*{\CycSupp}[2]{\ensuremath{S_{#1}^{\DImp{#2}}}}
+
+\newcommand*{\CycSupp}[2]{\ensuremath{S_{#1}^{\triangleright{#2}}}}
+
+\newcommand*{\DepName}{\ensuremath{\rightarrow}}
+\newcommand*{\Dep}[2]{\ensuremath{#1 \DepName #2}}
+\newcommand*{\NotDep}[2]{\ensuremath{#1 \not\DepName #2}}
+
+\newcommand*{\LessThan}{\ensuremath{\preceq}}
+
+
+ % the data structures
+\newcommand*{\CS}{\textit{C}}
+\newcommand*{\WS}{\textit{WS}}
+%\newcommand*{\CD}{\textit{CD}}
+\newcommand*{\ICD}{\textit{ICD}}
+\newcommand*{\CyDep}{\textit{CyDep}}
+\newcommand*{\LS}{\textit{L}}
+
+\newcommand*{\CDTableStable}[1]{\ensuremath{\mathcal{C}(\DTableStable{#1})}}
+
+\newcommand*{\CDNETableStable}[1]{\ensuremath{\mathcal{C}(\DTableStable{#1})^{>,<}}}
+
+\newcommand*{\DSup}{\ensuremath{\Var{DSupp}}}
+
+\newcommand*{\A}[1]{\ensuremath{\mathcal{A}_{#1}}}
+
+\newcommand*{\Anc}[1]{\ensuremath{\mathit{Anch}_{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand*{\DScenario}{\ensuremath{\Xi}}
+\newcommand*{\Dist}[1]{\ensuremath{dstr}_{#1}}
+\newcommand*{\Par}{\ensuremath{\preccurlyeq}}
+\newcommand*{\ParS}[1]{\ensuremath{\prec}_{#1}}
+\newcommand*{\ParSE}[1]{\ensuremath{\prec}_{#1}^{x}}
+\newcommand*{\ParSA}[1]{\ensuremath{\prec}_{#1}^{e}}
+\newcommand*{\TotalS}[1]{\ensuremath{<}_{#1}}
+\newcommand*{\ESet}[1]{\ensuremath{\Var{eset}(#1)}}
+\newcommand*{\Dash}{`{\bf -}'}
+\newcommand*{\DashMath}{\textrm{\bf -}}
+\newcommand*{\Sim}[1]{\ensuremath{Sim}_{#1}}
+\newcommand*{\SimClass}[1]{\ensuremath{SimClass}_{#1}}
+\newcommand*{\SyncSet}{\ensuremath{SyncSet}}
+\newcommand*{\DR}[1]{\ensuremath{\mathcal{DR}_{#1}}}
+\newcommand*{\Can}[1]{\ensuremath{\mathit{C}}_{#1}}
+\newcommand*{\PR}[1]{\ensuremath{\ParS{#1}}}
+\newcommand*{\DRS}[1]{\ensuremath{\mathcal{DR}_{#1}^s}}
+\newcommand*{\DRE}[1]{\ensuremath{\mathcal{DR}_{#1}^x}}
+\newcommand*{\DRSE}[1]{\ensuremath{\mathcal{DR}_{#1}^{xs}}}
+\newcommand*{\DF}[1]{\ensuremath{\mathcal{DF}_{#1}}}
+\newcommand*{\DFS}[1]{\ensuremath{\mathcal{DF}_{#1}^{s}}}
+\newcommand*{\DFE}[1]{\ensuremath{\mathcal{DF}_{#1}^{xs}}}
+\newcommand*{\DFEX}[1]{\ensuremath{\mathcal{DF}_{#1}^{x}}}
+\newcommand*{\Proj}[1]{\ensuremath{\mathcal{P}_{#1}}}
+\newcommand*{\SeqS}{\ensuremath{\mathit{s}}}
+\newcommand*{\SeqSC}{\ensuremath{\mathit{sc}}}
+\newcommand{\precdot}{\prec\mathrel{\mkern-5mu}\mathrel{\cdot}}
+\newcommand*{\ParSdot}[1]{\ensuremath{\precdot}_{#1}}
+\newcommand*{\ParScover}[1]{\ensuremath{\prec}_{#1}^{c}}
+\newcommand*{\Perm}[1]{\ensuremath{perm}(#1)}
+\newcommand*{\K}[2]{\ensuremath{d}_K(#1,#2)}
+\newcommand*{\RK}[1]{\ensuremath{r}_K(#1)}
+\newcommand*{\CK}[1]{\ensuremath{r}_c(#1)}
+%\newcommand*{\CD}[3]{\ensuremath{{{d}_c}^{#3}(#1,#2)}}
+\newcommand*{\CD}[2]{\ensuremath{{{d}_c}(#1,#2)}}
+\newcommand*{\DDist}{\ensuremath{\Var{d-distance}}}
+\newcommand*{\CDiff}{\textit{c\_diff}}
+%\newcommand*{\CDis}{\textit{c\_dis}}
+\newcommand*{\CDis}[1]{\ensuremath{{dsg}_{#1}}}
+\newcommand*{\CBD}[1]{\ensuremath{{cbd}_{#1}}}
+\newcommand*{\OBD}[1]{\ensuremath{{obd}_{#1}}}
+\newcommand*{\BAR}{\ensuremath{\boldsymbol{|}}}
+\newcommand*{\D}{\ensuremath{\mathcal{D}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand*{\Univ}{\ensuremath{B_{\xi}}}
+
+%\newcommand*{\AbsTime}{\Var{AbsTime}}
+%\newcommand*{\Abs}[1]{\ensuremath{\AbsTime(#1)}}
+
+\newcommand*{\MinValue}[1]{\ensuremath{min\_value(#1)}}
+\newcommand*{\MaxValue}[1]{\ensuremath{max\_value(#1)}}
+
+\newcommand*{\IsCovered}[3]{\ensuremath{is\_covered(#1, #2, #3)}}
+
+\newcommand*{\OurClass}{\ensuremath{\mathit{TA_{DS}}}}
+\newcommand*{\SynthClass}{\ensuremath{\mathit{TA_{synth}}}}
+
+\newcommand*{\Unseen}{\Var{Unseen}}
+\newcommand*{\Seen}{\Var{Seen}}
+
+% Transition j on path p_{\xi}
+\newcommand*{\tr}[2]{\ensuremath{r_{#1}^{#2}}}
+%\newcommand*{\tr}[2]{\ensuremath{tr(#1,p_{#2})}}
+
+
+
+\newcommand*{\Beginat}{\Var{Begin\_at}}
+
+\newcommand*{\MG}{\VarCal{M}}             % The symbol for a  mode grap
+\newcommand*{\TA}{\VarCal{A}}             % and for the constructed automaton
+\newcommand*{\Legal}{\ensuremath{B_{\MG}}} % The set of legal behaviours for MG
+\newcommand*{\Allowed}[1]{\ensuremath{\Var{Allowed}(#1)}}
+
+%\newcommand*{\Sup}[1]{\ensuremath{\Var{Supp}(#1)}}
+%\newcommand*{\Sup}{\ensuremath{\Var{Supp}}}
+
+\newcommand*{\Sup}[1]{\ensuremath{\Var{Supp}(#1)}}
+
+
+\newcommand*{\Behaviour}[1]{\ensuremath{\mathcal{#1}}}
+
+\newcommand{\ParaTitle}[1]{\noindent\textbf{#1.}}
+
+
+\newcommand*{\Ind}{\hspace{1em}}
+\newcommand*{\ind}{\hspace{0.5em}}
+
+
+\usepackage{url}
+\urldef{\mailsa}\path|{alfred.hofmann, ursula.barth, ingrid.haas,
+  frank.holzwarth,|
+\urldef{\mailsb}\path|anna.kramer, leonie.kunz, christine.reiss, nicole.sator,|
+\urldef{\mailsc}\path|erika.siebert-cole, peter.strasser, lncs}@springer.com|
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+  \noindent\keywordname\enspace\ignorespaces#1}
+
+%%%%%%%%%%
+
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+% first the title is needed
+\title{Timed Scenario Expressions and Realisability}
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{Timed Scenario Expressions and Realisability}
+
+\author{Neda Saeedloei\inst{*} \and Feliks Klu\'{z}niak}
+%\author{Neda Saeedloei}
+%\affil{Towson University}
+%
+\authorrunning{Neda Saeedloei and Feliks Klu\'{z}niak}
+% abbreviated author list (for running head)
+%
+%%%% list of authors for the TOC (use if author list has to be modified)
+\tocauthor{Neda Saeedloei, Feliks Klu\'{z}niak}
+%
+%\institute{Towson University\\
+%\email{nsaeedloei@towson.edu}
+
+%\author{Neda Saeedloei\inst{1} \and Feliks Klu\'{z}niak\inst{2}}
+%\author{Neda Saeedloei}
+%
+%\authorrunning{Neda Saeedloei and Feliks  Klu\'{z}niak}
+%\authorrunning{Neda Saeedloei}
+% abbreviated author list (for running head)
+%
+%%%% list of authors for the TOC (use if author list has to be modified)
+%\tocauthor{Neda Saeedloei, Feliks Klu\'{z}niak}
+%\tocauthor{Neda Saeedloei}
+%
+\institute{* Towson University\\
+  \email{nsaeedloei@towson.edu}
+%  ,
+%\and
+%RelationalAI\\
+%\email{feliks.kluzniak@relational.ai}
+}
+
+\toctitle{Timed Scenario Expressions and Realisability}
+\tocauthor{Authors' Instructions}
+\maketitle
+
+% Without this the first footnote will have number 3, since there are footnotes
+% in the title.
+\setcounter{footnote}{0}
+
+%\vspace{-1.6em}
+\begin{abstract}
+  We introduce expressions formed from distributed timed scenario.
+  Such expressions allow us to specify complex distributed behaviours in a
+  hierarchical fashion.
+We define the semantics and consistency of a scenario
+expression. We then address the problem of realisability of sets
+of sequential timed scenarios as scenario expressions and
+present an efficient algorithm which produces a non-trivial scenario
+expression that preserves the semantics of the original set of
+scenarios. Our method directly handles explicit time constraints
+and produces a scenario expression whose time constraints are
+inferred from those of the realised set.
+\end{abstract}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\vspace{-2em}
+\section{Introduction}
+\label{sec-intro}
+\input{introduction}
+%----------------------------------
+%\vspace{-1em}
+%\section{Preliminaries}
+%\label{sec-preliminaries}
+%\vspace{-1em}
+%-----------------------------------
+%\subsection{Timed automata}
+%\label{timed}
+%\input{timed_automata-new}
+%----------------------------------
+%\vspace{-1em}
+\section{Preliminaries}
+\label{sec-prelim}
+This section briefly recounts our
+earlier work \cite{neda-2018-2,DTS-2025}.
+%\vspace{-0.5em}
+\subsection{Sequential Timed Scenarios}
+\label{sec-seq}
+\input{preliminaries}
+%\vspace{-0.5em}
+\subsection{Distributed Timed Scenarios}
+\label{sec-dts}
+\input{dts-nodash-noset}
+%----------------------------------
+%\vspace{-2em}
+\section{Timed Scenario Expressions}
+\label{sec-exp}
+%\input{expressions}
+\input{expressions-no-star}
+%----------------------------------
+%\vspace{-1em}
+\section{Realisation of Sequential Scenarios as Expressions}
+\label{sec-realize}
+\input{realize}
+%---------------------------------
+%\vspace{-0.5em}
+\subsection{Partitioning a Set of Sequential Scenarios Based on
+Ordering}
+\label{sec-no-time}
+\input{realise-no-time}
+%---------------------------------
+%\vspace{-1.5em}
+\subsection{Partitioning a Set of Sequential Scenarios Involving Constraints}
+\label{sec-full}
+\input{realise-time-no-dsg}
+%---------------------------------
+%\vspace{-1em}
+\subsection{The Algorithm}
+\label{sec-algo}
+\input{algo-no-informative}
+%----------------------------------
+\subsection{Revisiting an Assumption}
+\label{sec-relax}
+\input{sec-relax}
+%----------------------------------
+%\vspace{-1em}
+\section{Experimental Results}\label{sec-experiments}
+\input{experiments}
+%----------------------------------
+%\vspace{-1.5em}
+\section{Conclusions}\label{sec-conclusions}
+\input{conclusions}
+%----------------------------------------
+%\section*{References}
+\bibliographystyle{elsarticle-num}
+\bibliography{mybibfile3}
+
+%\mbox{}
+
+%\newpage
+
+%\appendix
+%\setcounter{theorem}{0}
+
+%\section{Appendix: The proof of Theorem 1}
+%\label{sec-thm-1}
+%\input{sec-thm-1}
+
+%\section{Appendix: The proof of Theorem 2}
+%\label{sec-thm-2}
+%\input{sec-thm-2}
+
+%setcounter{obs}{2}
+%--------------------------
+\end{document}

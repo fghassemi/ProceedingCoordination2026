@@ -1,0 +1,400 @@
+Our algorithm is implemented as function \emph{realise}, which takes
+a set of normalised scenarios, $\mathcal{S}$. The sequences of events in
+all members of $\mathcal{S}$ contain the same events, but each
+sequence is unique. The function iteratively
+performs the following:
+\setlist{nolistsep}
+\begin{itemize}[noitemsep]
+\item
+  If $\mathcal{S}=\{\SeqS\}$, i.e., a singleton, then \emph{realise} returns the
+  expression $\SeqS$.
+  \item
+    If $\mathcal{S}$ is not a singleton and is not order-closed, then \emph{realise} invokes
+    function \emph{partition-order},
+       which returns the best OBD.
+%       i.e., the one with the lowest o-ranking.
+%  To break a tie, a division with the lowest K-ranking is returned,
+%  and if necessary to further a tie a division with the lowest l-ranking is returned.
+Then \emph{realise} is recursively invoked on each partition of the
+    division.
+\item
+  If $\mathcal{S}$ is order-closed, and
+  \begin{itemize}
+    \item
+  all its members are compatible with $\DR{\mathcal{S}}$,
+  then $\mathcal{S}$ is realisable by a DTS (Theorem \ref{thm-realisable}). In that
+  case, \emph{realise-DTS} \cite{DTS-2025} is invoked, which returns
+  the DTS that realises $\mathcal{S}$.
+\item
+  some, but not all of its members are
+  compatible with $\DR{\mathcal{S}}$, then $\mathcal{S}$ is divided into two partitions of
+  compatible and not compatible scenarios.
+Then \emph{realise} is recursively invoked on each partition.
+\item
+  none of its members are compatible with $\DR{\mathcal{S}}$,
+  then function \emph{partition-const} is called,
+  which returns the best CBD
+ (by Thm. \ref{thm-not-locally-stable} there is such a CBD).
+% o-rankings, K-rankings, c-rankings and
+%  l-rankings will be used to determine the best CBD.
+ % In case of a tie, the CBD with the lowest
+ % c-ranking is returned. If this does not resolve the tie, the CBD
+ % with the lowest l-ranking will be returned.
+  Then \emph{realise} is recursively invoked on each partition of the CBD.
+  \end{itemize}
+   \end{itemize}
+%------------ALGORITHM----------
+\begin{function}[!t]
+%  \begin{spacing}{0.9}
+\SetNoFillComment
+\If{$|\mathcal{S}|=1$}
+   {
+      $E:=\SeqS$, where $\mathcal{S}=\{\SeqS\}$\tcc*{trivially realisable by DTS
+     $\SeqS$}
+   }
+%   \Else %\tcc*{$\mathcal{S}$ has more than one member}
+%       {
+   \ElseIf%(\tcc*[h]{$\mathcal{S}$ is not order-closed})
+       {$\neg\mathit{order}\emph{-}\mathit{closed}(\mathcal{S})$}{
+     $(\mathcal{S}_1,\mathcal{S}_2):= \emph{partition-order}(\mathcal{S})$\;
+                   $E:=realise(\mathcal{S}_1)\BAR realise(\mathcal{S}_2)$\;
+                         }
+            \Else(\tcc*[h]{$\mathcal{S}$ is order-closed})
+                {
+                  $C:=\emph{compatible}(\mathcal{S})$\tcc*{compatible members of $\mathcal{S}$}
+              \If{$C=\mathcal{S}$}
+                 {
+                   $E:=\emph{realise-DTS}(\mathcal{S})$\tcc*{Thm \ref{thm-realisable}:
+                     a DTS realises $\mathcal{S}$}
+                 }
+                 \Else
+                 {
+                   \If%(\tcc*[h]{a non-trivial division exists})
+                      {$C\neq\emptyset \wedge C\neq\mathcal{S}$}
+                      {
+                        $E:=realise(C)\BAR realise(\mathcal{S}\setminus C)$\;
+                 }
+                 \Else
+                     {
+                     $(\mathcal{S}_1,\mathcal{S}_2):=\emph{partition-const}(\mathcal{S})$\;
+                     $E:=realise(\mathcal{S}_1)\BAR realise(\mathcal{S}_2)$\;
+                     }
+                     }
+
+                  }
+%         }
+return $E$\;
+	\caption{realise(a set of scenarios $\mathcal{S}$)}
+        \label{algo-realise}
+%        \end{spacing}
+\end{function}
+%-------------------------
+%-------------------------------
+%-----------------------------
+%-----------------------------
+%\begin{algorithm}[!t]
+%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+%\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+%\Input{A set $\mathcal{S}$ of scenarios.}
+%\Output{A pair of sets of scenarios.}
+%\BlankLine
+%---------------
+\begin{function}[!t]
+%   \begin{spacing}{0.9}
+\SetNoFillComment
+%-----------------
+%\tcc{invoked when $\mathcal{S}$ is not order-closed and $|\mathcal{S}|>1$.}
+$\emph{not-ordered} := \Set{(e,e')\in\Sigma_\mathcal{S}}{e\not\PR{\mathcal{S}}e'\wedge
+e'\not\PR{\mathcal{S}}e}$\;
+$D := (\emptyset,\emptyset,\infty,\infty,\infty)$\tcc*{best OBD, so far}
+\ForEach{$(e,e')\in\mathit{not}\emph{-}\mathit{ordered}$}
+{
+$\mathcal{S}_1:= \Set{\SeqS\in \mathcal{S}}{e\PR{\SeqS}e'}$\;
+  $\mathcal{S}_2:= \Set{\SeqS\in \mathcal{S}}{e'\PR{\SeqS}e}$\;%\tcc*{larger (or equal) group}
+  % $o_1 := \emph{order-closed}(\mathcal{S}_1)$\;
+  % $o_2 := \emph{order-closed}(\mathcal{S}_2)$\;
+    $\emph{k-obd} :=
+            {g_{k}}\emph{-rank}(\mathcal{S}_1)*|\mathcal{S}_1|/|\mathcal{S}|+{g_{k}}\emph{-rank}(\mathcal{S}_2)*|\mathcal{S}_2|/|\mathcal{S}|$\;
+   \If{$\textit{better-ok}(\mathcal{S}_1,\mathcal{S}_2,D,\textit{k-obd})\vee
+   \textit{better-l}(\mathcal{S}_1,\mathcal{S}_2,D,\textit{k-obd})$
+   }
+   {
+    %     \If(\tcc*[h]{smaller partition appears first}){$|\mathcal{S}_1|\leq|\mathcal{S}_2|$}
+    % {
+       $D := (\mathcal{S}_1,\mathcal{S}_2,o\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2),\emph{k-obd}, l\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2))$\;
+   }
+}
+     return $(p_1(D), p_2(D))$\;
+\caption{partition-order(a set of scenarios $\mathcal{S}$)}
+\label{algo-partition-order}
+% \end{spacing}
+\end{function}
+%\end{algorithm}
+%\Vspace{-0.5cm}
+%-------------------------
+%-------------------------
+%-------------------------
+\begin{function}[!t]
+%   \begin{spacing}{0.9}
+\SetNoFillComment
+$C:=\emptyset$\tcc*{the set of compatible scenarios in $\mathcal{S}$}
+\ForEach{$\SeqSC\in \mathcal{S}$}
+        {
+          \If{$\DF{\SeqSC}=\DF{p}$, where $p\in\Proj{\mathcal{S}}$ and
+            $\SeqSC$ matches $p$}
+             {
+              $C:=C\cup\{\SeqSC\}$\;
+               }
+          }
+return $C$\;
+	\caption{compatible(a set of scenarios $\mathcal{S}$)}
+	\label{compatible}
+%         \end{spacing}
+%\vspace{-0.2em}
+\end{function}
+%\vspace{-0.5cm}
+%-------------------------
+%-------------------------
+%-------------------------
+%-------------------------
+\begin{function}[!t]
+%   \begin{spacing}{0.9}
+\SetNoFillComment
+%$C:=\emptyset$\tcc*{the set of compatible scenarios in $\mathcal{S}$}
+return
+   $o\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2)<o\emph{-}\mathit{rk}(p_1(D),
+   p_2(D))\;\vee$\\
+   $(o\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2)=o\emph{-}\mathit{rk}(p_1(D),
+   p_2(D))\wedge
+   \mathit{k}<K\emph{-}\mathit{rk}(p_1(D),p_2(D)))$\;
+  % \mathit{k}<{d_{k}}\emph{-}\mathit{rank}(D))$\;
+	\caption{better-ok(set $\mathcal{S}_1$, set
+           $\mathcal{S}_2$, division $D$, int $k$)}
+	\label{better-ok}
+%         \end{spacing}
+\end{function}
+%-------------------------
+\begin{function}[!t]
+%   \begin{spacing}{0.9}
+\SetNoFillComment
+%$C:=\emptyset$\tcc*{the set of compatible scenarios in $\mathcal{S}$}
+return
+     $o\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2)=o\emph{-}\mathit{rk}(p_1(D),
+     p_2(D))\wedge
+\mathit{k}=K\emph{-}\mathit{rk}(p_1(D),p_2(D))\;\wedge$\\
+%\mathit{k}={d_{k}}\emph{-}\mathit{rank}(D)\wedge$\\
+    $l\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2)<l\emph{-}\mathit{rk}(p_1(D), p_2(D))$\;	\caption{better-l(set $\mathcal{S}_1$, set
+           $\mathcal{S}_2$, division $D$, int $k$)}
+	\label{better-l}
+ %        \end{spacing}
+\end{function}
+%-------------------------
+\begin{function}[!t]
+%   \begin{spacing}{0.8}
+\SetNoFillComment
+%$C:=\emptyset$\tcc*{the set of compatible scenarios in $\mathcal{S}$}
+return
+     $o\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2)=o\emph{-}\mathit{rk}(p_1(D),
+     p_2(D))\wedge
+\mathit{k}=K\emph{-}\mathit{rk}(p_1(D),p_2(D))\;\wedge$\\
+%\mathit{k}={d_{k}}\emph{-}\mathit{rank}(D)\wedge$\\
+    $c<c\emph{-}\mathit{rk}(p_1(D),
+     p_2(D))$\;
+     \caption{better-c(set $\mathcal{S}_1$, set $\mathcal{S}_2$,
+     division $D$, int $k$, int $c$)}
+	\label{better-c}
+%         \end{spacing}
+\end{function}
+%-------------------------
+%-------------------------
+\begin{function}[!t]
+%   \begin{spacing}{0.9}
+\SetNoFillComment
+%$C:=\emptyset$\tcc*{the set of compatible scenarios in $\mathcal{S}$}
+return
+     $o\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2)=o\emph{-}\mathit{rk}(p_1(D),
+     p_2(D))\wedge\mathit{k}=K\emph{-}\mathit{rk}(p_1(D),p_2(D))\;\wedge$\\
+     %\mathit{k}={d_{k}}\emph{-}\mathit{rank}(D)\wedge$\\
+    $c=c\emph{-}\mathit{rk}(p_1(D),
+     p_2(D))\wedge$
+     $l\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2)<l\emph{-}\mathit{rk}(p_1(D), p_2(D))$\;
+     \caption{better-cl(set $\mathcal{S}_1$, set $\mathcal{S}_2$,
+     division $D$, int $k$, int $c$)}
+	\label{better-cl}
+ %        \end{spacing}
+\end{function}
+%-------------------------
+%-------------------------
+%\begin{algorithm}[!ht]
+%%\scriptsize
+%%\scalebox{0.9}{
+%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+%\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+%\Input{A set $\mathcal{S}$ of scenarios.}
+%\Output{A pair of sets of scenarios.}
+%\BlankLine
+%--------------------
+\begin{function}[!t]
+%   \begin{spacing}{0.9}
+\SetNoFillComment
+%-----------------
+\tcc{invoked when $|\mathcal{S}|>1$ and none of the members of $\mathcal{S}$ is compatible
+  with $\DR{\mathcal{S}}$.}
+$\mathit{ordered} := \Set{(e,e')\in\Sigma_\mathcal{S}}{e\PR{\SeqS}e'\text{ for
+    some } \SeqS\in \mathcal{S}}$\;
+$CBDs :=  \mathit{CDGs} := \emptyset$\;
+\ForEach{$\SeqSC\in\mathcal{S}$}
+  {
+$\mathit{CDGs} := \mathit{CDGs} \cup \CDis{}(\SeqSC)$\;
+    }
+\ForEach{$(e,e')\in \mathit{CDGs}$}
+        {
+          $\mathcal{S}_1:= \{\SeqS\in \mathcal{S}~ |~
+          e\PR{\SeqS}e'\wedge\DF{\SeqS}(e,e')\neq \DF{p}(e,e')
+           (\SeqS\text{ matches }p\in\Proj{\mathcal{S}})\}$\;
+        %  match(\SeqS,p)\}$\;
+          $\mathcal{S}_2:= \mathcal{S}\setminus \mathcal{S}_1$\;
+          \If(\tcc*[h]{$\mathcal{S}_1\neq\emptyset$}){$\mathcal{S}_2\neq\emptyset$}
+          {
+            $\mathit{CBDs}:=\mathit{CBDs}\cup\{\{\mathcal{S}_1,\mathcal{S}_2\}\}$\;
+             }
+}
+        \ForEach{$(e,e')\in \mathit{ordered}\setminus\mathit{CDGs}$}
+                {
+                  \If{there exists $\SeqSC\in\mathcal{S}$, such that
+                  $(e\PR{\SeqS}e'\wedge\DF{\SeqS}(e,e')\neq
+                    [0,\infty])$
+                    % $\vee(e'\PR{\SeqS}e\wedge\DF{\SeqS}(e',e)\neq
+                   % [0,\infty])$
+                  }
+                     {
+$\mathcal{S}_1:= \Set{\SeqS\in \mathcal{S}}{e\PR{\SeqS}e'}$\;
+                       % $\mathcal{S}_2:= \Set{\SeqS\in \mathcal{S}}{e'\PR{\mathcal{S}}e}$\;
+                       $\mathcal{S}_2:=
+                       \mathcal{S}\setminus\mathcal{S}_1$\;
+                    %    \If{$\mathcal{S}_1\neq\emptyset\wedge \mathcal{S}_2\neq\emptyset$}
+         % {
+            $\mathit{CBDs}:=\mathit{CBDs}\cup\{\{\mathcal{S}_1,\mathcal{S}_2\}\}$\;
+         %    }
+                       }
+                  }
+           $D := (\emptyset,\emptyset,\infty,\infty,\infty,\infty)$\tcc*{best CBD, so far}
+           \ForEach{$\{\mathcal{S}_1,\mathcal{S}_2\}\in \mathit{CBDs}$}
+                   {
+                     $\emph{k-cbd} :=
+                     {g_{k}}\emph{-rank}(\mathcal{S}_1)*|\mathcal{S}_1|/|\mathcal{S}|+{g_{k}}\emph{-rank}(\mathcal{S}_2)*|\mathcal{S}_2|/|\mathcal{S}|$\;
+                     $\emph{c-cbd} :=
+       {g_{c}}\emph{-rank}(\mathcal{S}_1)+ {g_{c}}\emph{-rank}(\mathcal{S}_2)$\;
+       \If{$\textit{better-ok}(\mathcal{S}_1,\mathcal{S}_2,D,\textit{k-cbd})\vee
+       \textit{better-c}(\mathcal{S}_1,\mathcal{S}_2,D,\textit{k-cbd},\textit{c-cbd})\;\vee$
+       $\textit{better-cl}(\mathcal{S}_1,\mathcal{S}_2,D,\textit{k-cbd},\textit{c-cbd})$
+%$\mathit{k}\emph{-}\mathit{cbd}< {d_{k}}\emph{-}\mathit{rank}(D)\vee
+%         (\mathit{k}\emph{-}\mathit{cbd}={d_{k}}\emph{-}\mathit{rank}(D)\wedge
+%         \mathit{c}\emph{-}\mathit{cbd}<{d_{c}}\emph{-}\mathit{rank}(D))$\\
+% $\vee(\mathit{k}\emph{-}\mathit{cbd}={d_{k}}\emph{-}\mathit{rank}(D)\wedge
+%         \mathit{c}\emph{-}\mathit{cbd}={d_{c}}\emph{-}\mathit{rank}(D)\wedge$\\
+%         $~~~l\emph{-}\mathit{rank}(\mathcal{S}_1,\mathcal{S}_2)<{d_{l}}\emph{-}\mathit{rank}(D))$
+}
+                     {
+       $D := (\mathcal{S}_1,\mathcal{S}_2,o\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2),\emph{k-cbd},\emph{c-cbd},l\emph{-}\mathit{rk}(\mathcal{S}_1,\mathcal{S}_2))$\;
+       }
+                   }
+                   return $(p_1(D), p_2(D))$\;
+\caption{partition-const(a set of scenarios $\mathcal{S}$)}
+\label{algo-partition-const}
+% \end{spacing}
+\end{function}
+%\end{algorithm}
+%-------------------------
+%\begin{function}[!t]
+%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+%\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+%\Input{A set $\mathcal{S}$ of sets of scenarios.}
+%\Output{A scenario expression.}
+%\BlankLine
+%Let $g\in \mathcal{S}$\;
+%$\mathcal{S} := \mathcal{S}\setminus \{g\}$\;
+%$E := \emph{realise}(g)$\;
+%\ForEach{$g'\in \mathcal{S}$}
+%{
+%$E:=E|\emph{realise}(g')$\;
+%}
+%return $E$\;
+%\caption{$realise-g$(a set of sets of scenarios $\mathcal{S}$)}
+%\label{algo-realise-g}
+%\end{function}
+%\noindent
+\noindent
+To avoid additional clutter we do not show the details of dealing with gaps
+(see \Sec{sec-realize}, \Page{paragraph-gaps}). Before every
+invocation of \emph{realise} the argument is partitioned, if necessary,
+into sets with no gaps: \emph{realise} is then called on
+each of these partitions separately, and the results are combined in a
+choice expression.
+
+%-----------------------------
+The function $\mathit{order}\emph{-}\mathit{closed}$
+checks whether a set of scenarios is order-closed.
+%takes a set of
+%scenarios and returns True if the set is order-closed, and False
+%otherwise.
+
+In function $\mathit{partition}\emph{-}\mathit{order}$ variable
+$D$ keeps track of the best OBD found so far.
+It is a five-tuple, $(\mathcal{S}_1,\mathcal{S}_2,r_o,r_k,r_l)$:
+the items are the two partitions,
+%$r_o$ is $\mathit{o}\emph{-}\mathit{rk}(D)$,
+the o-ranking, the K-ranking and the l-ranking,
+respectively.
+In function $\mathit{partition}\emph{-}\mathit{const}$ the variable
+$D$, which is a
+six-tuple $(\mathcal{S}_1,\mathcal{S}_2,r_o,r_k,r_c,r_l)$, keeps track
+of the best CBD found so far.
+The additional item is the  c-ranking.
+%of $D$.
+%The first two items of $D$ are its partitions, while the next four
+%items are $D$'s o-ranking, K-ranking, c-ranking and l-ranking, respectively.
+%-----------------
+%Auxiliary functions:
+Given a tuple $D$,
+%$D=(\mathcal{S}_1,\mathcal{S}_2)$,
+functions $p_1$ and $p_2$ return
+$\mathcal{S}_1$ and $\mathcal{S}_2$.
+Functions
+$\mathit{o}\emph{-}\mathit{rk}$,
+$\mathit{K}\emph{-}\mathit{rk}$,
+$\mathit{l}\emph{-}\mathit{rk}$ and
+$\mathit{c}\emph{-}\mathit{rk}$
+return the
+o-ranking, K-ranking, c-ranking and l-ranking of
+$(\mathcal{S}_1,\mathcal{S}_2)$;
+%We assume
+${g_{k}}\emph{-rank}$ and ${g_{c}}\emph{-rank}$
+are the K-ranking and the c-ranking
+of a partition.
+
+Let $N$ be the number of scenarios in $\mathcal{S}$ and $L$ be the
+length of each scenario in $\mathcal{S}$.
+In the worst case the number of divisions constructed by the algorithm
+is $O(N)$.
+%(when $\mathcal{S}$ is realised by a scenario expression in
+%which every member of $\mathcal{S}$ is a separate alternative).
+For each partition of a division the worst-case time complexity of
+constructing the distance
+relation is $O(N*L^2)$ (for the construction of the partial order)
+plus $O(L^3)$ (for the stabilisation of the distance function).
+The overall cost of creating the projections of the distance relation is
+$O(N*L^3)$.
+%, while stabilising the distance table of each projection costs
+%$O(L^3)$.
+Checking the compatibility of each member of the
+partition with the distance relation of the partition costs $O(N*L^2)$.
+So the cost of treating one partition is
+$O(N*L^3)$. Since there are at
+most $O(N)$ divisions,
+%and each division has two partitions,
+the overall
+worst-case time complexity of the algorithm is $O(N^2*L^3)$.

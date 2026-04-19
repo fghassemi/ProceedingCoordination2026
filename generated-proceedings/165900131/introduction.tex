@@ -1,0 +1,62 @@
+\section{Introduction}
+
+Driven by the availability of large datasets and powerful computational resources, machine learning has become ubiquitous across a wide range of domains, including healthcare, finance, autonomous systems, and scientific discovery. Despite its success, machine learning faces two major and persistent challenges: explainability and privacy. Modern models, particularly deep neural networks, often operate as black boxes, making their decisions difficult to interpret or justify, which limits trust, accountability, and adoption in high-stakes applications. This lack of transparency has motivated a growing body of work on explainable and interpretable machine learning. At the same time, machine learning systems are increasingly trained on sensitive personal or proprietary data, raising serious privacy concerns. Moreover, centralized data collection and training can expose individuals and organizations to risks such as data leakage, membership inference, and model inversion attacks, and may violate regulatory constraints such as data protection laws. Addressing explainability and privacy is therefore essential for the responsible and sustainable deployment of machine learning systems.
+
+Being rooted in logic programming, which deals with symbolic programs of a declarative nature, inductive logic programming~\cite{de2008logical,muggleton1991inductive} provides an interesting solution to the explainability issue in machine learning. Indeed, inductive logic programming learns hypotheses expressed as sets of logical rules and thus makes explicit the relational structure and reasoning steps underlying predictions. As a result, this declarative and symbolic representation allows learned models to be directly inspected, validated, and reasoned about by domain experts.
+
+% Muggleton, S. (1991). Inductive Logic Programming. New Generation Computing.
+% De Raedt, L. (2008). Logical and Relational Learning. Springer.
+
+However, inductive logic programming (ILP) is often formulated as a centralized learning task: it requires access to all data and assumes that the required knowledge, examples and background knowledge, is available on a single machine. This restricts its applicability in privacy-sensitive or multi-institutional settings where data must remain distributed, precisely in scenarios in which explainability offered by ILP would be most beneficial. Federated learning \cite{mcmahan2017communication} has been designed precisely to that end. In fact, it provides a decentralized architecture in which a central server orchestrates training while data remain strictly local. However, most existing research on federated learning relies on sub-symbolic models, most often on neural networks, that offer limited explainability. Hence the question naturally arises whether inductive logic programming can be reformulated in a federated setting thereby offering a machine learning framework both explainable and respecting privacy and distributed issues.
+
+The aim of this paper is to establish that data-driven coordination languages constitute a good means to combine federated learning and inductive logic programming. However, our work should be understood as a first step towards exploring the use of coordination languages for federated inductive logic programming. Rather than aiming for an exhaustive comparison of distributed computing paradigms, we focus on Bach, a Linda-like coordination language, as a representative and well-understood model that enables us to explicitly capture and analyze the coordination mechanisms underlying distributed hypothesis evaluation.
+
+Nevertherless, in contrast to standard federated learning approaches, which typically rely on aggregating numerical model updates, our coordination-based approach enables the explicit orchestration of symbolic interactions, where only abstract evaluation outcomes are exchanged instead of data or model parameters.
+
+On the learning side, we consider Popper~\cite{cropper2021learning}, a recent ILP system that is particularly appealing due to its ability to learn from failures and to find globally optimal hypotheses. Bach~\cite{DJL18}, grounded in logic programming principles, provides the coordination layer through which distributed evaluation is orchestrated. The resulting combination, named Bach4Popper, is shown to be correct with respect to Popper, in the sense that it computes equivalent models. This is established both theoretically and experimentally, and we further show that computational performance is preserved when moving from a centralized to a federated setting.
+
+
+%The aim of this paper is to establish that data-driven coordination languages constitute a good means to combine federated learning and inductive logic programming. More precisely we shall focus in this paper on Popper as an inductive logic language, and Bach, as a coordination language. Popper \cite{cropper2021learning} is a recent language, particularly appealing because of its property to learn from failures and its ability to find globally optimal hypotheses. Bach~\cite{DJL18} is a coordination language, developped by some of the authors, which has taken inspiration in its design from logic programming foundations. The resulting combination, named Bach4Popper, is subsequently shown to be correct with respect to Popper, in the sense that the same models are computed. This will be established both theoretically but also on experiments. We will also argue that computational performance is preserved when moving from a centralized to a federated setting.
+
+The rest of the paper is organized as follows.
+The two following sections introduce the background knowledge in the two domains connected by our contribution. First, Section~\ref{sect-ilp} introduces the basic notions on which \emph{logic programming} relies and explains \emph{inductive logic programming}  with a particular focus on Popper. Then, Section~\ref{sect-BLPy} presents the main features of \emph{the Bach coordination language} and details a socket-based implementation in Python, named BLPy. Using that background, Section~\ref{sect-BachForPopper} presents our main contributions : it introduces \emph{the Bach4Popper framework} and \emph{proves that it is correct} with respect to Popper. These theoretical concerns are completed with experimental ones in Section~\ref{sect-experiments}.  It shows that these results are 
+%met
+confirmed on experiments and 
+%evinces that computational performance is preserved
+demonstrates that computational performance is preserved when moving from a centralized to a federated setting. Section~\ref{sect-related-work} compares our work to related work and Section~\ref{sect-conclusion} draws our conclusions.
+
+
+%Interpretable machine learning (ML) has gained attention as symoblic approaches such as Inductive Logic Programming (ILP) provide structured, human-readable models that capture complex relational patterns. 
+
+%Yet, ILP systems like Popper~\cite{cropper2021learning}, Aleph, TILDE, Progol remain fundamentally centralized: they assure full access to all examples, making them incompatible with distributed or privacy-preserving settings such as Federated Learning (FL). 
+
+%FL has become essential in modern ML pipelines due to regulatory frameworks such as the GDPR and other international privacy  laws that restrict the movement and centralization of sensitive data. 
+%FL allows for collaborative model learning without sharing data; instead, clients compute local model updates that are aggregated by a central server. The paradigm was introduced by Macmahan et al.~\cite{mcmahan2017communication} with neural networks, which, despite their efficiency, that are opaque and hard to interpret. Over time, FL has been extended to a variety of ML models, including more interpretable ones in order to improve transparency and explainability. 
+
+%Nevertheless, symbolic and logic-based learners, most notably ILP, remain almost entirely unexplored in federated settings. 
+
+%Enabling ILP in federated settings requires rethinking the notion of aggregation, since we are dealing with rules (logic programs) rather than numeric model updates. A recent work~\cite{akaichi2025federated} extended Popper and Progol to a federated scenario using a majority-voting aggregation: each client independently learns a local hypothesis, sends it to the server, and the server combines all hypotheses and redistributes them. Clients then evaluate the candidate programs for prediction, and the final output is selected through a majority vote over client-side predictions.
+%While this strategy demonstrates the feasibility of ILP in a distributed context, (to finish..)
+
+
+
+%Despite this initial step, enabling true federated ILP remains an open challenge. Logic programs are symbolic, discrete, and highly structured, which makes classical FL aggregation methods (e.g., averaging) unsuitable. Unlike neural models, ILP systems such as Popper~\cite{cropper2021learning} operate through a generate–test–constrain loop: hypotheses are constructed incrementally, evaluated against examples, and refined through counterexamples or violated constraints. Capturing this dynamic in a distributed environment requires more than combining predictions; it requires a way to coordinate learning across sites without sharing data or full hypotheses.
+
+%This calls for a shift in perspective. Rather than federating complete programs, one must federate the learning workflow itself, distributing the roles of hypothesis generation, example testing, and constraint construction. In other words, federated ILP should not merely exchange learned rules, but should preserve the internal logic-guided search:
+%clients evaluate candidate rules on private data, outcomes are abstracted into symbolic signals, the server updates the hypothesis space accordingly. Such a decomposition has never been explored in ILP nor in FL. It requires a communication model capable of safely orchestrating symbolic interactions between distributed agents—something classical FL frameworks do not provide.
+
+%In this work, we explore Bach, a coordination language originally designed for distributed multi-agent problem solving, as a natural enabler of symbolic Federated Learning. Bach offers declarative communication primitives (tell, ask, nask, …) that enable agents to share only partial, abstract knowledge rather than data or complete models. We argue that these properties make Bach particularly well-suited for orchestrating FL in settings where both privacy and explainability are essential.
+
+%To demonstrate the idea, we introduce Bach4Popper, a federated ILP framework that leverages the Bach coordination language to orchestrate Popper’s learning process across clients and a central server. Bach primitives (e.g., tell, ask) enable clients to publish local evaluation outcomes as abstract coordination signals, while the server uses them to construct new constraints and generate refined hypotheses. No data leave the clients; only symbolic outcomes flow through the system. This architecture preserves ILP’s explainability while enabling distributed learning under strict privacy and decentralization constraints.
+
+%Ecrire un paragraphe sur machine learning ubiquitous
+
+%Ecrire un paragraphe sur federated learning
+
+%Ecrire un paragraphe sur utilisation coordination languages
+
+%Introduire la recherche
+
+%Parler travaux relatif
+
+%Structure de l'article

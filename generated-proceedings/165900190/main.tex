@@ -1,0 +1,254 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+\usepackage{mathpartir}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+
+\usepackage{tabularx, ragged2e}
+\usepackage{ltablex}
+\newcolumntype{L}{>{\RaggedRight\hangafter=1\hangindent=1em}X}
+\usepackage{enumitem}
+
+\usepackage[firstpage]{draftwatermark}
+
+\usepackage{ifthen}
+\provideboolean{artefact}
+\setboolean{artefact}{false}
+
+\provideboolean{appendix}
+\setboolean{appendix}{false}
+
+\usepackage[dvipsnames]{xcolor}
+
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+% \usepackage{color}
+\usepackage[
+    colorlinks=true,
+    urlcolor=blue,
+    linkcolor=blue,
+    citecolor=blue
+  ]{hyperref} %TODO: Is this ok?
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+
+% Double struck 0 and 1
+\usepackage{bbold}
+
+\usepackage{stmaryrd}
+\usepackage{amsmath, amssymb}
+
+% \llangle and \rrangle definitions
+\makeatletter
+\newsavebox{\@brx}
+\newcommand{\llangle}[1][]{\savebox{\@brx}{\(\m@th{#1\langle}\)}%
+  \mathopen{\copy\@brx\mkern2mu\kern-0.9\wd\@brx\usebox{\@brx}}}
+\newcommand{\rrangle}[1][]{\savebox{\@brx}{\(\m@th{#1\rangle}\)}%
+  \mathclose{\copy\@brx\mkern2mu\kern-0.9\wd\@brx\usebox{\@brx}}}
+\makeatother
+
+
+\usepackage{ebproof}
+% Make horizontal lines aligned
+\ebproofset{center=false}
+
+\usepackage{formal-grammar}
+\usepackage{tikz}
+\usetikzlibrary{external} % Externalizes Tikz graphics - speeds up compilation if unchanged.
+\usetikzlibrary{tikzmark}
+\usetikzlibrary{shadows}
+\usetikzlibrary{arrows.meta, calc}
+\usetikzlibrary{positioning}
+\usepackage{pgf-umlsd}
+\usepackage{listings}
+\lstset{%
+  columns=flexible,
+  keepspaces=true,
+  tabsize=3,
+  basicstyle={\fontfamily{tx}\sffamily\scriptsize},
+  stringstyle=\color{blue},
+  commentstyle=\color{gray},
+  % identifierstyle=\slshape{},
+  keywordstyle=\bfseries,
+  numberstyle=\small\color{gray},
+  showstringspaces=false,
+  numbers=left,
+  numberblanklines=false,
+  inputencoding={utf8},
+  belowskip=-1mm,
+  mathescape=true,
+  escapeinside={//*}{\^^M}, % Allow to set labels and the like in comments
+  literate=
+      {->}{{$\rightarrow\;$}}1
+      {~}{{\raisebox{0.5ex}{\texttildelow}}}{1}
+}
+
+
+\usepackage{forest} % For drawing trees
+
+% Syntax highlighting for Pat code
+\usepackage{lstpat}
+% Syntax highlighting for Rocq code
+\usepackage{lstcoq}
+
+\input{macros}
+
+
+\begin{document}
+\SetWatermarkText{\hspace*{3.7in}\raisebox{8.55in}{\href{https://eapls.org/pages/artifact_badges/}{\mbox{\includegraphics[width=1.4cm]{badges/available}\includegraphics[width=1.4cm]{badges/functional}}}}}
+\SetWatermarkAngle{0}
+%
+% Potential titles:
+% Sealed with Proof: Mechanized Mailbox Types
+% Stamp of Approval: Formally Verified Mailbox Types
+% Proof of Delivery: Mechanized Mailbox Types
+% \title{Contribution Title}
+\title{Proof of Delivery: Mechanized Mailbox Types}
+%
+% \titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+% \author{First Author\inst{1}\orcidID{0000-1111-2222-3333} \and
+% Second Author\inst{2,3}\orcidID{1111-2222-3333-4444} \and
+% Third Author\inst{3}\orcidID{2222--3333-4444-5555}}
+\author{Edgard Schiebelbein\inst{1}\orcidID{0009-0002-9476-5727} \and\\
+Annette Bieniusa\inst{1}\orcidID{0000-0002-1654-6118} \and
+Simon Fowler\inst{2}\orcidID{0000-0001-5143-5475}
+}
+%
+\authorrunning{E. Schiebelbein et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{RPTU University Kaiserslautern-Landau, Kaiserslautern, Germany\\
+\email{\{edgard.schiebelbein,annette.bieniusa\}@cs.rptu.de} \and
+University of Glasgow, Glasgow, UK\\
+\email{simon.fowler@glasgow.ac.uk}
+}
+% \institute{Princeton University, Princeton NJ 08544, USA \and
+% Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
+% \email{lncs@springer.com}\\
+% \url{http://www.springer.com/gp/computer-science/lncs} \and
+% ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+% \email{\{abc,lncs\}@uni-heidelberg.de}}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+Programming languages based on the actor model such as Erlang and Elixir rely on message passing for communication.
+A core concept of this communication model are mailboxes: all actors are allowed to send messages to a mailbox,
+but only its owner may retrieve them.
+A major challenge in such systems is detecting and eliminating protocol violations and deadlocks.
+Mailbox types are a novel type system that enables static reasoning about the
+contents of mailboxes, but the metatheory of mailbox type systems is complex and
+requires extensive reasoning about subtyping.
+This paper establishes a machine-checked foundation for mailbox types.
+As a basis for this, we formalize Pat, the first programming language to use mailbox types, in Rocq.
+With its help, we identified and corrected several oversights in the original definitions.
+Furthermore, we provide mechanized proofs of several properties of the semantics of mailbox types and the substitution lemma for Pat.
+
+\keywords{Mailbox types \and Behavioural type systems \and Formal verification \and Actor languages}
+\end{abstract}
+%
+%
+%
+\input{sections/introduction}
+
+%% \section{Background}
+%% SJF: I think this is covered enough in the introduction.
+%% IMO it doesn't add enough to warrant the space.
+%\input{sections/typed-process-communication}
+%\input{sections/mailbox-types-intro}
+
+\section{Mailbox Types}
+\label{sec:sup-mailbox-types}
+
+We begin by describing mailbox configurations and mailbox patterns, before formalising
+mailbox types along with the necessary notion of type
+combination. Due to the potentially infinite representation of mailbox
+semantics, we require novel definitions that are more amenable to mechanization.
+
+\input{sections/mailboxes-and-patterns}
+\input{sections/mailbox-types}
+
+\section{The Pat Programming Language}
+\label{sec:pat-programming-language}
+
+%%  Next, we mechanize the Pat programming language described by Fowler et al. \cite{fowlerSpecialDeliveryProgramming2023}.
+%%  We start by extending mailbox types with \emph{quasi-linear typing}, a feature of Pat's type system.
+%%  Then, we introduce Pat's syntax and continue with its typing rules.
+%%  Finally, we discuss proving the non-trivial substitution lemma.
+
+\input{sections/pat-intro}
+\input{sections/pat-types.tex}
+\input{sections/pat-syntax.tex}
+\input{sections/environments.tex}
+\input{sections/typing-rules.tex}
+\input{sections/substitution.tex}
+
+% \input{sections/mechanization.tex}
+
+\input{sections/related-work.tex}
+\input{sections/conclusion.tex}
+
+\begin{credits}
+% \subsubsection{\ackname} \todo{ES}{TODO}
+
+\subsubsection{\discintname}
+% The authors have no competing interests to declare that are relevant to the content of this article.
+% \todo{ES}{Correct?}
+% It is now necessary to declare any competing interests or to specifically
+% state that the authors have no competing interests. Please place the
+% statement with a bold run-in heading in small font size beneath the
+% (optional) acknowledgments\footnote{If EquinOCS, our proceedings submission
+% system, is used, then the disclaimer can be provided directly in the system.},
+% for example: The authors have no competing interests to declare that are
+% relevant to the content of this article. Or: Author A has received research
+% grants from Company W. Author B has received a speaker honorarium from
+% Company X and owns stock in Company Y. Author C is a member of committee Z.
+\end{credits}
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+
+\subsubsection*{Acknowledgements.}
+We thank the anonymous reviewers for their helpful comments.
+Fowler was supported by EPSRC grant EP/T014628/1 (STARDUST).
+
+\newpage
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+% ---- Appendix ----
+
+\ifappendix
+
+\clearpage
+
+\appendix
+
+\ifartefact
+
+\input{sections/artefact.tex}
+
+\fi
+
+\input{sections/pat-example.tex}
+
+\fi
+
+\end{document}

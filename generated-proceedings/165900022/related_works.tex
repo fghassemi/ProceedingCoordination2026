@@ -1,0 +1,9 @@
+Logical axiomatisations of communication models can be found in~\cite{DBLP:conf/fm/ChevrouH0Q19,DBLP:journals/pacmpl/GiustoFLL23,ENGELS2002253}.
+Recent works on histories try to remove the arbitration relation from abstract executions~\cite{DBLP:journals/corr/abs-2510-21304}.
+MONA was already applied to a wide range of applications, including reactive systems~\cite{KlaNieSun:casestudyautver}, pointer programs~\cite{JenJoeKlaSch:AutVerPoinProgMonSecOrdLog}, hardware verification~\cite{BasKla:BeyondFiniteHardware}, or parsing~\cite{YakYak99}.
+There are several other automated verification techniques and tools that could have been considered instead of MONA, each with its own drawbacks (MONA being the finiteness assumptions we already mentioned).
+Several model-checking tools are well suited for discrete time, with an interleaving semantics of parallelism (like SPIN~\cite{holzmann2007design} or TLA+~\cite{yu1999model}, to quote a very few), but they miss continuous-time.
+Timed automata~\cite{alur1994theory} and the model-checking tools based on them~\cite{bengtsson1995uppaal,bozga1998kronos}, on the other hand, do not handle any partial order beyond the total order of events defined by their timings.
+Automated theorem provers~\cite{kovacs2013first,weidenbach2009spass} and SMT solvers~\cite{de2008z3} are quite versatile, but with a limited support of quantifiers, specifically when quantifying over a binary relation. 
+Interval Temporal Logics aim at automated reasoning on Gantt diagrams, but the strong theoretical results developed in this research community are not so well tools supported. 
+That said, it is unclear to us whether some of these techniques, and the recent advances in each of these research communities, could not compete with our MONA-based approach, either on satisfiability and automated reasoning, or on runtime, distributed monitoring and model-checking.

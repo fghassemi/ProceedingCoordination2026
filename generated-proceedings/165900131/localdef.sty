@@ -1,0 +1,172 @@
+\newcommand{\Bach}{{\sf Bach}}
+\newcommand{\BachT}{{\sf BachT}}
+\newcommand{\AnimBach}{{\sf Anim-Bach}}
+
+\newcommand{\Scan}{{\sf Scan}}
+\newcommand{\Anemone}{{\sf Anemone}}
+
+\newcommand{\seqc}{ \; ; \; } 
+\newcommand{\parac}{ \; || \; } 
+\newcommand{\choice}{ \; + \; } 
+\newcommand{\seqcc}[2]{ {#1} \; ; \; {#2} } 
+\newcommand{\paracc}[2]{ {#1} \; || \; {#2} } 
+\newcommand{\choicec}[2]{ {#1} \; + \; {#2} } 
+\newcommand{\conf}[2]{ \langle {#1} \mid {#2} \rangle }
+\newcommand{\extconf}[3]{ \langle {#1} \mbox{@} {#2} \mid {#3} \rangle } 
+\newcommand{\trans}[2]{$ {#1} \longrightarrow {#2} $} 
+\newcommand{\transm}[2]{ {#1} \longrightarrow {#2} } 
+\newcommand{\xtransm}[3]{ {#1} \xrightarrow{#2} {#3} }
+\newcommand{\bmset}{ \{ } 
+\newcommand{\emset}{ \} } 
+\newcommand{\infrule}[2]{% 
+\( \begin{array}{c} 
+       {#1} \\ 
+       \hline  
+       {#2} 
+\end{array} \) 
+} 
+
+\newcommand{\infrulemath}[2]{%
+\begin{array}{c}
+       {#1} \\
+       \hline
+       {#2}
+\end{array}
+}
+
+\newcommand{\infseq}{\omega}
+\newcommand{\fseq}{*}
+
+\newcommand{\gdLg}{{\cal L}_g}
+\newcommand{\rLg}{{\cal L}_r}  
+\newcommand{\pnc}[1]{{\cal P}(#1)}
+\newcommand{\powerset}[1]{{\cal P}(#1)}
+\newcommand{\Shist}{\mathit{Shist}}
+\newcommand{\Smstore}{\mathit{Smstore}}
+\newcommand{\Sstore}{\mathit{Sstore}} 
+\newcommand{\OpSemh}{{\cal O}_{h}}
+\newcommand{\OpSemf}{{\cal O}_{f}}
+\newcommand{\tconf}[2]{ \langle {#1} \mid {#2} \rangle }
+
+\newcommand{\bset}{ \{ }
+\newcommand{\eset}{ \} }
+
+\newcommand{\tell}{\mathit{tell}}
+\newcommand{\ask}{\mathit{ask}}
+\newcommand{\get}{\mathit{get}}
+\newcommand{\nask}{\mathit{nask}}
+
+\newcommand{\gtell}[1]{[ \mathit{tell({#1})} ]}
+\newcommand{\gask}[1]{[ \mathit{ask({#1})} ]}
+\newcommand{\glist}[2]{[ \mathit{#1} \rightarrow \mathit{#2} ]}
+
+\newcommand{\toDo}{\noindent {\bf\large To be done}\\*[0.1em]}
+\newcommand{\eToDo}{\mbox{ }\\*[0.1em] \noindent {\bf\large End to be done}\\*[0.5em]}
+
+
+\newenvironment{labeleqn}[1]{% 
+      \def\definedlabel{#1} 
+      $$ 
+}{     
+      \eqno {\definedlabel} 
+      $$ 
+} 
+
+%\newcommand{\leftmerge}{\parallel\hspace*{-2.5mm}\rule[-1mm]{3mm}{0.1mm}\ }
+
+\newcommand{\leftmerge}{\,
+                  \setlength{\unitlength}{1ex}
+                  \begin{picture}(1,1.75)
+                  \put(0,0){\line(1,0){1}}
+                  \put(0,0){\line(0,1){1.75}}
+                  \put(0.45,0){\line(0,1){1.75}}
+                  \end{picture}
+                  \,}
+
+
+\newcommand{\coder}{{\cal C}} 
+\newcommand{\decoder}{{\cal D}} 
+\newcommand{\emptystore}{\emptyset} 
+
+\newcommand{\bHMderiv}[3]{ {#1} \vdash {#2} \; [{#3}] }
+
+% From chapter intro LP by JMJ
+
+% puts argument in mathematical mode
+\newcommand{\mf}[1]{$#1$}
+
+% equivalent of \mf but for mathematical mode
+\newcommand{\mfm}[1]{#1}
+
+
+% derivation relation
+\newcommand{\jmjderivsymbol}{\mbox{$ \vdash $}} 
+\newcommand{\jmjderiv}[3]{\mbox{$\; {#1} \vdash {#2} \; [{#3}] $}}
+% \newcommand{\jmjderivindex}{\mathindex{$\; P \vdash G \; [\theta] $}}
+
+% logical consequence relation
+\newcommand{\jmjlogconssymbol}{\mbox{$ \models $}} 
+\newcommand{\jmjlogcons}[3]{\mbox{$\; {#1} \models {#2}{#3}$}}
+
+% empty conjunction of literals
+\newcommand{\jmjemptyconj}{\mbox{$ \; \Box \;$}}
+\newcommand{\jmjemptyconjindex}{\index{$ \; \Box \;$}}
+
+\newcommand{\bsetm}{ \{ }
+% open paranthesis of a set
+
+\newcommand{\esetm}{ \} }
+% closing parenthesis of a set
+
+\newcommand{\jmjemptysubst}{\mbox{$ \; \epsilon \; $}}
+% empty substitution
+
+\newcommand{\jmjsubstcomp}{\mbox{$\, \circ \, $}}
+% composition of substitutions
+
+\newcommand{\jmjequiv}{\mbox{$ \; \equiv \; $}}
+% equivalence of terms and substitutions
+
+\newcounter{cilist}
+\newcounter{cilistsec}
+
+\newlength{\crlilist}
+\newlength{\crlielist}
+\newlength{\crlthmprop}
+\newlength{\crllprop}
+\newlength{\crlslprop}
+
+\newenvironment{thm}{\begin{theorem}}{
+       \end{theorem}}
+
+\newenvironment{thmprop}{
+       \begin{list}{\arabic{cilist})}{
+             \usecounter{cilist}
+             \setlength{\labelsep}{2ex}
+             \setlength{\labelwidth}{4ex}
+             \setlength{\leftmargin}{6ex}
+             \setlength{\listparindent}{0ex}
+             \setlength{\topsep}{0ex}
+             \setlength{\parskip}{0ex}
+             \setlength{\parsep}{0ex}
+             \setlength{\itemsep}{0ex}
+             \setlength{\partopsep}{0ex}
+             \setlength{\partopsep}{0ex}
+             \setlength{\partopsep}{0ex}
+             \setlength{\partopsep}{0ex}
+             \setlength{\crlthmprop}{\topsep}
+             \addtolength{\crlthmprop}{\parskip}
+             \addtolength{\crlthmprop}{\partopsep}}}{
+
+       \end{list}}
+
+
+\newenvironment{system}{
+       \left\{ \begin{array}}{
+       \end{array} \right. }
+
+\newenvironment{csystem}{
+       \left\{ \begin{array}}{
+       \end{array} \right\} }
+
+

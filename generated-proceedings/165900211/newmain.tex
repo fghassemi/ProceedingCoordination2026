@@ -1,0 +1,215 @@
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx,booktabs}
+\usepackage{amssymb,mathtools,amsmath}
+\usepackage{mathbbol}
+\usepackage{listings}
+\usepackage{lstcustom}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+\usepackage{macros}
+\usepackage{comment}
+\usepackage{todonotes}
+\usepackage{jmllistings}
+\usepackage[inline]{enumitem}
+\usepackage{etoolbox}
+\usepackage{mathpartir}
+\usepackage{stmaryrd,textcomp}
+\usepackage{mathabx}
+
+\newtoggle{extended}
+\toggletrue{extended} 
+\togglefalse{extended} 
+\lstdefinelanguage{stipula}{%
+  basicstyle=\ttfamily,keywords={stipula,assets,fields,agreement,now,if,else,false,true}
+}
+
+\def\stipula#1{\mbox{\lstinline[mathescape=true,language=stipula]!#1!}}
+\def\jml#1{\mbox{\lstinline[mathescape=true,language={[JML]Java}]|#1|}}
+
+% Enumerate listings without prepending section numbers.
+% There surely is a cleaner way to do this, but it seems to work for now.
+\AtBeginDocument{\renewcommand*{\thelstlisting}{\arabic{lstlisting}}}
+
+\renewcommand{\todo}[1]{}
+
+\newif \ifconf
+\conftrue
+
+\begin{document}
+
+% \title{\hspace*{-.35cm}\mbox{Verification of legal contracts via Java/JML and KeY}}
+
+\title{Deductive Verification of Legal Contracts}
+
+\titlerunning{Deductive Verification of Legal Contracts}
+
+\author{Reiner H\"ahnle\inst{1}\orcidID{0000-0001-8000-7613} \and
+  Cosimo Laneve\inst{2}\orcidID{0000-0002-0052-4061}}
+
+\authorrunning{R.~H\"ahnle, C. Laneve}
+
+\institute{
+  Department of Computer Science, TU Darmstadt, Germany\\
+  \email{reiner.haehnle@tu-darmstadt.de}
+  \and
+  DISI, University of Bologna, Italy\\
+  \email{cosimo.laneve@unibo.it}
+  }
+
+\maketitle              
+
+\begin{abstract}%
+  We enable deductive verification for {\Stipula}, a domain-specific
+  language for legal contracts, by systematically translating
+  contracts into {\Java} programs annotated with {\tt Java Modeling
+    Language} specifications, and subsequently proving them using
+a deductive verification tool.
+  % 
+  A central challenge of the translation lies in representing
+  event-driven and time-dependent behaviour within a static
+  specification framework. To address this, we introduce a dispatch
+  table that records schedulable events together with their triggering
+  times.
+  % 
+  The technique is presented for acyclic {\Stipula} contracts. We also
+  extend the proposed technique to cyclic contracts, outlining the
+  additional challenges and the conditions under which the approach
+  remains applicable.
+
+  \keywords{Formal Verification \and Stipula Language \and
+    Translation-based Verification \and Deductive Verification.}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:introduction}
+\input{Introduction}
+ 
+\section{Background}
+\label{sec:background}
+\input{Background}
+
+\section{Translation Approach}
+\label{sec:translation}
+\input{Translation}
+
+\section{The Dispatch Table and Generation of Execution Paths}
+\label{sec:dispatchtable}
+\input{DispatchTable}
+
+\section{Cyclic Behaviour and its Translation}
+\label{sec:cyclic-behavior}
+\input{Cycles}
+
+%\section{Implementation and Evaluation}
+%\label{sect:casestudies}
+%
+\section{Related Work}
+\label{sec:relatedworks}
+
+Legal modeling frameworks like Ergo~\cite{ergo},
+OpenLaw~\cite{OpenLaw}, Lexon~\cite{Lexon}, and Accord~\cite{Accord}
+embed contracts into broader systems, but they lack a precise formal
+semantics. While Catala~\cite{Catala} formalizes legislative logic and
+has a runtime environment, it does not address contract
+verification. In contrast, {\Stipula} offers an operational model with
+explicit permissions, assets, and timed clauses and has a
+comprehensive suite of tools, including a visual code editor for
+intuitive contract authoring, an interpreter for automatic execution,
+and a number of analyzers for verifying several legally relevant
+properties (unreachability of clauses, absence of frozen assets,
+etc.)~\cite{Laneve2026}.
+
+Closer to our work, prior efforts explored translation-based
+verification: OCL-to-{\Java} with {\JML}~\cite{hamie2002ocl}, and
+Circus-to-{\Java} for formal reasoning~\cite{DBLP:conf/fm/FreitasC06}.
+Our approach applies this paradigm to legal contracts, preserving
+their normative and temporal semantics.
+
+More recent work models blockchain smart contracts (by hand) in a
+modeling language designed for verification which is then
+automatically translated to EVM bytecode \cite{Solidity}, for example,
+Dafny-to-EVM \cite{Dafny24} or Why3-to-EVM \cite{Why319}. This is the
+\emph{reverse} direction of our approach. While it makes verification
+easier, \emph{validation} becomes harder.
+
+While the current {\Stipula} runtime is realized by compilation to
+{\Java}~\cite{stipulaprototype}, the language is
+implementation-agnostic and could be compiled to blockchain smart
+contracts like {\tt Solidity}~\cite{Solidity} or {\tt
+  Obsidian}~\cite{Obsidian}.  This path is promising, as our
+verification approach using {\KeY}~\cite{DBLP:series/lncs/10001} can
+build on established work that already applies the system to
+blockchain platforms like Hyperledger
+Fabric~\cite{BeckertHerdaKirsten2018_1000092715} and {\tt
+  Solidity}~\cite{DBLP:conf/isola/AhrendtB20} by embedding them into
+\Java.
+% Using these advances would enable rigorous verification of
+% {\Stipula} contracts on decentralized infrastructures.
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+  The formal modeling and verification of digital contracts is
+  gaining momentum at the intersection of legal informatics,
+  programming languages, and formal methods.  This work contributes by
+  connecting the contract language {\Stipula} with a deductive
+  verification system (\KeY) via a translation to {\JML}-annotated
+  {\Java}.
+ 
+  We focus on two recurring interaction patterns in legal contracts:
+  acyclic behaviour and non-nested cyclic behaviour consisting only of
+  function calls. We also impose other technical restrictions which
+  might be lifted in the future.  Maximising automation has been our
+  guiding principle. In the acyclic case, verification is fully
+  automatic once the contract is specified. For cyclic behaviour, where
+  stronger reasoning is needed, we aim to minimise additional
+  annotations and proof guidance to preserve usability and
+  scalability. From a theoretical perspective, the most challenging
+  problem is the precise handling of clock values in events
+  originating from cycles. It would require a generalisation of
+  dispatch tables that precisely describes event generation for an
+  \emph{unbounded} number of iterations.
+  %
+  A systematic, experimentally driven investigation of
+  the trade-offs between coverage and precision constitutes an
+  important direction for future work.  Table~\ref{tab:restrictions}
+  summarises the current restrictions and to which extent they could
+  be dropped.
+
+  \input{Restrictions.tex}
+  
+  % Some technical restrictions could be relaxed: for
+  % example, allowing events in cycles when states do not mix functions
+  % and events, but others are more fundamental. In particular,
+  % supporting nested cycles or time expressions depending on parameters
+  % or contract fields would require substantial changes to the
+  % translation, complicating the execution-path encoding and dispatch
+  % management, and potentially reducing the automation and strength of
+  % the verification in {\KeY}.
+
+  In general, a systematic empirical evaluation, especially for large
+  and structurally complex cyclic contracts remains to be
+  done. Preliminary results are promising but concern an earlier
+  version of the translation without dispatch tables~\cite{iFM25}.  A
+  comprehensive assessment of the current framework remains essential.
+
+
+\appendix
+\vspace{-.3cm}
+\section{Addendum: The Function {\sc Stipula2Java}}
+\label{sec:stipula2java}
+\input{Stipula2Java.tex}
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
