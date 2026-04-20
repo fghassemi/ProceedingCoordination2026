@@ -1,7 +1,9 @@
 \documentclass[]{llncs}
+\usepackage{xcolor}
 \usepackage{longtable}
 \newcommand{\tocTitle}[2]{\contentsline{title}{#1}{#2}{}}
 \newcommand{\tocAuthors}[1]{{\raggedright \leftskip 15pt \rightskip 2.55em\itshape #1\endgraf}}
+\newcommand{\meta}[1]{{\color{blue}#1}}
 \newcommand{\tocSection}[1]{\subsection*{#1}}
 \pagestyle{plain}
 \pagenumbering{roman}
@@ -9,27 +11,91 @@
 \begin{document}
 
 \section*{Preface}
-This volume contains the papers presented at COORDINATION 2026: COORDINATION 2026 - 28th International Conference on Coordination Models and Languages held on June 9-11, 2026 in Urbino.
+
+This volume contains the proceedings of the 28th International Conference on Coordination Models and Languages (COORDINATION 2026), held on June 8–12, 2026, in Urbino, Italy hosted by the
+University of Urbino Carlo Bo., as part of the 21st International Federated
+Conference on Distributed Computing Techniques (DisCoTec 2026).
 
 
+Modern information systems rely increasingly on combining concurrent, distributed,
+mobile, adaptive, reconfigurable, and heterogeneous components. New models, architectures, languages, and verification techniques are necessary to cope with the complexity induced by the demands of today’s software development. Coordination languages
+have emerged as a successful approach, in that they provide abstractions that cleanly
+separate behavior from communication, thereby increasing modularity, simplifying
+reasoning, and ultimately enhancing software development. Building on the success of	
+the previous editions, COORDINATION 2026 provides a well-established forum for the
+growing community of researchers interested in models, languages, architectures, and
+implementation techniques for coordination.
 
-There were 41 submissions. Each submission was reviewed by at least 0 people, and on the average 2.6 people, program committee members. The committee decided to accept 13 papers. The program also includes 0 talks.
+COORDINATION 2026 solicited contributions in three different categories: (1) regular papers describing thorough and complete research results and experience reports;
+(2) survey papers describing important results and success stories related to
+the topics of COORDINATION; and (3) tool papers describing technological artifacts
+in the scope of the research topics of COORDINATION, and requiring the submission
+of the associated artifact via a separate procedure.
+
+%There were 41 submissions. Each submission was reviewed by at least 0 people, and on the average 2.6 people, program committee members. The committee decided to accept 13 papers. The program also includes 0 talks.
+
+There were 28 paper submissions distributed over the different categories: 24 regular
+papers, and 5 tool papers. The selection of the papers
+was entrusted to the Programme Committee (PC), consisting of 32 members from 15
+different countries (with gender balance F/M = 12/20). The selection of the papers was
+done electronically, in two phases. In the first phase, which lasted three weeks, each
+submission was single-blind reviewed by at least three PC members, in some cases with
+the help of external reviewers. During the second phase, which lasted four days, the papers were thoroughly discussed. The decision to accept or reject a paper
+was based not only on the reviews and scores but also on these in-depth discussions. In
+the end, 13 papers were selected to be presented at the conference: 11 regular papers, and 2 tool papers. 
 
 
+The authors of the submitted tool papers were requested to participate in the EAPLS
+artifact badging, which instead was optional for all the other paper categories. There
+were 13 artifact submissions. The 9 members of the Artifact Evaluation Committee
+(AEC), chaired by Gianluca Aguzzi, awarded the Available and Reusable Badge to 3
+artifacts, and the Available and Functional Badge to 4 artifacts.
 
-You can write the history of your conference here.
+%You can write the history of your conference here.
+
+We organized the accepted papers into five groups according to the topics they address:\begin{enumerate}
+	\item Theoretical foundations and models for distributed systems: this group, containing three papers, focuses on formal reasoning of distributed system properties. The paper ``Timed Scenario Expressions and Realisability''  addresses the problem of realisability for the distributed system modeled by sets of sequential timed scenarios.  The paper ``HistMSO: a Logic for Reasoning on Consistency Models with MONA'' reasons on the consistency of replicated data systems modeled by sequences of data operations. The third paper ``Motif Refinement for the Hierarchical Control of Structured CPSs" introduces a refinement-based modeling and development approach for Cyber-physical systems which preserves control stability.  
+	\item Distributed algorithms for collective adaptive systems: this group contains two papers which reformulate collective distributed algorithms within the aggregate programming framework with specific guarantees. The paper ``Aggregate Indoor Localisation" provides two existing established localisation algorithms to guarantees  adaptability and resilience while improving their performance. The paper ``A Self-Stabilizing Min-Max Consensus via Path-loop Detection" implements the min-max consensus algorithm as a
+	reusable library for the Collektive DSL, which guarantees the self-stabilization property. 
+	\item \emph{Coordination languages, frameworks, and patterns}: this group includes contributions centred on the design and implementation of coordinated systems through programming languages and middleware support.
+	The paper ``ScalaTropy: Multiparty Coordination with Monadic Communication Primitives'' provides a design and Scala-internal DSL that combines choreographic and multi-tier programming to support multiple coordination patterns.
+	The paper ``Bach4Popper: Towards Federated Inductive Logic Programming using Coordination'' \meta{proposes a distributed framework and architecture for federated inductive logic programming, to support learning while ensuring explainability and privacy}.
+	\item \emph{Formal verification in coordination languages}: this group focuses on the static verification of two classes of coordination languages. The paper ``Proof of Delivery: Mechanized Mailbox Types" introduces a machine-checked foundation for the programming languages, specifically Pat, that incorporate mailbox type system to reason about the contents of mailboxes. The paper ``Deductive Verification of Legal Contracts" enables deductive verification of contracts specified by Stipula through their translation into Java programs annotated with Java 
+	Modeling Language specifications preserving the dynamic
+	features of the original programs – most notably the scheduling of events at future times.
+	\item Simulation tools and methodologies for collective adaptive systems
+\end{enumerate} 
 
 
+As Programme Chairs, we actively contributed to the selection of the three keynote
+speakers of DisCoTec 2026:\begin{itemize}
+	\item Prof. Mehdi Dastani (Utrecht University, The Netherlands);
+	\item Paolo Romano (NESC-ID, Portugal);
+	\item Nathalie Bertrand (Inria, France).
+\end{itemize}
+We are most grateful to Prof. Dastani for accepting our invitation as the  COORDINATION-related keynote speaker. This volume includes the abstract of his keynote
+talk: “Efficient Communication and Coordination in Multiagent Reinforcement Learning”.
 
-Write any acknowledgements ...
+
+As is traditional in DisCoTec, a joint session with the best papers from each main conference was organized. The best paper of COORDINATION 2026 was “Runtime adaptation as a programming pattern in service composition” authored by Carlos Gustavo Lopez Pombo, Pablo Montepagano and Emilio Tuosto. 
+
+%Write any acknowledgements ...
+We are grateful to all the persons involved in COORDINATION 2026. In particular,
+we thank the authors for their submissions, the attendees of the conference for their
+participation, the PC members and external reviewers for their work in reviewing sub-
+missions and participating in the discussions, the AEC chair Gianluca Aguzzi and
+the AEC members for their effort in the evaluation of the artifacts, and the Steering Committee,
+chaired by Michele Loreti, for their guidance and support. We are also grateful to the
+Organizing Committee, chaired by Claudio Antares Mezzina, for their excellent job. We also thank
+the providers of the EasyChair Conference Management System, which was of great
+help in the submission and reviewing process and in the preparation of the proceedings.
+We would also like to acknowledge the prompt and professional support from Springer,
+which published these proceedings in printed and electronic volumes as part of their
+LNCS book series.
 
 
-
-Do not forget to mention your sponsors!
-
-
-
-We appreciate some words about the use of EasyChair but it is not necessary.
+%Do not forget to mention your sponsors!
+%We appreciate some words about the use of EasyChair but it is not necessary.
 
 
 
@@ -45,6 +111,20 @@ Cesena
 Roberto Casadei\\
 Fatemeh Ghassemi
 \end{minipage}
+
+
+%~\bigskip
+%
+%\noindent
+%\begin{minipage}[t]{.4\textwidth}
+%April 19, 2026\\
+%Cesena
+%\end{minipage}%
+%\hfill
+%\begin{minipage}[t]{.4\textwidth}\flushright
+%Roberto Casadei\\
+%Fatemeh Ghassemi
+%\end{minipage}
 
 \clearpage
 
