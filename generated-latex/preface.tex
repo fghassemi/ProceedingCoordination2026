@@ -1,5 +1,8 @@
 \documentclass[]{llncs}
+\usepackage{xcolor}
+\newcommand{\meta}[1]{{\color{blue}#1}}
 \begin{document}
+
 \section*{Preface}
 %This volume contains the papers presented at COORDINATION 2026: COORDINATION 2026 - 28th International Conference on Coordination Models and Languages held on June 9-11, 2026 in Urbino.
 
@@ -12,7 +15,7 @@ Modern information systems rely increasingly on combining concurrent, distribute
 mobile, adaptive, reconfigurable, and heterogeneous components. New models, architectures, languages, and verification techniques are necessary to cope with the complexity induced by the demands of today’s software development. Coordination languages
 have emerged as a successful approach, in that they provide abstractions that cleanly
 separate behavior from communication, thereby increasing modularity, simplifying
-reasoning, and ultimately enhancing software development. Building on the success of
+reasoning, and ultimately enhancing software development. Building on the success of	
 the previous editions, COORDINATION 2026 provides a well-established forum for the
 growing community of researchers interested in models, languages, architectures, and
 implementation techniques for coordination.
@@ -48,8 +51,10 @@ We organized the accepted papers into five groups according to the topics they a
 	\item Theoretical foundations and models for distributed systems: this group, containing three papers, focuses on formal reasoning of distributed system properties. The paper ``Timed Scenario Expressions and Realisability''  addresses the problem of realisability for the distributed system modeled by sets of sequential timed scenarios.  The paper ``HistMSO: a Logic for Reasoning on Consistency Models with MONA'' reasons on the consistency of replicated data systems modeled by sequences of data operations. The third paper ``Motif Refinement for the Hierarchical Control of Structured CPSs" introduces a refinement-based modeling and development approach for Cyber-physical systems which preserves control stability.  
 	\item Distributed algorithms for collective adaptive systems: this group contains two papers which reformulate collective distributed algorithms within the aggregate programming framework with specific guarantees. The paper ``Aggregate Indoor Localisation" provides two existing established localisation algorithms to guarantees  adaptability and resilience while improving their performance. The paper ``A Self-Stabilizing Min-Max Consensus via Path-loop Detection" implements the min-max consensus algorithm as a
 	reusable library for the Collektive DSL, which guarantees the self-stabilization property. 
-	\item Coordination languages, frameworks, and patterns
-	\item Formal verification in coordination languages: this group focuses on the static verification of two classes of coordination languages. The paper ``Proof of Delivery: Mechanized Mailbox Types" introduces a machine-checked foundation for the programming languages, specifically Pat, that incorporate mailbox type system to reason about the contents of mailboxes. The paper ``Deductive Verification of Legal Contracts" enables deductive verification of contracts specified by Stipula through their translation into Java programs annotated with Java 
+	\item \emph{Coordination languages, frameworks, and patterns}: this group includes contributions centred on the design and implementation of coordinated systems through programming languages and middleware support.
+	The paper ``ScalaTropy: Multiparty Coordination with Monadic Communication Primitives'' provides a design and Scala-internal DSL that combines choreographic and multi-tier programming to support multiple coordination patterns.
+	The paper ``Bach4Popper: Towards Federated Inductive Logic Programming using Coordination'' \meta{proposes a distributed framework and architecture for federated inductive logic programming, to support learning while ensuring explainability and privacy}.
+	\item \emph{Formal verification in coordination languages}: this group focuses on the static verification of two classes of coordination languages. The paper ``Proof of Delivery: Mechanized Mailbox Types" introduces a machine-checked foundation for the programming languages, specifically Pat, that incorporate mailbox type system to reason about the contents of mailboxes. The paper ``Deductive Verification of Legal Contracts" enables deductive verification of contracts specified by Stipula through their translation into Java programs annotated with Java 
 	Modeling Language specifications preserving the dynamic
 	features of the original programs – most notably the scheduling of events at future times.
 	\item Simulation tools and methodologies for collective adaptive systems
