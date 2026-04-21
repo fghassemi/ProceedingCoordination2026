@@ -1,1 +1,1 @@
-zip 16590-volume-proceedings.zip -r 165900*/ frontmatter/ Table_of_Contents_template.xlsx LNCS_productionII.docx
+zip 16590-volume-proceedings.zip -r 165900*/ frontmatter/preface.tex frontmatter/preface.pdf frontmatter/invited-talk.tex frontmatter/invited-talk.pdf frontmatter/lncs.cls Table_of_Contents_template.xlsx LNCS_productionII.docx
