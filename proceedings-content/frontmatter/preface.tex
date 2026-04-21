@@ -1,5 +1,6 @@
 \documentclass[]{llncs}
 \usepackage{xcolor}
+\usepackage{pdfpages}
 \usepackage{longtable}
 \newcommand{\tocTitle}[2]{\contentsline{title}{#1}{#2}{}}
 \newcommand{\tocAuthors}[1]{{\raggedright \leftskip 15pt \rightskip 2.55em\itshape #1\endgraf}}
@@ -8,9 +9,14 @@
 \pagestyle{plain}
 \pagenumbering{roman}
 \setcounter{page}{5}
+
+\sloppypar
+
 \begin{document}
 
-\section*{Preface}
+
+\chapter*{Preface}
+\markboth{Preface}{Preface}
 
 This volume contains the proceedings of the 28th International Conference on Coordination Models and Languages (COORDINATION 2026), held on June 8–12, 2026, in Urbino, Italy hosted by the
 University of Urbino Carlo Bo., as part of the 21st International Federated
@@ -103,8 +109,8 @@ LNCS book series.
 
 \noindent
 \begin{minipage}[t]{.4\textwidth}
-April 19, 2026\\
-Cesena
+April, 2026\\
+%Cesena
 \end{minipage}%
 \hfill
 \begin{minipage}[t]{.4\textwidth}\flushright
@@ -128,7 +134,180 @@ Fatemeh Ghassemi
 
 \clearpage
 
-\section*{Table of Contents}
+
+\chapter*{Organization}
+\markboth{Organization}{Organization}
+\setlength{\tabcolsep}{0pt}     % remove spacing between columns in the following long tables
+\setlength{\LTpre}{0pt}         % remove extra vertical space before the long tables
+
+\section*{General Chair}
+\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+Claudio Antares Mezzina          & University of Urbino, Italy
+\end{longtable}
+
+
+\clearpage
+
+\section*{Program Committee Chairs}
+
+\noindent
+\begin{longtable}{p{0.35\textwidth}p{0.65\textwidth}}
+Roberto Casadei & University of Bologna\\
+
+Fatemeh Ghassemi & University of Tehran\\
+\end{longtable}
+
+
+\section*{Program Committee}
+\noindent
+\begin{longtable}{p{0.35\textwidth}p{0.65\textwidth}}
+S. Akshay & IIT Bombay\\
+
+Duncan Paul Attard & University of Malta\\
+
+Giorgio Audrito & University of Turin\\
+
+Simon Bliudze & INRIA\\
+
+Roberto Casadei & University of Bologna\\
+
+Valentina Castiglioni & Eindhoven University of Technology\\
+
+Mariangiola Dezani-Ciancaglini & Dipartimento di Informatica, Universit\`a di Torino\\
+
+Cinzia Di Giusto & Universit\'e C\^ote d'Azur, CNRS, I3S\\
+
+Francisco Ferreira & Imperial College\\
+
+Fatemeh Ghassemi & University of Tehran\\
+
+Silvia Ghilezan & University of Novi Sad, Mathematical Institute SASA\\
+
+Susanne Graf & Universite Joseph Fourier / CNRS / VERIMAG\\
+
+Ludovic Henrio & CNRS\\
+
+Thomas Hildebrandt & University of Copenhagen\\
+
+Ping Hou & University of Oxford\\
+
+Eva K\"uhn & Vienna University of Technology\\
+
+Ivan Lanese & University of Bologna\\
+
+Carlos Gustavo Lopez Pombo & Escuela de Producci\'on, Tecnolog\'iay Medio Ambiente, Universidad Nacional de R\'io Negro and CONICET\\
+
+Michele Loreti & University of Camerino\\
+
+
+Stefano Mariani & Universit\`a di Modena e Reggio Emilia\\
+
+Hernan Melgratti & Departamento Computaci\'on, Universidad de Buenos Aires\\
+
+Claudio Antares Mezzina & Universit\`a di Urbino, Italy\\
+
+Fabrizio Montesi & University of Southern Denmark\\
+
+J. Garrett Morris & The University of Kansas\\
+
+Rumyana Neykova & Brunel University\\
+
+Jos\'e Proen\c{c}a & CISTER \& University of Porto, Portugal\\
+
+Violet Ka I Pun & Western Norway University of Applied Sciences, Norway\\
+
+Ant\'onio Ravara & Universidade NOVA de Lisboa | FCT -- NOVA LINCS\\
+
+Marjan Sirjani & Malardalen University\\
+
+Carolyn Talcott & SRI  International\\
+
+Maurice ter Beek & CNR\\
+
+Francesco Tiezzi & Universit\`a di Firenze\\
+
+Nils Timm & University of Pretoria\\
+
+Emilio Tuosto & Gran Sasso Science Institute, IT\\
+
+Frank Valencia & LIX, Ecole Polytechnique\\
+
+\end{longtable}
+
+\clearpage
+
+\section*{Artefact Evaluation Committee Chair}
+
+\noindent
+\begin{longtable}{p{0.35\textwidth}p{0.65\textwidth}}
+
+Gianluca Aguzzi & Alma Mater Studiorum - Universit\`a di Bologna
+
+\end{longtable}
+
+\section*{Artefact Evaluation Committee}
+
+\noindent
+\begin{longtable}{p{0.35\textwidth}p{0.65\textwidth}}
+
+Gianluca Aguzzi & Alma Mater Studiorum - Universit\`a di Bologna\\
+
+Davide Domini & University of Bologna\\
+
+Nicolas Farabegoli & University of Bologna\\
+
+Matteo Magnini & University of Luxembourg\\
+
+M\'ario Pereira & Universidade NOVA de Lisboa | FCT -- NOVA LINCS\\
+
+
+Marco Quadrini & University of Camerino\\
+
+Corentin Reuther & University of Namur\\
+
+Lorenzo Rossi & University of Camerino\\
+
+Gerard Tabone & University of Malta\\
+
+Laura Voinea & University of Glasgow\\
+
+\end{longtable}
+
+
+\section*{Additional Reviewers}
+\noindent
+\begin{longtable}{p{0.35\textwidth}p{0.65\textwidth}}
+%\textbf{B} \\*
+Davide Basile & todo
+\\
+Nicola Del Giudice & todo
+\\
+Masoud Ebrahimi & todo
+\\
+Gabriele Genovese & todo
+\\
+Ramchandra Phawade & todo
+\\
+Jose Ignacio Requeno & todo
+\\
+Volker Stolz & todo
+\\
+\end{longtable}
+
+
+
+
+\clearpage
+
+\chapter*{Invited contributions}
+
+
+\includepdf{invited-talk.pdf}
+
+
+\clearpage
+
+\chapter*{Table of Contents}
 \tocSection{Theoretical foundations and models for distributed systems}
   \tocTitle{Timed Scenario Expressions and Realisability}{1}
   \tocAuthors{Neda Saeedloei and Feliks Kluzniak}
@@ -160,131 +339,6 @@ Fatemeh Ghassemi
   \tocAuthors{Riccardo Petracci, Nicola Del Giudice, Diletta Romana Cacciagrano and Michele Loreti}
   \tocTitle{High-Fidelity Simulation of Aggregate Computing Systems with Collektivity}{255}
   \tocAuthors{Filippo Gurioli, Martina Baiardi, Angela Cortecchia and Danilo Pianini}
-
-\clearpage
-
-\section*{Program Committee}
-\noindent
-\begin{longtable}{p{0.35\textwidth}p{0.65\textwidth}}
-Gianluca Aguzzi & Alma Mater Studiorum - Universit\`a di Bologna\\
-
-S. Akshay & IIT Bombay\\
-
-Duncan Paul Attard & University of Malta\\
-
-Giorgio Audrito & University of Turin\\
-
-Simon Bliudze & INRIA\\
-
-Roberto Casadei & University of Bologna\\
-
-Valentina Castiglioni & Eindhoven University of Technology\\
-
-Mariangiola Dezani-Ciancaglini & Dipartimento di Informatica, Universit\`a di Torino\\
-
-Cinzia Di Giusto & Universit\'e C\^ote d'Azur, CNRS, I3S\\
-
-Davide Domini & University of Bologna\\
-
-Nicolas Farabegoli & University of Bologna\\
-
-Francisco Ferreira & Imperial College\\
-
-Fatemeh Ghassemi & University of Tehran\\
-
-Silvia Ghilezan & University of Novi Sad, Mathematical Institute SASA\\
-
-Susanne Graf & Universite Joseph Fourier / CNRS / VERIMAG\\
-
-Ludovic Henrio & CNRS\\
-
-Thomas Hildebrandt & University of Copenhagen\\
-
-Ping Hou & University of Oxford\\
-
-Eva K\"uhn & Vienna University of Technology\\
-
-Ivan Lanese & University of Bologna\\
-
-Carlos Gustavo Lopez Pombo & Escuela de Producci\'on, Tecnolog\'iay Medio Ambiente, Universidad Nacional de R\'io Negro and CONICET\\
-
-Michele Loreti & University of Camerino\\
-
-Matteo Magnini & University of Luxembourg\\
-
-Stefano Mariani & Universit\`a di Modena e Reggio Emilia\\
-
-Hernan Melgratti & Departamento Computaci\'on, Universidad de Buenos Aires\\
-
-Claudio Antares Mezzina & Universit\`a di Urbino, Italy\\
-
-Fabrizio Montesi & University of Southern Denmark\\
-
-J. Garrett Morris & The University of Kansas\\
-
-Rumyana Neykova & Brunel University\\
-
-M\'ario Pereira & Universidade NOVA de Lisboa | FCT -- NOVA LINCS\\
-
-Jos\'e Proen\c{c}a & CISTER \& University of Porto, Portugal\\
-
-Violet Ka I Pun & Western Norway University of Applied Sciences, Norway\\
-
-Marco Quadrini & University of Camerino\\
-
-Ant\'onio Ravara & Universidade NOVA de Lisboa | FCT -- NOVA LINCS\\
-
-Corentin Reuther & University of Namur\\
-
-Lorenzo Rossi & University of Camerino\\
-
-Marjan Sirjani & Malardalen University\\
-
-Gerard Tabone & University of Malta\\
-
-Carolyn Talcott & SRI  International\\
-
-Maurice ter Beek & CNR\\
-
-Francesco Tiezzi & Universit\`a di Firenze\\
-
-Nils Timm & University of Pretoria\\
-
-Emilio Tuosto & Gran Sasso Science Institute, IT\\
-
-Frank Valencia & LIX, Ecole Polytechnique\\
-
-Laura Voinea & University of Glasgow\\
-
-\end{longtable}
-
-\clearpage
-
-\section*{Additional Reviewers}
-\begin{longtable}{l}
-\textbf{B} \\*
-Basile, Davide
-\\
-\textbf{D} \\*
-Del Giudice, Nicola
-\\
-\textbf{E} \\*
-Ebrahimi, Masoud
-\\
-\textbf{G} \\*
-Genovese, Gabriele
-\\
-\textbf{P} \\*
-Phawade, Ramchandra
-\\
-\textbf{R} \\*
-Requeno, Jose Ignacio
-\\
-\textbf{S} \\*
-Stolz, Volker
-\\
-\end{longtable}
-
 
 
 \end{document}
