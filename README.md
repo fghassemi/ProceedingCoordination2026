@@ -4,7 +4,7 @@
 ## Basic info
 
 - Your volume number is: **16590**. 
-- [ ] It is extremely important that we receive the **“production file” stating the details and order of the volume editors, in order to be able to start working on the book**.
+- [X] It is extremely important that we receive the **“production file” `LNCS_productionII.docx` stating the details and order of the volume editors, in order to be able to start working on the book**.
 
 ## `CS_Editors_Proceedings_guidelines.pdf`
 
@@ -46,11 +46,11 @@
 - [X] We encourage the inclusion of ORCIDs in the publication. For more information see: http://bit.ly/2H5xBpN.
 - [X] **CHECK COPYRIGHT FORMS**. It is essential that all copyright forms are present and correct, so please check these before sending the files. The title of the book or, for proceedings, the **conference name should be entered in the top line of the copyright form**, and NOT the volume number(s). The corresponding author must sign the form on behalf of all of the authors of a particular paper, having gained their permission to do so. He or she signs for and accepts responsibility for releasing the material on behalf of any and all co-authors. 
     - The corresponding author must be available to check the paper before it is published. Please note that **once a paper has been delivered to Springer, changes relating to the authorship of the paper cannot be made**. Authors' names cannot be added or deleted, their order cannot be changed, and the corresponding author cannot be altered.
-- [ ] Please **zip all of the folders together in a single zip file** and **send this** (e.g. via **Filezilla**) to our **sftp server**
+- [X] Please **zip all of the folders together in a single zip file** and **send this** (e.g. via **Filezilla**) to our **sftp server**
     - sftp.springernature.com - port: 22
     - user: lncs ; password: u2UEaSKlGM#/
     - If you would rather share your files with csproceedings_support@springernature.com via Google Drive, please feel free to do so.
-- [ ] NOTIFY: Kindly **inform <csproceedings_support@springernature.com> as soon as you have sent the files to the sftp server**. If we are not informed, then the files will not be picked up. This is to avoid files being picked up before they are complete.
+- [X] NOTIFY: Kindly **inform <csproceedings_support@springernature.com> as soon as you have sent the files to the sftp server**. If we are not informed, then the files will not be picked up. This is to avoid files being picked up before they are complete.
 
 
 ## Examples
