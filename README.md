@@ -38,13 +38,13 @@
 - Please use the VOLUME NUMBER to **label the folders containing the files as described in the attached editors' guidelines**.
 - At the end of the guidelines you will find a **checklist** of everything we require from you. 
 
-- [ ] The `Preface` and `Organization` pages should adhere to the requirements presented in the attached **`frontmatter_sample.pdf`**
-- [ ] The attached Excel file **`Table_of_Contents_template.xlsx`** can be used to provide us with the list of corresponding authors.
-- [ ] Also attached is a Word file **`LNCS_productionII.docx`**, which we would ask you to **complete and send together with the files, in a single zip file**.
-- [ ] PREFACE. We ask you to include information on the **number of submissions** and the **acceptance ratio** in the **preface**. 
-- [ ] TOC. Please also be sure to include **topical headings in the Table of Contents**, **as described in `Sect. 6.3` of the guidelines**. 
-- [ ] We encourage the inclusion of ORCIDs in the publication. For more information see: http://bit.ly/2H5xBpN.
-- [ ] **CHECK COPYRIGHT FORMS**. It is essential that all copyright forms are present and correct, so please check these before sending the files. The title of the book or, for proceedings, the **conference name should be entered in the top line of the copyright form**, and NOT the volume number(s). The corresponding author must sign the form on behalf of all of the authors of a particular paper, having gained their permission to do so. He or she signs for and accepts responsibility for releasing the material on behalf of any and all co-authors. 
+- [X] The `Preface` and `Organization` pages should adhere to the requirements presented in the attached **`frontmatter_sample.pdf`**
+- [X] The attached Excel file **`Table_of_Contents_template.xlsx`** can be used to provide us with the list of corresponding authors.
+- [X] Also attached is a Word file **`LNCS_productionII.docx`**, which we would ask you to **complete and send together with the files, in a single zip file**.
+- [X] PREFACE. We ask you to include information on the **number of submissions** and the **acceptance ratio** in the **preface**. 
+- [X] TOC. Please also be sure to include **topical headings in the Table of Contents**, **as described in `Sect. 6.3` of the guidelines**. 
+- [X] We encourage the inclusion of ORCIDs in the publication. For more information see: http://bit.ly/2H5xBpN.
+- [X] **CHECK COPYRIGHT FORMS**. It is essential that all copyright forms are present and correct, so please check these before sending the files. The title of the book or, for proceedings, the **conference name should be entered in the top line of the copyright form**, and NOT the volume number(s). The corresponding author must sign the form on behalf of all of the authors of a particular paper, having gained their permission to do so. He or she signs for and accepts responsibility for releasing the material on behalf of any and all co-authors. 
     - The corresponding author must be available to check the paper before it is published. Please note that **once a paper has been delivered to Springer, changes relating to the authorship of the paper cannot be made**. Authors' names cannot be added or deleted, their order cannot be changed, and the corresponding author cannot be altered.
 - [ ] Please **zip all of the folders together in a single zip file** and **send this** (e.g. via **Filezilla**) to our **sftp server**
     - sftp.springernature.com - port: 22
