@@ -18,23 +18,34 @@
 \chapter*{Preface}
 \markboth{Preface}{Preface}
 
-This volume contains the proceedings of the 28th International Conference on Coordination Models and Languages (COORDINATION 2026), held on June 8–12, 2026, in Urbino, Italy hosted by the
-University of Urbino Carlo Bo., as part of the 21st International Federated
+This volume contains the proceedings of the \textbf{28th International Conference on Coordination Models and Languages (COORDINATION 2026)}, held on June 8–12, 2026, in Urbino (Italy), hosted by the
+University of Urbino Carlo Bo, as part of the 21st International Federated
 Conference on Distributed Computing Techniques (DisCoTec 2026).
 
-
-Modern information systems rely increasingly on combining concurrent, distributed,
-mobile, adaptive, reconfigurable, and heterogeneous components. New models, architectures, languages, and verification techniques are necessary to cope with the complexity induced by the demands of today’s software development. Coordination languages
+The COORDINATION conference series 
+ has a long history of contributions
+ related to the study and engineering of coordinated systems.
+%
+Interaction is a fundamental dimension in systems.
+%
+Modern information systems increasingly rely on combining concurrent, distributed,
+mobile, adaptive, reconfigurable, and heterogeneous components. 
+%
+New models, architectures, languages, and verification techniques are necessary to cope with the complexity induced by the demands of today’s software development. 
+%
+Coordination languages
 have emerged as a successful approach, in that they provide abstractions that cleanly
 separate behavior from communication, thereby increasing modularity, simplifying
-reasoning, and ultimately enhancing software development. Building on the success of	
+reasoning, and ultimately enhancing software development. 
+%
+Building on the success of	
 the previous editions, COORDINATION 2026 provides a well-established forum for the
 growing community of researchers interested in models, languages, architectures, and
 implementation techniques for coordination.
 
-COORDINATION 2026 solicited contributions in three different categories: (1) regular papers describing thorough and complete research results and experience reports;
-(2) survey papers describing important results and success stories related to
-the topics of COORDINATION; and (3) tool papers describing technological artifacts
+COORDINATION 2026 solicited contributions in three different categories: (1) \emph{regular papers} describing thorough and complete research results and experience reports;
+(2) \emph{survey papers} describing important results and success stories related to
+the topics of COORDINATION; and (3) \emph{tool papers} describing technological artifacts
 in the scope of the research topics of COORDINATION, and requiring the submission
 of the associated artifact via a separate procedure.
 
@@ -44,10 +55,16 @@ There were 28 paper submissions sent for peer-review distributed over the differ
 papers, and 5 tool papers. The selection of the papers
 was entrusted to the Programme Committee (PC), consisting of 32 members from 15
 different countries (with gender balance F/M = 12/20). The selection of the papers was
-done electronically, in two phases. In the first phase, which lasted three weeks, each
+done electronically, in two phases. In the first phase, %which lasted three weeks, 
+ each
 submission was single-blind reviewed by at least three PC members, in some cases with
-the help of external reviewers. During the second phase, which lasted four days, the papers were thoroughly discussed. The decision to accept or reject a paper
-was based not only on the reviews and scores but also on these in-depth discussions. In
+the help of external reviewers. During the second phase, %which lasted four days, 
+the papers were thoroughly discussed. 
+%
+The decision to accept or reject a paper
+was based not only on the reviews and scores but also on these in-depth discussions. 
+%
+In
 the end, 13 papers were selected to be presented at the conference, for an acceptance ratio of 47\%: 11 regular papers, and 2 tool papers. 
 
 
@@ -59,22 +76,23 @@ artifacts, and the Available and Functional Badge to 4 artifacts.
 
 %You can write the history of your conference here.
 
-We organized the accepted papers into five groups according to the topics they address:
+We organized the accepted papers into five groups according to the topics they address.
 
 \paragraph{Theoretical foundations and models for distributed systems.} 
 This group, containing three papers, focuses on formal reasoning of distributed system properties. 
 \begin{itemize}
-\item The paper ``Timed Scenario Expressions and Realisability''  addresses the problem of realisability for the distributed system modeled by sets of sequential timed scenarios.  
+\item The paper ``Timed Scenario Expressions and Realisability''  %addresses the problem of realisability for the distributed system modeled by sets of sequential timed scenarios.  
+  introduces the notion of timed scenarios expressions to tackle the problem of realisability of global models of distributed systems denoted as sets of sequential timed scenarios.
 \item The paper ``HistMSO: a Logic for Reasoning on Consistency Models with MONA'' reasons on the consistency of replicated data systems modeled by sequences of data operations. 
-\item The paper ``Motif Refinement for the Hierarchical Control of Structured CPSs" introduces a refinement-based modeling and development approach for cyber-physical systems which preserves control stability.  
+\item The third paper ``Motif Refinement for the Hierarchical Control of Structured CPSs'' introduces a refinement-based modeling and development approach for cyber-physical systems which preserves control stability.  
 \end{itemize}
 
 \paragraph{Distributed algorithms for collective adaptive systems.} 
-This group contains two papers which reformulate collective distributed algorithms within the aggregate programming framework with specific guarantees. 
+This group contains two papers which propose collective distributed algorithms within the aggregate programming framework with specific guarantees. 
 \begin{itemize}
-\item The paper ``Aggregate Indoor Localisation" provides two existing established localisation algorithms to guarantees  adaptability and resilience while improving their performance. 
-\item The paper ``A Self-Stabilizing Min-Max Consensus via Path-loop Detection" implements the min-max consensus algorithm as a
-	reusable library for the Collektive DSL, which guarantees the self-stabilization property. 
+\item The paper ``Aggregate Indoor Localisation" reformulates existing localisation algorithms in aggregate computing settings, provides stabilisation guarantees, and propose improved algorithmic variants %to guarantees  adaptability and resilience while improving their performance.
+   that are experimentally studied w.r.t. resilience and performance.
+\item The paper ``A Self-Stabilizing Min-Max Consensus via Path-loop Detection" proposes a novel min-max consensus algorithm, proves its self-stabilization property, and experimentally assess its Collektive implementation for correctness and resilience by simulation. 
 \end{itemize}
 
 \paragraph{Coordination languages, frameworks, and patterns.}
